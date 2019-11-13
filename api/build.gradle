@@ -1,0 +1,5 @@
+shadowJar {
+    setArchivesBaseName("MinetasiaCore-Api")
+}
+
+build.dependsOn(shadowJar)

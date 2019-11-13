@@ -1,0 +1,9 @@
+dependencies {
+    compile project(":api")
+}
+
+shadowJar {
+    setArchivesBaseName("MinetasiaCore-Common")
+}
+
+build.dependsOn(shadowJar)
