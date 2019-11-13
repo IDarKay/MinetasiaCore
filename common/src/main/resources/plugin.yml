@@ -1,0 +1,5 @@
+name: MinetasiaCore
+main: fr.idarkay.mintasia.core.common.MinetasiaCore
+version: @version@
+prefix: MinetasiaCore
+authors: [IDarKay]

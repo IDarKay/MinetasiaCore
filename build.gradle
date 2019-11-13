@@ -1,0 +1,48 @@
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id "com.github.johnrengelman.shadow" version "5.1.0"
+    id "java"
+}
+
+allprojects {
+    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'java'
+    apply plugin: 'maven'
+
+    group 'fr.idarkay.mintasia'
+    version = '1.0'
+
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'papermc-repo'
+            url = 'https://papermc.io/repo/repository/maven-public/'
+        }
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/groups/public/'
+        }
+        flatDir {
+            dirs 'libs'
+        }
+    }
+
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+        compileOnly 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
+        compile name: 'Normes-1.0'
+    }
+
+
+
+    processResources {
+        from(sourceSets.main.resources.srcDirs) {
+            filter ReplaceTokens, tokens: [version: version]
+        }
+    }
+}
