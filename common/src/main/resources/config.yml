@@ -1,0 +1,18 @@
+# =========================================================================================================== #                                                                 #
+# host: url of the db (set localhost for local db)                                                            #
+# login: login for connect need have permission to create and edit table                                      #
+# password: password of the login                                                                             #
+# dbname: name of the db need be created always                                                               #
+# =========================================================================================================== #
+db: # NO value here !
+  host: ''
+  login: ''
+  password: ''
+  dbname: ''
+  connexion_args: '?allowMultiQueries=true&useSSL=false'
+
+# =========================================================================================================== #
+# user : in MINUTES the time that a user will be save in cache                                                  #
+# =========================================================================================================== #
+cache: # NO value here !
+  user: 5
