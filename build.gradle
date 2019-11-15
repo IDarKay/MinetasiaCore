@@ -27,6 +27,10 @@ allprojects {
             name = 'sonatype'
             url = 'https://oss.sonatype.org/content/groups/public/'
         }
+        maven {
+            name = 'enginehub-maven'
+            url = 'http://maven.enginehub.org/repo/'
+        }
         flatDir {
             dirs 'libs'
         }
@@ -35,6 +39,7 @@ allprojects {
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         compileOnly 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
+        compile group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
         compile name: 'Normes-1.0'
     }
 
