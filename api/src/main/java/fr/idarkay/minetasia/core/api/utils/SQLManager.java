@@ -11,6 +11,10 @@ import java.sql.Connection;
  *
  * @author Alois. B. (IDarKay),
  * Created the 13/11/2019 at 17:58
+ * @since 1.0
+ * all methods for use SQL
+ * for update methods use {@link SQLManager#updateAsynchronously(String, Object...)}
+ * for get use {@link SQLManager#getSQL()} and create yourself statement
  */
 public interface SQLManager {
 
@@ -39,8 +43,8 @@ public interface SQLManager {
      * This method is to execute an update request (UPDATE, DELETE, CREATE, DROP,
      * ...)
      *
-     * @param query Query (with '?') which will be send to the database
-     * @param args  Object which will replace the '?' (in order) of the query
+     * @param query Query (with {@code '?'}) which will be send to the database
+     * @param args  Object which will replace the {@code '?'} (in order) of the query
      */
     void updateAsynchronously(String query, Object... args);
 

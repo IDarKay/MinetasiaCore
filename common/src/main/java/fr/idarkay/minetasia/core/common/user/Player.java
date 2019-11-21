@@ -1,10 +1,14 @@
 package fr.idarkay.minetasia.core.common.user;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -17,23 +21,39 @@ import java.util.UUID;
  * @author Alois. B. (IDarKay),
  * Created the 15/11/2019 at 21:09
  */
-public class Player implements IPlayer {
+public class Player {
 
-    private HashMap<String, String> data;
-    private HashMap<UUID, String> friends;
-    private HashMap<Economy, Float> moneys;
+    private HashMap<String, String> data = new HashMap<>();
+    private HashMap<UUID, String> friends = new HashMap<>();
+    private HashMap<Economy, Float> moneys = new HashMap<>();
     private String username;
     private UUID uuid;
 
     public Player(String jsonData)
     {
-        data = new HashMap<>();
-        friends = new HashMap<>();
-        moneys = new HashMap<>();
+        update(jsonData);
+    }
+
+    public Player(UUID uuid, String username)
+    {
+        this.uuid = uuid;
+        this.username = username;
+    }
+
+    public void update(String jsonData)
+    {
+        JsonObject data = new JsonParser().parse(jsonData).getAsJsonObject();
+
+        username = data.get("username").getAsString();
+        uuid = UUID.fromString(data.get("uuid").getAsString());
+
+        for (Map.Entry<String, JsonElement> a : data.get("data").getAsJsonObject().entrySet()) this.data.put(a.getKey(), a.getValue().getAsString());
+        for (Map.Entry<String, JsonElement> a : data.get("moneys").getAsJsonObject().entrySet()) this.moneys.put(Economy.valueOf(a.getKey()), a.getValue().getAsFloat());
+        for (Map.Entry<String, JsonElement> a : data.get("friends").getAsJsonObject().entrySet()) this.friends.put(UUID.fromString(a.getKey()), a.getValue().getAsString());
 
     }
 
-    @Override
+
     public float getMoney(@NotNull Economy economy) {
         Float m;
         if((m = moneys.get(economy)) != null) return m;
@@ -44,7 +64,7 @@ public class Player implements IPlayer {
         }
     }
 
-    @Override
+
     public void addMoney(@NotNull Economy economy, float amount, boolean ignoreWarn) {
 
         if(!ignoreWarn && amount >= economy.warnNumber)
@@ -56,43 +76,70 @@ public class Player implements IPlayer {
         else moneys.put(economy, amount);
     }
 
-    @Override
+
     public void setMoney(@NotNull Economy economy, float amount) {
         moneys.put(economy, amount);
     }
 
-    @Override
+
     public @Nullable String getData(@NotNull String key) {
         return data.get(key);
     }
 
-    @Override
+
     public void setData(@NotNull String key, @NotNull String value) {
         data.put(key, value);
     }
 
-    @Override
+
     public HashMap<UUID, String> getFriends() {
         return friends;
     }
 
-    @Override
+
     public boolean isFriend(@NotNull UUID uuid) {
         return friends.containsKey(uuid);
     }
 
-    @Override
-    public void addFriends(@NotNull UUID uuid) {
 
+    public void addFriends(@NotNull UUID uuid) {
     }
 
-    @Override
+
     public boolean removeFriends(@NotNull UUID uuid) {
         return false;
     }
 
-    @Override
+
     public String getName() {
         return username;
     }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getJson()
+    {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("uuid", uuid.toString());
+        jsonObject.addProperty("username", username);
+
+        JsonObject mo = new JsonObject();
+        for (Map.Entry<Economy, Float> a : moneys.entrySet()) mo.addProperty(a.getKey().name(), a.getValue());
+        jsonObject.add("moneys", mo);
+
+        JsonObject data = new JsonObject();
+        for (Map.Entry<String, String> a : this.data.entrySet()) data.addProperty(a.getKey(), a.getValue());
+        jsonObject.add("data", data);
+
+        JsonObject f = new JsonObject();
+        for (Map.Entry<UUID, String> a : this.friends.entrySet()) f.addProperty(a.getKey().toString(), a.getValue());
+        jsonObject.add("friends", f);
+
+        return jsonObject.toString();
+
+
+    }
+
 }

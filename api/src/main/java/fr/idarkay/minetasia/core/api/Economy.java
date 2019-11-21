@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  *
  * @author Alois. B. (IDarKay),
  * Created the 15/11/2019 at 21:20
+ * @since 1.0
  */
 public enum Economy {
 
@@ -29,6 +30,7 @@ public enum Economy {
      *             its preferable to not set special char or color char
      * @param displayName   the display name can be  change the display name will be show in gui message etc...
      * @param warnNumber the limits number after that a warn message will be send in log and in to Webhooks.
+     * @since 1.0
      */
     Economy(String name, String displayName, float warnNumber)
     {
@@ -42,6 +44,7 @@ public enum Economy {
      *
      * @param name to get the {@link Economy}
      * @return the  {@link Economy} or null if none exist
+     * @since 1.0
      */
     @Nullable Economy getFromName(String name)
     {
