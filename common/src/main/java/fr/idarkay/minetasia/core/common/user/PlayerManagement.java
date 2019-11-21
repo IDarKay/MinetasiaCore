@@ -3,11 +3,9 @@ package fr.idarkay.minetasia.core.common.user;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import fr.idarkay.minetasia.core.common.MinetasiaCore;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,28 +23,33 @@ public class PlayerManagement {
     private final Cache<UUID, Player> userCache;
     private final MinetasiaCore plugin;
 
-    public PlayerManagement(MinetasiaCore plugin)
+    public PlayerManagement(MinetasiaCore minetasiaCore)
     {
-        this.plugin = plugin;
-        userCache = CacheBuilder.newBuilder().expireAfterAccess(plugin.getConfig().getLong("cache.user"), TimeUnit.MINUTES).build();
+        this.plugin = minetasiaCore;
+        userCache = CacheBuilder.newBuilder().expireAfterWrite(plugin.getConfig().getLong("cache.user"), TimeUnit.MINUTES).build();
     }
 
     public @Nullable Player get(UUID uuid)
     {
         try {
             return userCache.get(uuid, () -> new Player(plugin.getFrsClient().getValue("usersData", uuid.toString())));
-        } catch (ExecutionException ignore) {
+        } catch (Exception ignore) {
             return null;
         }
     }
 
+    public void newPlayer(UUID uuid, String name)
+    {
+        Player p = new Player(uuid, name);
+        userCache.put(uuid, p);
+        plugin.getSqlManager().update("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
+        plugin.getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+
+    }
+
     public @Nullable Player getOnlyInCache(UUID uuid)
     {
-        try {
-            return userCache.get(uuid, () -> null);
-        } catch (ExecutionException ignore) {
-            return null;
-        }
+        return userCache.getIfPresent(uuid);
     }
 
 }

@@ -14,6 +14,10 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author alice. B. (IDarKay),
  * Created the 14/11/2019 at 13:48
+ * @since 1.0
+ *
+ * The event call when {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String)} have called
+ * please don't call yourself the event , this very boring
  */
 public final class FRSMessageEvent extends Event {
 
@@ -23,6 +27,7 @@ public final class FRSMessageEvent extends Event {
 
     public FRSMessageEvent(@NotNull String chanel, @NotNull String value)
     {
+        super(true);
         this.chanel = chanel;
         this.value = value;
     }
@@ -30,6 +35,7 @@ public final class FRSMessageEvent extends Event {
     /**
      * get channel of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#Publish(String, String)}
      * @return String channel
+     * @since 1.0
      */
     public @NotNull String getChanel() {
         return chanel;
@@ -38,13 +44,20 @@ public final class FRSMessageEvent extends Event {
     /**
      * get message of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#Publish(String, String)}
      * @return String message
+     * @since 1.0
      */
     public @NotNull String getValue() {
         return value;
     }
 
+
     @Override
     public @NotNull HandlerList getHandlers() {
+        return handlerList;
+    }
+
+    public static HandlerList getHandlerList()
+    {
         return handlerList;
     }
 }

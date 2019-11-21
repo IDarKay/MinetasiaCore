@@ -275,7 +275,7 @@ public class FRSClient
 	{
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getPluginManager().callEvent(new FRSMessageEvent(channel, message)));
 	}
-	
+
 	public boolean isConnected()
 	{
 		return connected || s != null;
