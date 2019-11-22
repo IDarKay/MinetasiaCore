@@ -33,7 +33,7 @@ public final class FRSMessageEvent extends Event {
     }
 
     /**
-     * get channel of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#Publish(String, String)}
+     * get channel of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String)}
      * @return String channel
      * @since 1.0
      */
@@ -42,7 +42,7 @@ public final class FRSMessageEvent extends Event {
     }
 
     /**
-     * get message of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#Publish(String, String)}
+     * get message of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String)}
      * @return String message
      * @since 1.0
      */
