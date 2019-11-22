@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.common;
 
+import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
 import fr.idarkay.minetasia.core.common.listener.FRSMessageListener;
 import fr.idarkay.minetasia.core.common.listener.PlayerListener;
@@ -9,7 +10,12 @@ import fr.idarkay.minetasia.core.common.utils.FRSClient;
 import fr.idarkay.minetasia.core.common.utils.SQLManager;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -81,6 +87,95 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         else return null;
     }
 
+    @Override
+    public @Nullable UUID getPlayerUUID(@NotNull String username) {
+        org.bukkit.entity.Player p;
+        if((p = Bukkit.getPlayer(username)) != null) return p.getUniqueId();
+        else
+        {
+            sqlManager.getSQL();
+            try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT uuid FROM `uuid_username` WHERE  username = " + username);  ResultSet rs = ps.executeQuery())
+            {
+                if(rs.next())
+                {
+                    return UUID.fromString(rs.getString("uuid"));
+                }
+            }catch ( SQLException e)
+            {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public float getPlayerMoney(UUID uuid, Economy economy) {
+        Player p = playerManagement.get(uuid);
+        if(p != null) return p.getMoney(economy);
+        else return -1.0F;
+    }
+
+    @Override
+    public boolean addPlayerMoney(UUID uuid, Economy economy, float amount) {
+        if(amount < 0) throw new IllegalArgumentException("negative money amount");
+        Player p = playerManagement.get(uuid);
+        if(p != null){
+            p.addMoney(economy, amount);
+            return true;
+        } else return false;
+    }
+
+    @Override
+    public boolean removePlayerMoney(UUID uuid, Economy economy, float amount) {
+        if(amount < 0) throw new IllegalArgumentException("negative money amount ");
+        Player p = playerManagement.get(uuid);
+        if(p != null) return p.removeMooney(economy, amount);
+        else return false;
+    }
+
+    @Override
+    public boolean setPlayerMoney(UUID uuid, Economy economy, float amount) {
+        if(amount < 0) throw new IllegalArgumentException("negative money amount");
+        Player p = playerManagement.get(uuid);
+        if(p != null){
+            p.setMoney(economy, amount);
+            return true;
+        } else return false;
+    }
+
+    @Override
+    public @NotNull HashMap<UUID, String> getFriends(@NotNull UUID uuid) {
+        Player p = playerManagement.get(uuid);
+        if (p != null) return p.getFriends();
+        return new HashMap<>();
+    }
+
+    @Override
+    public boolean isFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
+        Player p = playerManagement.get(uuid);
+        if(p != null) return p.isFriend(uuid2);
+        return false;
+    }
+
+    @Override
+    public boolean removeFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
+        Player p = playerManagement.get(uuid);
+        if(p != null) return p.removeFriends(uuid2);
+        return false;
+    }
+
+    @Override
+    public boolean addFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
+        Player p = playerManagement.get(uuid);
+        if(p != null) return p.addFriends(uuid2);
+        return false;
+    }
+
+    @Override
+    public boolean isPlayerOnline(@NotNull UUID uuid) {
+        return true;
+    }
+
 
     @Override
     public void publish(@NotNull String chanel, @NotNull String message) {
@@ -90,6 +185,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void movePlayerToHub(@NotNull org.bukkit.entity.Player player) {
         player.kickPlayer("Disconnect hub function not set");
+    }
+
+    @Override
+    public String getPlayerLang(@NotNull UUID uuid) {
+        return getPlayerData(uuid, "lang");
+    }
+
+    @Override
+    public @Nullable String getPlayerName(UUID uuid) {
+        Player p = playerManagement.get(uuid);
+        if(p != null) return p.getName();
+        return null;
     }
 
     @Override
@@ -119,4 +226,5 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public FRSClient getFrsClient() {
         return frsClient;
     }
+
 }

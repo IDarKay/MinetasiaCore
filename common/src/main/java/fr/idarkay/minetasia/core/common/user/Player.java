@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.core.common.MinetasiaCore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,17 +66,27 @@ public class Player {
     }
 
 
-    public void addMoney(@NotNull Economy economy, float amount, boolean ignoreWarn) {
-
-        if(!ignoreWarn && amount >= economy.warnNumber)
-        {
-            //todo: elastickserach webhocks
-        }
+    public void addMoney(@NotNull Economy economy, float amount) {
         Float m;
         if((m = moneys.get(economy)) != null) moneys.put(economy, m + amount);
         else moneys.put(economy, amount);
     }
 
+    public boolean removeMooney(@NotNull Economy economy, float amount)
+    {
+        Float m;
+        if((m = moneys.get(economy)) != null)
+        {
+            if(m >= amount)
+            {
+                moneys.put(economy, m - amount);
+                return true;
+            }
+
+        }
+        else moneys.put(economy, 0F);
+        return amount == 0F;
+    }
 
     public void setMoney(@NotNull Economy economy, float amount) {
         moneys.put(economy, amount);
@@ -102,12 +113,19 @@ public class Player {
     }
 
 
-    public void addFriends(@NotNull UUID uuid) {
+    public boolean addFriends(@NotNull UUID uuid) {
+        String p = MinetasiaCore.getInstance().getPlayerName(uuid);
+        if(p != null)
+        {
+            friends.put(uuid, p);
+            return true;
+        }
+        return false;
     }
 
 
     public boolean removeFriends(@NotNull UUID uuid) {
-        return false;
+        return friends.remove(uuid) != null;
     }
 
 
