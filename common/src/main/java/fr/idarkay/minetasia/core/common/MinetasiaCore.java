@@ -2,6 +2,7 @@ package fr.idarkay.minetasia.core.common;
 
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.common.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.common.listener.FRSMessageListener;
 import fr.idarkay.minetasia.core.common.listener.PlayerListener;
 import fr.idarkay.minetasia.core.common.user.Player;
@@ -116,31 +117,42 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public boolean addPlayerMoney(UUID uuid, Economy economy, float amount) {
-        if(amount < 0) throw new IllegalArgumentException("negative money amount");
-        Player p = playerManagement.get(uuid);
-        if(p != null){
-            p.addMoney(economy, amount);
-            return true;
-        } else return false;
+    public void addPlayerMoney(UUID uuid, Economy economy, float amount) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            if(amount < 0) throw new IllegalArgumentException("negative money amount");
+            Player p = playerManagement.get(uuid);
+            if(p != null){
+                p.addMoney(economy, amount);
+                publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + p.getMoney(economy));
+                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+            } else throw new PlayerNotFoundException("can't add money to not found user");
+        });
     }
 
     @Override
-    public boolean removePlayerMoney(UUID uuid, Economy economy, float amount) {
-        if(amount < 0) throw new IllegalArgumentException("negative money amount ");
-        Player p = playerManagement.get(uuid);
-        if(p != null) return p.removeMooney(economy, amount);
-        else return false;
+    public void removePlayerMoney(UUID uuid, Economy economy, float amount) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            if(amount < 0) throw new IllegalArgumentException("negative money amount");
+            Player p = playerManagement.get(uuid);
+            if(p != null){
+                p.removeMooney(economy, amount);
+                publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + p.getMoney(economy));
+                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+            } else throw new PlayerNotFoundException("can't remove money to not found user");
+        });
     }
 
     @Override
-    public boolean setPlayerMoney(UUID uuid, Economy economy, float amount) {
-        if(amount < 0) throw new IllegalArgumentException("negative money amount");
-        Player p = playerManagement.get(uuid);
-        if(p != null){
-            p.setMoney(economy, amount);
-            return true;
-        } else return false;
+    public void setPlayerMoney(UUID uuid, Economy economy, float amount) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            if(amount < 0) throw new IllegalArgumentException("negative money amount");
+            Player p = playerManagement.get(uuid);
+            if(p != null){
+                p.setMoney(economy, amount);
+                publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + amount);
+                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+            } else throw new PlayerNotFoundException("can't set money to not found user");
+        });
     }
 
     @Override
@@ -158,17 +170,43 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public boolean removeFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
-        Player p = playerManagement.get(uuid);
-        if(p != null) return p.removeFriends(uuid2);
-        return false;
+    public void removeFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
+        removeFriend(uuid, uuid2, true);
+    }
+
+    private void removeFriend(@NotNull UUID uuid, @NotNull UUID uuid2, boolean r) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Player p = playerManagement.get(uuid);
+            if(p != null)
+            {
+                if(p.removeFriends(uuid2))
+                {
+                    if(r) removeFriend(uuid2, uuid, false);
+                    publish("core-data", "fremove;" + uuid.toString() + ";" + uuid2.toString());
+                    getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+                }
+            }
+        });
     }
 
     @Override
-    public boolean addFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
-        Player p = playerManagement.get(uuid);
-        if(p != null) return p.addFriends(uuid2);
-        return false;
+    public void addFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
+        addFriend(uuid, uuid2, true);
+    }
+
+    private void addFriend(@NotNull UUID uuid, @NotNull UUID uuid2, boolean r) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Player p = playerManagement.get(uuid);
+            if(p != null)
+            {
+                if(p.addFriends(uuid2))
+                {
+                    if(r) addFriend(uuid2, uuid, false);
+                    publish("core-data", "fadd;" + uuid.toString() + ";" + uuid2.toString());
+                    getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+                }
+            }
+        });
     }
 
     @Override

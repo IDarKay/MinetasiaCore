@@ -3,3 +3,13 @@ main: fr.idarkay.minetasia.core.common.MinetasiaCore
 version: @version@
 prefix: MinetasiaCore
 authors: [IDarKay]
+commands:
+  friends:
+    aliases: [friend, f]
+permissions:
+  core.friends:
+    description: allow /friends <add / remove / accept>
+  core.*:
+    description: allow all command of the core
+    children:
+      core.friends: true

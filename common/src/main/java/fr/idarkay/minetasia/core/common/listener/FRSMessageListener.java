@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.common.listener;
 
+import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.common.MinetasiaCore;
 import fr.idarkay.minetasia.core.common.user.Player;
@@ -18,7 +19,7 @@ import java.util.UUID;
  * @author Alois. B. (IDarKay),
  * Created the 20/11/2019 at 13:46
  */
-public class FRSMessageListener implements Listener {
+public final class FRSMessageListener implements Listener {
 
     private final MinetasiaCore plugin;
 
@@ -33,15 +34,29 @@ public class FRSMessageListener implements Listener {
         if(e.getChanel().equals("data"))
         {
             String[] msg = e.getValue().split(";");
-            if(msg.length > 3)
+            if(msg.length > 2)
             {
                 try
                 {
                     Player p;
                     if((p =  plugin.getPlayerManagement().getOnlyInCache(UUID.fromString(msg[1]))) != null)
                     {
-                        if(msg[0].equals("data")) p.setData(msg[1], concat(msg, ";", 3));
-                        else if (msg[0].equals("username")) p.setUsername(concat(msg, ";", 3));
+                        switch (msg[0]) {
+                            case "data":
+                                p.setData(msg[1], concat(msg, ";", 3));
+                                break;
+                            case "username":
+                                p.setUsername(concat(msg, ";", 3));
+                                break;
+                            case "money":
+                                p.setMoney(Economy.valueOf(msg[2]), Float.parseFloat(msg[3]));
+                                break;
+                            case "fremove":
+                                p.removeFriends(UUID.fromString(msg[2]));
+                                break;
+                            case "fadd":
+                                p.addFriends(UUID.fromString(msg[2]));
+                        }
                     }
                 } catch (IllegalArgumentException ignore) { }
             }

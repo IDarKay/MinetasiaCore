@@ -102,34 +102,34 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract float getPlayerMoney(UUID uuid, Economy economy);
 
     /**
+     * async task
      * add some of money to player
      * @param uuid uuid of the player
      * @param economy the economy type {@link Economy}
      * @param amount of money to add (not negative)
-     * @return true if money has added
      * @since 1.0
      */
-    public abstract boolean addPlayerMoney(UUID uuid, Economy economy, float amount);
+    public abstract void addPlayerMoney(UUID uuid, Economy economy, float amount);
 
     /**
+     * async task
      * remove some of money to player
      * @param uuid uuid of the player
      * @param economy the economy type {@link Economy}
      * @param amount of money to remove  (not negative)
-     * @return true if money has removed
      * @since 1.0
      */
-    public abstract boolean removePlayerMoney(UUID uuid, Economy economy, float amount);
+    public abstract void removePlayerMoney(UUID uuid, Economy economy, float amount);
 
     /**
+     * async task
      * set the account of player to specific value
      * @param uuid uuid of the player
      * @param economy the economy type {@link Economy}
      * @param amount of money to set (not negative)
-     * @return true if money has updated
      * @since 1.0
      */
-    public abstract boolean setPlayerMoney(UUID uuid, Economy economy, float amount);
+    public abstract void setPlayerMoney(UUID uuid, Economy economy, float amount);
 
     /**
      *  get all friend of a player
@@ -150,22 +150,22 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract boolean isFriend(@NotNull UUID uuid, @NotNull UUID uuid2);
 
     /**
+     * async task
      * remove a friend of to player
      * @param uuid uuid of the player to remove the friend
      * @param uuid2 uuid of the player will remove
-     * @return true if the friend was removed else false (if the player is not friend with the uuid2) or uuid2 not exist
      * @since 1.0
      */
-    public abstract boolean removeFriend(@NotNull UUID uuid, @NotNull UUID uuid2);
+    public abstract void removeFriend(@NotNull UUID uuid, @NotNull UUID uuid2);
 
     /**
+     * async task
      * add a friend of to player
      * @param uuid uuid of the player to add the friend
      * @param uuid2 uuid of the player will add
-     * @return true if friend was added else false if uuid or uuid2 not exist
      * @since 1.0
      */
-    public abstract boolean addFriend(@NotNull UUID uuid, @NotNull UUID uuid2);
+    public abstract void addFriend(@NotNull UUID uuid, @NotNull UUID uuid2);
 
     /**
      * check if player is connect in the network

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.common.MinetasiaCore;
+import fr.idarkay.minetasia.core.common.exception.NoEnoughMoneyException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +23,7 @@ import java.util.UUID;
  * @author Alois. B. (IDarKay),
  * Created the 15/11/2019 at 21:09
  */
-public class Player {
+public final class Player {
 
     private HashMap<String, String> data = new HashMap<>();
     private HashMap<UUID, String> friends = new HashMap<>();
@@ -72,7 +73,7 @@ public class Player {
         else moneys.put(economy, amount);
     }
 
-    public boolean removeMooney(@NotNull Economy economy, float amount)
+    public void removeMooney(@NotNull Economy economy, float amount)
     {
         Float m;
         if((m = moneys.get(economy)) != null)
@@ -80,12 +81,11 @@ public class Player {
             if(m >= amount)
             {
                 moneys.put(economy, m - amount);
-                return true;
-            }
+            } else throw new NoEnoughMoneyException("cant remove "+ amount + " " + economy.displayName + " to " + username);
 
         }
         else moneys.put(economy, 0F);
-        return amount == 0F;
+        if (amount != 0) throw new NoEnoughMoneyException("cant remove "+ amount + " " + economy.displayName + " to " + username);
     }
 
     public void setMoney(@NotNull Economy economy, float amount) {
