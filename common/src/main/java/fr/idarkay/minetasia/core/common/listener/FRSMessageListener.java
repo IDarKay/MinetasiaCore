@@ -48,7 +48,7 @@ public final class FRSMessageListener implements Listener {
                                 p.setData(msg[1], concat(msg, ";", 3));
                                 break;
                             case "username":
-                                p.setUsername(concat(msg, ";", 3));
+                                p.setUsername(concat(msg, ";", 2));
                                 break;
                             case "money":
                                 p.setMoney(Economy.valueOf(msg[2]), Float.parseFloat(msg[3]));
