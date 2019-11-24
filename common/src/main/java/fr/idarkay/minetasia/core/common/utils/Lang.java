@@ -17,6 +17,8 @@ import org.omg.CORBA.NO_PERMISSION;
  */
 public enum Lang implements IMinetasiaLang {
 
+    WELCOME("welcome", "&Welcome to the server :)"),
+    CHANGE_USERNAME("change-username", "&a Hey We have detect you have change your username !"),
     HELP_FORMAT("help_format", "&6%1$s --> &9%2$s"),
 
     ALREADY_FRIEND("already-friend", "&cYour are friend with %1$s !"),
