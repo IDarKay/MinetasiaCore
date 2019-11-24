@@ -3,7 +3,9 @@ package fr.idarkay.minetasia.core.common.listener;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.common.MinetasiaCore;
+import fr.idarkay.minetasia.core.common.executor.FriendsExecutor;
 import fr.idarkay.minetasia.core.common.user.Player;
+import fr.idarkay.minetasia.core.common.utils.Lang;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -31,7 +33,7 @@ public final class FRSMessageListener implements Listener {
     @EventHandler
     public void onFRSMessageEvent(FRSMessageEvent e)
     {
-        if(e.getChanel().equals("data"))
+        if(e.getChanel().equals("core-data"))
         {
             String[] msg = e.getValue().split(";");
             if(msg.length > 2)
@@ -58,6 +60,42 @@ public final class FRSMessageListener implements Listener {
                                 p.addFriends(UUID.fromString(msg[2]));
                         }
                     }
+                } catch (IllegalArgumentException ignore) { }
+            }
+        } else if (e.getChanel().equals("core-cmd"))
+        {
+            String[] msg = e.getValue().split(";");
+            if(msg.length > 2)
+            {
+                try
+                {
+                    UUID u = UUID.fromString(msg[2]);
+                    org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
+                    if(p != null)
+                    {
+                        if ("friends".equals(msg[0])) {
+                            if(plugin.isFriendsOn()) plugin.getFriendsExecutor().newRequest(u, UUID.fromString(msg[1]), p);
+                        }
+                    }
+
+                } catch (IllegalArgumentException ignore) { }
+            }
+        } else if(e.getChanel().equals("core-msg"))
+        {
+            String[] msg = e.getValue().split(";");
+            if(msg.length > 1)
+            {
+                try
+                {
+                    UUID u = UUID.fromString(msg[1]);
+                    org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
+                    if(p != null)
+                    {
+                        Object[] arg = new Object[msg.length - 2];
+                        for(int i = 2; i < msg.length; i++) arg[i -2] = msg[i];
+                        p.sendMessage(Lang.valueOf(msg[0]).get(plugin.getPlayerLang(u), arg));
+                    }
+
                 } catch (IllegalArgumentException ignore) { }
             }
         }

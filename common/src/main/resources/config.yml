@@ -28,3 +28,11 @@ frs: # NO value Here
 # =========================================================================================================== #
 cache: # NO value here !
   user: 5
+  friends: 2
+
+
+commands:
+  friends: true
+
+
+prefix: "&9Mine&6Tasia&7>>"
