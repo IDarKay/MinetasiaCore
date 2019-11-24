@@ -1,5 +1,6 @@
 name: MinetasiaCore
 main: fr.idarkay.minetasia.core.common.MinetasiaCore
+api-version: 1.14
 version: @version@
 prefix: MinetasiaCore
 authors: [IDarKay]

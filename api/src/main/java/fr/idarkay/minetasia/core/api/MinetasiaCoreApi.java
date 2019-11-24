@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -175,6 +176,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract boolean isPlayerOnline(@NotNull UUID uuid);
 
+    public abstract boolean isPlayerOnline(@NotNull String name);
+
     /**
      * publish a message to the redis system
      * the message will be get by all only server with the {@link fr.idarkay.minetasia.core.api.event.FRSMessageEvent}
@@ -218,5 +221,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      */
     public abstract void shutdown();
+
+    @NotNull
+    public abstract HashMap<UUID, String> getOnlinePlayers();
 
 }

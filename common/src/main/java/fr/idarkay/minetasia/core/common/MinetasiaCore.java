@@ -3,19 +3,23 @@ package fr.idarkay.minetasia.core.common;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
 import fr.idarkay.minetasia.core.common.exception.PlayerNotFoundException;
+import fr.idarkay.minetasia.core.common.executor.FriendsExecutor;
 import fr.idarkay.minetasia.core.common.listener.FRSMessageListener;
 import fr.idarkay.minetasia.core.common.listener.PlayerListener;
 import fr.idarkay.minetasia.core.common.user.Player;
 import fr.idarkay.minetasia.core.common.user.PlayerManagement;
 import fr.idarkay.minetasia.core.common.utils.FRSClient;
+import fr.idarkay.minetasia.core.common.utils.Lang;
 import fr.idarkay.minetasia.core.common.utils.SQLManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -34,11 +38,14 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private SQLManager sqlManager;
     private FRSClient frsClient;
     private PlayerManagement playerManagement;
+    private FriendsExecutor friendsExecutor;
+    private boolean friends;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         getMinetasiaLang().init();
+        Lang.prefix = ChatColor.translateAlternateColorCodes('&', getConfig().getString("prefix"));
         sqlManager = new SQLManager(this);
         frsClient = new FRSClient(this);
         frsClient.startConnection(System.out, getConfig().getString("frs.host"), getConfig().getInt("frs.port"),
@@ -46,6 +53,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         playerManagement = new PlayerManagement(this);
 
         sqlManager.update("CREATE TABLE IF NOT EXISTS `uuid_username` ( `uuid` VARCHAR(36) NOT NULL , `username` VARCHAR(16) NOT NULL , PRIMARY KEY (`uuid`))");
+
+        friends = getConfig().getBoolean("commands.friends", false);
+        if(friends)
+        {
+            friendsExecutor = new FriendsExecutor(this);
+            getCommand("friends").setExecutor(friendsExecutor);
+        }
 
         getServer().getPluginManager().registerEvents(new FRSMessageListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
@@ -95,8 +109,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         else
         {
             sqlManager.getSQL();
-            try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT uuid FROM `uuid_username` WHERE  username = " + username);  ResultSet rs = ps.executeQuery())
+            try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT uuid FROM `uuid_username` WHERE  username = ?");  )
             {
+                ps.setString(1, username);
+                ResultSet rs = ps.executeQuery();
                 if(rs.next())
                 {
                     return UUID.fromString(rs.getString("uuid"));
@@ -211,6 +227,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public boolean isPlayerOnline(@NotNull UUID uuid) {
+        //todo: todo only player
+        return true;
+    }
+
+    @Override
+    public boolean isPlayerOnline(@NotNull String name) {
+        //todo: todo only player
         return true;
     }
 
@@ -232,8 +255,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public @Nullable String getPlayerName(UUID uuid) {
-        Player p = playerManagement.get(uuid);
-        if(p != null) return p.getName();
+        org.bukkit.entity.Player pl = Bukkit.getPlayer(uuid);
+        if(pl == null)
+        {
+            Player p = playerManagement.get(uuid);
+            if(p != null) return p.getName();
+        } else return pl.getName();
         return null;
     }
 
@@ -241,6 +268,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void shutdown() {
         getServer().getOnlinePlayers().forEach(this::movePlayerToHub);
         getServer().shutdown();
+    }
+
+    @Override
+    @NotNull
+    public HashMap<UUID, String> getOnlinePlayers() {
+        //todo: todo only player
+        return new HashMap<>();
     }
 
     public void setUserName(UUID uuid, String username)
@@ -265,4 +299,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return frsClient;
     }
 
+    public FriendsExecutor getFriendsExecutor() {
+        return friendsExecutor;
+    }
+
+    public boolean isFriendsOn() {
+        return friends;
+    }
 }
