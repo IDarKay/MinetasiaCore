@@ -1,7 +1,7 @@
-package fr.idarkay.minetasia.core.common.exception;
+package fr.idarkay.minetasia.core.api.exception;
 
 /**
- * File <b>PlayerNotFoundExecption</b> located on fr.idarkay.minetasia.core.common.exception
+ * File <b>PlayerNotFoundExecption</b> located on fr.idarkay.minetasia.core.api.exception
  * PlayerNotFoundException is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2019 MinetasiaCore.
