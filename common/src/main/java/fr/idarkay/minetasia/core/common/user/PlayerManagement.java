@@ -2,8 +2,11 @@ package fr.idarkay.minetasia.core.common.user;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.google.gson.internal.$Gson$Preconditions;
 import fr.idarkay.minetasia.core.common.MinetasiaCore;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
+import fr.idarkay.minetasia.core.common.executor.FriendsExecutor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -33,14 +36,15 @@ public class PlayerManagement {
 
     public @Nullable Player get(UUID uuid)
     {
-        try {
-            return userCache.get(uuid, () -> {
-                if(plugin.getFrsClient().isConnected())
-                    return new Player(plugin.getFrsClient().getValue("usersData", uuid.toString()));
-                else throw new FRSDownException("can't get the player frs down ");
-            });
-        } catch (ExecutionException e) {
-            return null;
+        if(plugin.getFrsClient().isConnected())
+            try {
+                return userCache.get(uuid, () -> new Player(plugin.getFrsClient().getValue("usersData", uuid.toString())));
+            } catch (ExecutionException e) {
+                return null;
+            }
+        else{
+            System.out.println("frs down");
+            throw new FRSDownException("can't get the player frs down ");
         }
     }
 

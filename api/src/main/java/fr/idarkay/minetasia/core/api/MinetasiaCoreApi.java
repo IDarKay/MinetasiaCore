@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -176,6 +175,12 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract boolean isPlayerOnline(@NotNull UUID uuid);
 
+    /**
+     * check if player is connect in the network
+     * @param name of the player to check if is online
+     * @return true if player online else false
+     * @since 1.0
+     */
     public abstract boolean isPlayerOnline(@NotNull String name);
 
     /**
@@ -222,6 +227,10 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract void shutdown();
 
+    /**
+     * get all uuid and name of all player log in the server
+     * @return {@code HashMap<UUID, String>}
+     */
     @NotNull
     public abstract HashMap<UUID, String> getOnlinePlayers();
 

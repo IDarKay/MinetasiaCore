@@ -144,7 +144,7 @@ public final class FriendsExecutor implements TabExecutor {
             {
                 if(args[0].equalsIgnoreCase("add"))
                 {
-                    return (List<String>) minetasiaCore.getOnlinePlayers().values();
+                    return minetasiaCore.getOnlinePlayers().values().stream().filter(s -> s.startsWith(args[1])).collect(Collectors.toList());
                 } else if(args[0].equalsIgnoreCase("remove"))
                 {
                     return new ArrayList<>(minetasiaCore.getFriends(((Player) sender).getUniqueId()).values());

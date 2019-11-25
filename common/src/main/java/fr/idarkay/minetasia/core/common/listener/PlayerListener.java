@@ -57,7 +57,7 @@ public class PlayerListener implements Listener {
                 }
             } catch (FRSDownException ignore){
                 Bukkit.getLogger().warning("FRS DISCONNECT CAN4 LOAD PLAYER ! THE PLAYER WAS KICK !");
-                e.getPlayer().kickPlayer("Fatal error c'ant load your profile retry later");
+                Bukkit.getScheduler().runTask(plugin, () -> e.getPlayer().kickPlayer("Fatal error can't load your profile retry later"));
             }
         });
 
