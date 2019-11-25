@@ -5,6 +5,8 @@ import com.google.common.cache.CacheBuilder;
 import fr.idarkay.minetasia.core.common.MinetasiaCore;
 import fr.idarkay.minetasia.core.common.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -53,26 +55,30 @@ public final class FriendsExecutor implements TabExecutor {
                     {
                         if (args.length > 1 && args[0].equalsIgnoreCase("add"))
                         {
-                            UUID uuid = minetasiaCore.getPlayerUUID(args[1]);
-                            if(uuid != null)
+                            if(!args[1].equals(player.getName()))
                             {
-                                if(!minetasiaCore.isFriend(player.getUniqueId(), uuid))
+                                UUID uuid = minetasiaCore.getPlayerUUID(args[1]);
+                                if(uuid != null)
                                 {
-                                    if(minetasiaCore.isPlayerOnline(uuid))
+                                    if(!minetasiaCore.isFriend(player.getUniqueId(), uuid))
                                     {
-                                        sender.sendMessage(Lang.REQUEST_SEND_FRIENDS.get(lang, args[1]));
-                                        org.bukkit.entity.Player p = minetasiaCore.getServer().getPlayer(uuid);
-                                        if(p != null)
+                                        if(minetasiaCore.isPlayerOnline(uuid))
                                         {
-                                            newRequest(uuid, player.getUniqueId(), p);
+                                            sender.sendMessage(Lang.REQUEST_SEND_FRIENDS.get(lang, args[1]));
+                                            org.bukkit.entity.Player p = minetasiaCore.getServer().getPlayer(uuid);
+                                            if(p != null)
+                                            {
+                                                newRequest(uuid, player.getUniqueId(), p);
+                                            }
+                                            else minetasiaCore.publish("core-cmd", "friends;" + player.getUniqueId().toString() +";" + uuid.toString());
                                         }
-                                        else minetasiaCore.publish("core-cmd", "friends;" + player.getUniqueId().toString() +";" + uuid.toString());
+                                        else sender.sendMessage(Lang.PLAYER_NOT_ONLY.get(lang));
                                     }
-                                    else sender.sendMessage(Lang.PLAYER_NOT_ONLY.get(lang));
+                                    else sender.sendMessage(Lang.ALREADY_FRIEND.get(lang, args[1]));
                                 }
-                                else sender.sendMessage(Lang.ALREADY_FRIEND.get(lang, args[1]));
+                                else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
                             }
-                            else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
+                            else sender.sendMessage(Lang.SELF_ADD_FRIEND.get(lang));
                         }
                         else if (args.length > 1 && args[0].equalsIgnoreCase("remove"))
                         {
@@ -160,7 +166,9 @@ public final class FriendsExecutor implements TabExecutor {
     public void newRequest(UUID uuid, UUID uuid1, Player p)
     {
         friendRequest.put(uuid, uuid1);
-        p.sendMessage(Lang.REQUEST_FRIEND.get(minetasiaCore.getPlayerLang(uuid), minetasiaCore.getPlayerName(uuid1)));
+        TextComponent c = new TextComponent(Lang.REQUEST_FRIEND.get(minetasiaCore.getPlayerLang(uuid), minetasiaCore.getPlayerName(uuid1)));
+        c.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "f accept"));
+        p.spigot().sendMessage(c);
     }
 
 }

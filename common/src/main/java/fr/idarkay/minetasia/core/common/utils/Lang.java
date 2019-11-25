@@ -21,6 +21,7 @@ public enum Lang implements IMinetasiaLang {
     CHANGE_USERNAME("change-username", "&a Hey We have detect you have change your username !"),
     HELP_FORMAT("help_format", "&6%1$s --> &9%2$s"),
 
+    SELF_ADD_FRIEND("self-add-friend", "&cYou really must feel alone to want to add as a friend"),
     ALREADY_FRIEND("already-friend", "&cYour are friend with %1$s !"),
     REQUEST_SEND_FRIENDS("request-send-friends", "&aYour friends request have been send to %1$s !"),
     REQUEST_FRIEND("request-friend", "&a%1$s send to you a friend request use &6/friends accept&a for accept this else ignore the request but it's very sad"),

@@ -2,7 +2,8 @@ package fr.idarkay.minetasia.core.common;
 
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
-import fr.idarkay.minetasia.core.common.exception.PlayerNotFoundException;
+import fr.idarkay.minetasia.core.api.exception.FRSDownException;
+import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.common.executor.FriendsExecutor;
 import fr.idarkay.minetasia.core.common.listener.FRSMessageListener;
 import fr.idarkay.minetasia.core.common.listener.PlayerListener;
@@ -19,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -240,7 +240,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public void publish(@NotNull String chanel, @NotNull String message) {
-        frsClient.publish(chanel, message, false);
+        if(frsClient.isConnected())
+            frsClient.publish(chanel, message, false);
+        else throw new FRSDownException("can't publish frs is down");
     }
 
     @Override

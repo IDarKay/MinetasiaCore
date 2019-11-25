@@ -3,9 +3,11 @@ package fr.idarkay.minetasia.core.common.user;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import fr.idarkay.minetasia.core.common.MinetasiaCore;
+import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,8 +34,12 @@ public class PlayerManagement {
     public @Nullable Player get(UUID uuid)
     {
         try {
-            return userCache.get(uuid, () -> new Player(plugin.getFrsClient().getValue("usersData", uuid.toString())));
-        } catch (Exception ignore) {
+            return userCache.get(uuid, () -> {
+                if(plugin.getFrsClient().isConnected())
+                    return new Player(plugin.getFrsClient().getValue("usersData", uuid.toString()));
+                else throw new FRSDownException("can't get the player frs down ");
+            });
+        } catch (ExecutionException e) {
             return null;
         }
     }
