@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.common.MinetasiaCore;
-import fr.idarkay.minetasia.core.common.exception.NoEnoughMoneyException;
+import fr.idarkay.minetasia.core.api.exception.NoEnoughMoneyException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
