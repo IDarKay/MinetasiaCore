@@ -17,9 +17,12 @@ import org.omg.CORBA.NO_PERMISSION;
  */
 public enum Lang implements IMinetasiaLang {
 
-    WELCOME("welcome", "&Welcome to the server :)"),
+    WELCOME("welcome", "&6Welcome to the server :)"),
     CHANGE_USERNAME("change-username", "&a Hey We have detect you have change your username !"),
     HELP_FORMAT("help_format", "&6%1$s --> &9%2$s"),
+
+    SET_LANG("set-lang", "&aYour new lang is English"),
+    GET_LANG("get-lang", "&aThe lang of &6%1$s is &9%2$s"),
 
     SELF_ADD_FRIEND("self-add-friend", "&cYou really must feel alone to want to add as a friend"),
     ALREADY_FRIEND("already-friend", "&cYour are friend with %1$s !"),

@@ -10,7 +10,7 @@ package fr.idarkay.minetasia.core.api.exception;
  * @author Alois. B. (IDarKay),
  * Created the 25/11/2019 at 10:16
  */
-public class FRSDownException extends RuntimeException {
+public final class FRSDownException extends RuntimeException {
 
     public FRSDownException()
     {

@@ -5,7 +5,10 @@ import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.common.executor.FriendsExecutor;
+import fr.idarkay.minetasia.core.common.executor.LangExecutor;
+import fr.idarkay.minetasia.core.common.gui.GUI;
 import fr.idarkay.minetasia.core.common.listener.FRSMessageListener;
+import fr.idarkay.minetasia.core.common.listener.InventoryClickListener;
 import fr.idarkay.minetasia.core.common.listener.PlayerListener;
 import fr.idarkay.minetasia.core.common.user.Player;
 import fr.idarkay.minetasia.core.common.user.PlayerManagement;
@@ -39,7 +42,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private FRSClient frsClient;
     private PlayerManagement playerManagement;
     private FriendsExecutor friendsExecutor;
-    private boolean friends;
+    private GUI gui;
+    private boolean friends, lang;
 
     @Override
     public void onEnable() {
@@ -53,6 +57,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         playerManagement = new PlayerManagement(this);
 
         sqlManager.update("CREATE TABLE IF NOT EXISTS `uuid_username` ( `uuid` VARCHAR(36) NOT NULL , `username` VARCHAR(16) NOT NULL , PRIMARY KEY (`uuid`))");
+        gui = new GUI(this);
 
         friends = getConfig().getBoolean("commands.friends", false);
         if(friends)
@@ -61,8 +66,16 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             getCommand("friends").setExecutor(friendsExecutor);
         }
 
+        lang = getConfig().getBoolean("commands.lang", false);
+        if(friends)
+        {
+            gui.createLangInventory();
+            getCommand("lang").setExecutor(new LangExecutor(this));
+        }
+
         getServer().getPluginManager().registerEvents(new FRSMessageListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
 
     }
 
@@ -305,7 +318,15 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return friendsExecutor;
     }
 
+    public GUI getGui() {
+        return gui;
+    }
+
     public boolean isFriendsOn() {
         return friends;
+    }
+
+    public boolean isLangOn() {
+        return lang;
     }
 }

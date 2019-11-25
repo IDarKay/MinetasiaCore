@@ -29,7 +29,7 @@ public class FRSClient
 {
 	private JavaPlugin plugin;
 	
-	private static boolean enable, connected;
+	private static boolean enable, connected, fixEnable = false;
 	
 	private Runnable runnable;
 	private PrintWriter out;
@@ -131,6 +131,7 @@ public class FRSClient
 						s.setKeepAlive(true);
 						s.connect(new InetSocketAddress(ip, port), 15 * 1000);
 						FRSClient.this.out.println("Connected !");
+						fixEnable = true;
 						
 						inS = s.getInputStream();
 						outS = s.getOutputStream();
@@ -200,6 +201,7 @@ public class FRSClient
 	{
 		try
 		{
+			fixEnable = false;
 			enable = false;
 			if(onDisable) t1.interrupt();
 			t2.interrupt();
@@ -278,7 +280,7 @@ public class FRSClient
 
 	public boolean isConnected()
 	{
-		return connected || s != null;
+		return fixEnable;
 	}
 	
 	public void publish(String channel, String message, boolean... sync)
