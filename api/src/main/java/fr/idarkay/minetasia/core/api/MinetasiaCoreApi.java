@@ -1,12 +1,15 @@
 package fr.idarkay.minetasia.core.api;
 
 import fr.idarkay.minetasia.core.api.utils.SQLManager;
+import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -194,6 +197,14 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract void publish(@NotNull String chanel, @NotNull String message);
 
+    public abstract String getValue(String key, String field);
+
+    public abstract Set<String> getFields(String key);
+
+    public abstract Map<String, String> getValues(String key, Set<String> fields);
+
+    public abstract void setValue(String key, String field, String value, boolean... sync);
+
     /**
      * move a player to random lobby
      * @param player {@link NotNull}  to return to the lobby
@@ -232,6 +243,49 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @return {@code HashMap<UUID, String>}
      */
     @NotNull
-    public abstract HashMap<UUID, String> getOnlinePlayers();
+    public abstract Map<UUID, String> getOnlinePlayers();
+
+    /**
+     * get the type of the server (hub or name of the mini game)
+     * @return the type of the server
+     */
+    @NotNull
+    public abstract String getServerType();
+
+    /**
+     * get the current {@link Server}
+     * @return the current {@link Server}
+     * @since 1.0
+     */
+    @NotNull
+    public abstract Server getThisServer();
+
+    /**
+     * get a  {@link Server} from name or null if server not exist
+     * @param name name of the server wanted
+     * @return the wanted {@link Server}
+     * @since 1.0
+     */
+    @Nullable
+    public abstract Server getServer(String name);
+
+    /**
+     * get all {@link Server}
+     * @return {@code Map<String, Server> }
+     */
+    @NotNull
+    public abstract Map<String, Server> getServers();
+
+    /**
+     * get all {@link Server} of a type
+     * @param type  the type of the {@link Server}
+     * @return {@code Map<String, Server> }
+     */
+    @NotNull
+    public abstract Map<String, Server> getServers(String type);
+
+
+
+
 
 }

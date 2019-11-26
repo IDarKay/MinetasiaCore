@@ -1,0 +1,4 @@
+name: MinetasiaCoreBungee
+main: fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee
+version: @verssion@
+prefix: MinetasiaCoreBungee

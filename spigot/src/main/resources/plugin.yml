@@ -4,6 +4,7 @@ api-version: 1.14
 version: @version@
 prefix: MinetasiaCore
 authors: [IDarKay]
+load: STARTUP
 commands:
   friends:
     aliases: [friend, f, amis, freunde, amigos]

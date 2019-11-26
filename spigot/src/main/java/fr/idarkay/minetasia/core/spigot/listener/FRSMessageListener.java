@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.spigot.listener;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.server.Server;
 import fr.idarkay.minetasia.core.spigot.user.Player;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import org.bukkit.event.EventHandler;
@@ -32,70 +33,87 @@ public final class FRSMessageListener implements Listener {
     @EventHandler
     public void onFRSMessageEvent(FRSMessageEvent e)
     {
-        if(e.getChanel().equals("core-data"))
+        switch (e.getChanel())
         {
-            String[] msg = e.getValue().split(";");
-            if(msg.length > 2)
+            case "core-data":
             {
-                try
-                {
-                    Player p;
-                    if((p =  plugin.getPlayerManagement().getOnlyInCache(UUID.fromString(msg[1]))) != null)
-                    {
-                        switch (msg[0]) {
-                            case "data":
-                                p.setData(msg[1], concat(msg, ";", 3));
-                                break;
-                            case "username":
-                                p.setUsername(concat(msg, ";", 2));
-                                break;
-                            case "money":
-                                p.setMoney(Economy.valueOf(msg[2]), Float.parseFloat(msg[3]));
-                                break;
-                            case "fremove":
-                                p.removeFriends(UUID.fromString(msg[2]));
-                                break;
-                            case "fadd":
-                                p.addFriends(UUID.fromString(msg[2]));
+                String[] msg = e.getValue().split(";");
+                if (msg.length > 2) {
+                    try {
+                        Player p;
+                        if ((p = plugin.getPlayerManager().getOnlyInCache(UUID.fromString(msg[1]))) != null) {
+                            switch (msg[0]) {
+                                case "data":
+                                    p.setData(msg[1], concat(msg, ";", 3));
+                                    break;
+                                case "username":
+                                    p.setUsername(concat(msg, ";", 2));
+                                    break;
+                                case "money":
+                                    p.setMoney(Economy.valueOf(msg[2]), Float.parseFloat(msg[3]));
+                                    break;
+                                case "fremove":
+                                    p.removeFriends(UUID.fromString(msg[2]));
+                                    break;
+                                case "fadd":
+                                    p.addFriends(UUID.fromString(msg[2]));
+                            }
                         }
+                    } catch (IllegalArgumentException ignore) {
                     }
-                } catch (IllegalArgumentException ignore) { }
+                }
+                break;
             }
-        } else if (e.getChanel().equals("core-cmd"))
-        {
-            String[] msg = e.getValue().split(";");
-            if(msg.length > 2)
+            case "core-cmd":
             {
-                try
-                {
-                    UUID u = UUID.fromString(msg[2]);
-                    org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
-                    if(p != null)
-                    {
-                        if ("friends".equals(msg[0])) {
-                            if(plugin.isFriendsOn()) plugin.getFriendsExecutor().newRequest(u, UUID.fromString(msg[1]), p);
+                String[] msg = e.getValue().split(";");
+                if (msg.length > 2) {
+                    try {
+                        UUID u = UUID.fromString(msg[2]);
+                        org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
+                        if (p != null) {
+                            if ("friends".equals(msg[0])) {
+                                if (plugin.isFriendsOn())
+                                    plugin.getFriendsExecutor().newRequest(u, UUID.fromString(msg[1]), p);
+                            }
                         }
-                    }
 
-                } catch (IllegalArgumentException ignore) { }
+                    } catch (IllegalArgumentException ignore) {
+                    }
+                }
+                break;
             }
-        } else if(e.getChanel().equals("core-msg"))
-        {
-            String[] msg = e.getValue().split(";");
-            if(msg.length > 1)
+            case "core-msg":
             {
-                try
-                {
-                    UUID u = UUID.fromString(msg[1]);
-                    org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
-                    if(p != null)
-                    {
-                        Object[] arg = new Object[msg.length - 2];
-                        for(int i = 2; i < msg.length; i++) arg[i -2] = msg[i];
-                        p.sendMessage(Lang.valueOf(msg[0]).get(plugin.getPlayerLang(u), arg));
-                    }
+                String[] msg = e.getValue().split(";");
+                if (msg.length > 1) {
+                    try {
+                        UUID u = UUID.fromString(msg[1]);
+                        org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
+                        if (p != null) {
+                            Object[] arg = new Object[msg.length - 2];
+                            for (int i = 2; i < msg.length; i++) arg[i - 2] = msg[i];
+                            p.sendMessage(Lang.valueOf(msg[0]).get(plugin.getPlayerLang(u), arg));
+                        }
 
-                } catch (IllegalArgumentException ignore) { }
+                    } catch (IllegalArgumentException ignore) {
+                    }
+                }
+                break;
+            }
+            case "core-server":
+            {
+                String[] msg = e.getValue().split(";");
+                if (msg.length > 1) {
+                    if(msg[0].equals("create"))
+                    {
+                        plugin.getServerManager().addServer(Server.getProxyFromJson(concat(msg, ";", 1)));
+                    }
+                    else if (msg[0].equals("remove"))
+                    {
+                        plugin.getServerManager().removeServer(concat(msg, ";", 1));
+                    }
+                }
             }
         }
     }

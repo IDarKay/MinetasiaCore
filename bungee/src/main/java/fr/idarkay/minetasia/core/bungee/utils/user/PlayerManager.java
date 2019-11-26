@@ -1,9 +1,9 @@
-package fr.idarkay.minetasia.core.spigot.user;
+package fr.idarkay.minetasia.core.bungee.utils.user;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.api.exception.FRSDownException;
+import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
+import fr.idarkay.minetasia.core.bungee.exception.FRSDownException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -11,21 +11,21 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * File <b>PlayerManagement</b> located on fr.idarkay.minetasia.core.common.user
+ * File <b>PlayerManagement</b> located on fr.idarkay.minetasia.core.bungee.utils.user
  * PlayerManagement is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2019 MinetasiaCore.
  * <p>
  *
  * @author alice. B. (IDarKay),
- * Created the 15/11/2019 at 22:25
+ * Created the 26/11/2019 at 18:53
  */
-public class PlayerManagement {
+public class PlayerManager {
 
     private final Cache<UUID, Player> userCache;
-    private final MinetasiaCore plugin;
+    private final MinetasiaCoreBungee plugin;
 
-    public PlayerManagement(MinetasiaCore minetasiaCore)
+    public PlayerManager(MinetasiaCoreBungee minetasiaCore)
     {
         this.plugin = minetasiaCore;
         userCache = CacheBuilder.newBuilder().expireAfterWrite(plugin.getConfig().getLong("cache.user"), TimeUnit.MINUTES).build();
@@ -49,7 +49,7 @@ public class PlayerManagement {
     {
         Player p = new Player(uuid, name);
         userCache.put(uuid, p);
-        plugin.getSqlManager().update("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
+        plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
         plugin.getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
 
     }
