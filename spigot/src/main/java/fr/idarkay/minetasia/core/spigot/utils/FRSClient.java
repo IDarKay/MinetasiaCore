@@ -179,7 +179,11 @@ public class FRSClient
 							catch (InterruptedException ignore) { }
 						}
 					}
-					catch(IOException e) { FRSClient.this.out.println("Connection impossible/lost !"); }
+					catch(IOException e)
+					{
+						FRSClient.this.out.println("Connection impossible/lost !");
+						fixEnable = false;
+					}
 				}
 			};
 		}
@@ -293,7 +297,7 @@ public class FRSClient
 			}
 			catch (IOException e) { e.printStackTrace(); }
 		};
-		if(sync.length > 0 && !sync[0]) Bukkit.getScheduler().runTaskAsynchronously(plugin, cons);
+		if(sync.length == 0 || !sync[0]) Bukkit.getScheduler().runTaskAsynchronously(plugin, cons);
 		else cons.accept(null);
 	}
 	
@@ -346,7 +350,7 @@ public class FRSClient
 			}
 			catch (IOException e) { e.printStackTrace(); }
 		};
-		if(sync.length > 0 && !sync[0]) Bukkit.getScheduler().runTaskAsynchronously(plugin, cons);
+		if(sync.length == 0 || !sync[0]) Bukkit.getScheduler().runTaskAsynchronously(plugin, cons);
 		else cons.accept(null);
 	}
 }

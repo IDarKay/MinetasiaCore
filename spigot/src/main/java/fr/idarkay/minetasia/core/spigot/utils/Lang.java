@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 public enum Lang implements IMinetasiaLang {
 
     WELCOME("welcome", "&6Welcome to the server :)"),
-    CHANGE_USERNAME("change-username", "&a Hey We have detect you have change your username !"),
     HELP_FORMAT("help_format", "&6%1$s --> &9%2$s"),
 
     SET_LANG("set-lang", "&aYour new lang is English"),

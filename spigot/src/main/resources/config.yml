@@ -1,3 +1,11 @@
+# =========================================================================================================== #
+# the type of the server name of the mini game or other                                                       #
+# Example:                                                                                                    #
+#  if the server is a hub set : hub                                                                           #
+#   if the server is a sheepwars set : sheepwars                                                              #
+# =========================================================================================================== #
+server_type: "hub"
+
 # =========================================================================================================== #                                                                 #
 # host: url of the db (set localhost for local db)                                                            #
 # login: login for connect need have permission to create and edit table                                      #
@@ -29,6 +37,8 @@ frs: # NO value Here
 cache: # NO value here !
   user: 5
   friends: 2
+  sever_count: 1
+  online_player: 5
 
 
 commands:

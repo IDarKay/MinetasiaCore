@@ -3,5 +3,6 @@
 gradle.properties
 build
 api/build
-common/build
+bungee/build
+spigot/build
 **/build
