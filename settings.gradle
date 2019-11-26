@@ -1,4 +1,5 @@
 rootProject.name = "MinetasiaCore"
 
 include "api"
-include "common"
+include "spigot"
+include "bungee"

@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.common.gui;
+package fr.idarkay.minetasia.core.spigot.gui;
 
 import fr.idarkay.minetasia.normes.InventoryFileType;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;

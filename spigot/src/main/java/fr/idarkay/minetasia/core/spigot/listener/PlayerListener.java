@@ -1,9 +1,9 @@
-package fr.idarkay.minetasia.core.common.listener;
+package fr.idarkay.minetasia.core.spigot.listener;
 
-import fr.idarkay.minetasia.core.common.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
-import fr.idarkay.minetasia.core.common.user.Player;
-import fr.idarkay.minetasia.core.common.utils.Lang;
+import fr.idarkay.minetasia.core.spigot.user.Player;
+import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

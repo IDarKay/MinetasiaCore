@@ -1,9 +1,9 @@
-package fr.idarkay.minetasia.core.common.executor;
+package fr.idarkay.minetasia.core.spigot.executor;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import fr.idarkay.minetasia.core.common.MinetasiaCore;
-import fr.idarkay.minetasia.core.common.utils.Lang;
+import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;

@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.common.utils;
+package fr.idarkay.minetasia.core.spigot.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
