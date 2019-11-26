@@ -1,0 +1,9 @@
+dependencies {
+    compileOnly 'net.md-5:bungeecord-api:1.14-SNAPSHOT'
+}
+
+shadowJar {
+    setArchivesBaseName("MinetasiaCore-Bungee")
+}
+
+build.dependsOn(shadowJar)

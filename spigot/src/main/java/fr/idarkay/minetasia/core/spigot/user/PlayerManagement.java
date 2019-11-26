@@ -1,12 +1,9 @@
-package fr.idarkay.minetasia.core.common.user;
+package fr.idarkay.minetasia.core.spigot.user;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.google.gson.internal.$Gson$Preconditions;
-import fr.idarkay.minetasia.core.common.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
-import fr.idarkay.minetasia.core.common.executor.FriendsExecutor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;

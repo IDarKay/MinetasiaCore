@@ -1,7 +1,7 @@
-package fr.idarkay.minetasia.core.common.executor;
+package fr.idarkay.minetasia.core.spigot.executor;
 
-import fr.idarkay.minetasia.core.common.MinetasiaCore;
-import fr.idarkay.minetasia.core.common.utils.Lang;
+import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

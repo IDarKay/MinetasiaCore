@@ -1,9 +1,8 @@
-package fr.idarkay.minetasia.core.common.utils;
+package fr.idarkay.minetasia.core.spigot.utils;
 
 import fr.idarkay.minetasia.normes.IMinetasiaLang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.jetbrains.annotations.NotNull;
-import org.omg.CORBA.NO_PERMISSION;
 
 /**
  * File <b>Lang</b> located on fr.idarkay.mintasia.core.common.utils
