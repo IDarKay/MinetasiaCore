@@ -41,11 +41,11 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
         this.type = type;
     }
 
-    public static Server getProxyFromJson(String json)
+    public static Server getServerFromJson(String json)
     {
-        JsonObject proxy = new JsonParser().parse(json).getAsJsonObject();
-        return new Server(proxy.get("ip").getAsString(), proxy.get("port").getAsInt(), proxy.get("type").getAsString()
-                , UUID.fromString(proxy.get("uuid").getAsString()), proxy.get("createTime").getAsLong());
+        JsonObject server = new JsonParser().parse(json).getAsJsonObject();
+        return new Server(server.get("ip").getAsString(), server.get("port").getAsInt(), server.get("type").getAsString()
+                , UUID.fromString(server.get("uuid").getAsString()), server.get("createTime").getAsLong());
     }
 
     public long getCreatTime()

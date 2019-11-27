@@ -37,7 +37,6 @@ frs: # NO value Here
 cache: # NO value here !
   user: 5
   friends: 2
-  sever_count: 1
   online_player: 5
 
 

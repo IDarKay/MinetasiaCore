@@ -36,7 +36,7 @@ public class PlayerManager {
         if(plugin.getFrsClient().isConnected())
             try {
                 return userCache.get(uuid, () -> new Player(plugin.getFrsClient().getValue("usersData", uuid.toString())));
-            } catch (ExecutionException e) {
+            } catch (Exception e) {
                 return null;
             }
         else{
@@ -45,9 +45,10 @@ public class PlayerManager {
         }
     }
 
-    public void newPlayer(UUID uuid, String name)
+    public void newPlayer(UUID uuid, String name, String lang)
     {
         Player p = new Player(uuid, name);
+        p.setDaa("lang", lang);
         userCache.put(uuid, p);
         plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
         plugin.getFrsClient().setValue("usersData", uuid.toString(), p.getJson());

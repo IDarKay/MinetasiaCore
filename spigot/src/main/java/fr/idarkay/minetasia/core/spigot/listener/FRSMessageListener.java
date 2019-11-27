@@ -107,7 +107,7 @@ public final class FRSMessageListener implements Listener {
                 if (msg.length > 1) {
                     if(msg[0].equals("create"))
                     {
-                        plugin.getServerManager().addServer(Server.getProxyFromJson(concat(msg, ";", 1)));
+                        plugin.getServerManager().addServer(Server.getServerFromJson(concat(msg, ";", 1)));
                     }
                     else if (msg[0].equals("remove"))
                     {

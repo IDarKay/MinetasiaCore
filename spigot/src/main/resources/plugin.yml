@@ -1,5 +1,5 @@
 name: MinetasiaCore
-main: fr.idarkay.minetasia.core.common.MinetasiaCore
+main: fr.idarkay.minetasia.core.spigot.MinetasiaCore
 api-version: 1.14
 version: @version@
 prefix: MinetasiaCore
@@ -23,3 +23,4 @@ permissions:
     description: allow all command of the core
     children:
       core.friends: true
+      core.lang: true

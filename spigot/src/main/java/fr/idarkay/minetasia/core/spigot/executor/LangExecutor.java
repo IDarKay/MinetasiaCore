@@ -37,7 +37,7 @@ public final class LangExecutor implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         Bukkit.getScheduler().runTaskAsynchronously(minetasiaCore, () -> {
-            if(sender.hasPermission("core.friends"))
+            if(sender.hasPermission("core.lang"))
             {
                 if (sender.hasPermission("core.friends.admin") && args.length > 0)
                 {
