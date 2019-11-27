@@ -195,7 +195,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
      * @since 1.0
      */
-    public abstract void publish(@NotNull String chanel, @NotNull String message);
+    public abstract void publish(@NotNull String chanel, @NotNull String message, boolean... sync);
 
     public abstract String getValue(String key, String field);
 

@@ -20,7 +20,7 @@ import java.net.InetSocketAddress;
  */
 public final class ProxyManager {
 
-    private final String motd;
+    public static String motd;
     private final MinetasiaCoreBungee plugin;
     private final FRSClient frsClient;
     private Proxy proxy;
@@ -61,7 +61,8 @@ public final class ProxyManager {
 
     public void disable()
     {
-        frsClient.setValue("proxy", proxy.getUuid().toString(), null);
+        frsClient.setValue("proxy-player-count", proxy.getUuid().toString(), null, true);
+        frsClient.setValue("proxy", proxy.getUuid().toString(), null, true);
     }
 
     public Proxy getProxy() {

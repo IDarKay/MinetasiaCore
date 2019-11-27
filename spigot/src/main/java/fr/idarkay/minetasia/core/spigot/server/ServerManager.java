@@ -25,6 +25,7 @@ public final class ServerManager {
     {
         this.plugin = plugin;
         String ip = Bukkit.getIp();
+        if(ip.equals("")) ip = "127.0.0.1";
         int port = Bukkit.getPort();
 
         Server server = new Server(ip, port, plugin.getServerType());
@@ -32,13 +33,16 @@ public final class ServerManager {
         String json = server.toJson();
         plugin.getFrsClient().setValue("server", server.getName(), json);
         plugin.publish("core-server", "create;" + json);
-        plugin.getFrsClient().getValues("core", plugin.getFrsClient().getFields("core")).forEach( (k, v) -> servers.put(k, Server.getProxyFromJson(v)));
+        plugin.getFrsClient().getValues("server", plugin.getFrsClient().getFields("server")).forEach( (k, v) -> {
+            if(v != null && !v.equals("null"))
+            servers.put(k, Server.getServerFromJson(v));
+        });
     }
 
     public void disable()
     {
-        plugin.getFrsClient().setValue("server", server.getName(), null);
-        plugin.publish("core-server", "remove;" + server.getName());
+        plugin.getFrsClient().setValue("server", server.getName(), null, true);
+        plugin.getFrsClient().publish("core-server", "remove;" + server.getName(), true);
     }
 
     public Server getServer()

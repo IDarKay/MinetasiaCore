@@ -1,5 +1,13 @@
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
 dependencies {
     compileOnly 'net.md-5:bungeecord-api:1.14-SNAPSHOT'
+    compile 'com.maxmind.geoip2:geoip2:2.12.0'
+    compile name: 'Normes-1.0'
 }
 
 shadowJar {

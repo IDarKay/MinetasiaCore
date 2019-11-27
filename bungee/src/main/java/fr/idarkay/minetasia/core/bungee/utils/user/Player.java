@@ -56,6 +56,11 @@ public class Player {
         return data.get(key);
     }
 
+    public void setDaa(String key, String value)
+    {
+        data.put(key, value);
+    }
+
     public HashMap<UUID, String> getFriends() {
         return friends;
     }

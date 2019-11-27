@@ -106,8 +106,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public void onDisable() {
-        frsClient.shutdown(true);
         serverManager.disable();
+        frsClient.shutdown(true);
     }
 
     @Override
@@ -296,9 +296,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
 
     @Override
-    public void publish(@NotNull String chanel, @NotNull String message) {
+    public void publish(@NotNull String chanel, @NotNull String message, boolean... sync) {
         if(frsClient.isConnected())
-            frsClient.publish(chanel, message, false);
+            frsClient.publish(chanel, message, sync);
         else throw new FRSDownException("can't publish frs is down");
     }
 

@@ -55,7 +55,7 @@ public final class FriendsExecutor implements TabExecutor {
                     {
                         if (args.length > 1 && args[0].equalsIgnoreCase("add"))
                         {
-                            if(!args[1].equals(player.getName()))
+                            if(!args[1].equalsIgnoreCase(player.getName()))
                             {
                                 UUID uuid = minetasiaCore.getPlayerUUID(args[1]);
                                 if(uuid != null)
