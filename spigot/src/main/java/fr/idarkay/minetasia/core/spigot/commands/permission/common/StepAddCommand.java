@@ -46,7 +46,7 @@ public final class StepAddCommand extends StepCommand implements FixCommand {
                 perm = plugin.getServer().getPluginManager().getPermissions().stream().map(Permission::getName).collect(Collectors.toList());
                 perm.addAll(getBasicTabCompleter(sender, args));
             }
-            return perm;
+            return getMultiCompleter(sender, args, perm, true);
         }
         else return Collections.emptyList();
     }

@@ -60,6 +60,7 @@ public class PermissionManager {
             pa = v.get("temp_group_" + group);
             if(pa != null) pa.remove(); v.remove("temp_group_" + group);
         });
+        groups.remove(group);
         plugin.setValue("group", group, null);
         plugin.publish("core-group", "group;" + group + ";null");
     }
@@ -77,7 +78,7 @@ public class PermissionManager {
     {
         String j = group.toJson();
         plugin.setValue("group", group.getName(), j);
-        plugin.publish("core-group", "group;" + group + ";" + j);
+        plugin.publish("core-group", "group;" + group.getName() + ";" + j);
     }
 
     public void updateGroupToPlayer(String group)
@@ -218,7 +219,7 @@ public class PermissionManager {
         else Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> plugin.publish("core-cmd", "permission;" + player.toString()), 40);
     }
 
-    private List<String> getThinkOfUSer(@NotNull UUID uuid, String think, boolean isTemp)
+    private List<String> getThinkOfUSer(@NotNull UUID uuid, String think, boolean isTemp, boolean isPerm)
     {
         List<String> back = new ArrayList<>();
         if(permissionAttachments.containsKey(uuid))
@@ -227,7 +228,11 @@ public class PermissionManager {
             {
                 if(e.getKey().startsWith(think))
                 {
-                    back.addAll(e.getValue().getPermissions().keySet());
+                    if(isPerm)
+                        back.addAll(e.getValue().getPermissions().keySet());
+                    else
+                        back.add(e.getKey());
+
                 }
             }
         }
@@ -257,22 +262,22 @@ public class PermissionManager {
 
     public List<String> getGroupOfUser(@NotNull UUID uuid)
     {
-        return getThinkOfUSer(uuid, "group", false);
+        return getThinkOfUSer(uuid, "group", false, false);
     }
 
     public List<String> getPermissionOfUser(@NotNull UUID uuid)
     {
-        return getThinkOfUSer(uuid, "permission", false);
+        return getThinkOfUSer(uuid, "permission", false, true);
     }
 
     public List<String> getTempGroupOfUser(@NotNull UUID uuid)
     {
-        return getThinkOfUSer(uuid, "temp_group", true);
+        return getThinkOfUSer(uuid, "temp_group", true, false);
     }
 
     public List<String> getTempPermissionOfUser(@NotNull UUID uuid)
     {
-        return getThinkOfUSer(uuid, "temp_permission", true);
+        return getThinkOfUSer(uuid, "temp_permission", true, true);
     }
 
 

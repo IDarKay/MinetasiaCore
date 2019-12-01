@@ -51,7 +51,7 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
             permissions.add(jsonElement.getAsString());
         }
 
-        JsonArray b = json.getAsJsonArray("permission");
+        JsonArray b = json.getAsJsonArray("parents");
         for (JsonElement jsonElement : b)
         {
             parents.add(jsonElement.getAsString());
@@ -137,7 +137,7 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         p.add("permission", a);
 
         JsonArray b = new JsonArray();
-        permissions.forEach(b::add);
+        parents.forEach(b::add);
         p.add("parents", b);
 
         return p.toString();

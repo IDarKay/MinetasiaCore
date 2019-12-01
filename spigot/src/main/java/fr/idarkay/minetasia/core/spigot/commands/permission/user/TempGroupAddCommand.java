@@ -25,7 +25,7 @@ import java.util.UUID;
 public class TempGroupAddCommand extends SubCommand implements FlexibleCommand {
 
     public TempGroupAddCommand(@NotNull MinetasiaCore plugin) {
-        super(plugin, Lang.DESC_PERMISSION_USER_PERMISSION_ADD_VALUE_TEMP, CommandPermission.PERMISSION_USER_PERMISSION, 7);
+        super(plugin, Lang.DESC_PERMISSION_USER_GROUP_ADD_VALUE_TEMP, CommandPermission.PERMISSION_USER_PERMISSION, 7);
     }
 
     @Override

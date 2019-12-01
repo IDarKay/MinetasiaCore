@@ -41,8 +41,13 @@ public class ParentAddValueCommand extends SubCommand implements FlexibleCommand
         {
             if(plugin.getPermissionManager().groups.get(args[4]) != null)
             {
-                g.addParents(args[4]);
-                sender.sendMessage(Lang.GROUP_PARENT_ADD.get(lang, args[4], args[1]));
+                if(!args[1].equalsIgnoreCase(args[4]) && !g.getParents().contains(args[4]) && noRecursive(g, args[4]))
+                {
+                    g.addParents(args[4]);
+                    sender.sendMessage(Lang.GROUP_PARENT_ADD.get(lang, args[4], args[1]));
+                }
+                else sender.sendMessage(Lang.GROUP_PARENT_CANT_ADD.get(lang, args[4], args[1]));
+
             }
             else sender.sendMessage(Lang.GROUP_NOT_EXIST.get(lang));
         }
@@ -59,4 +64,18 @@ public class ParentAddValueCommand extends SubCommand implements FlexibleCommand
     public List<String> getPossibilities() {
         return null;
     }
+
+    private boolean noRecursive(Group g, String todd)
+    {
+        if(g != null)
+        {
+            for(String gr : g.getParents())
+            {
+                if(gr.equalsIgnoreCase(todd)) return false;
+                if(!noRecursive(plugin.getPermissionManager().groups.get(gr), todd)) return false;
+            }
+        }
+        return true;
+    }
+
 }

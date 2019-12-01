@@ -44,7 +44,7 @@ public class GroupAddValueCommand extends StepCommand implements FlexibleCommand
             if(u != null)
             {
                 plugin.getPermissionManager().addGroup(u, g.getName());
-                sender.sendMessage(Lang.USER_GROUP_ADD.get(lang, permission, args[1]));
+                sender.sendMessage(Lang.USER_GROUP_ADD.get(lang, args[4], args[1]));
             }
             else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
         }

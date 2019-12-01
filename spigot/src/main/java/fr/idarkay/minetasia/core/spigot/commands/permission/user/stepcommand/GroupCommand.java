@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 public class GroupCommand extends StepCommand implements FixCommand {
 
     public GroupCommand(@NotNull MinetasiaCore plugin) {
-        super(plugin, Lang.DESC_PERMISSION_GROUP_PARENT, CommandPermission.PERMISSION_GROUP_PARENT, 4);
+        super(plugin, Lang.DESC_PERMISSION_USER_GROUP, CommandPermission.PERMISSION_GROUP_PARENT, 4);
         child.add(new GroupAddCommand(plugin));
         child.add(new GroupRemoveCommand(plugin));
     }

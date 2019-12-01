@@ -34,7 +34,7 @@ public class PermissionListCommand extends SubCommand implements FixCommand {
     public void execute(@NotNull MinetasiaCore plugin, @NotNull CommandSender sender, @NotNull String[] args, @NotNull String label) {
         for(CommandPermission c : CommandPermission.values())
         {
-            if(c.name().startsWith("PERMISSION") || c.name().startsWith("1LL_PERMISSION"))
+            if(c.name().startsWith("PERMISSION") || c.name().startsWith("ALL_PERMISSION"))
             {
                 sender.sendMessage(ChatColor.AQUA + c.getPermission() + " : " + ChatColor.GREEN + c.getDescription());
             }

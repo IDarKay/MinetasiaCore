@@ -62,7 +62,7 @@ public final class LangExecutor implements TabExecutor {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if(args.length > 0 && sender.hasPermission(CommandPermission.LANG_ADMIN.getPermission())) return minetasiaCore.getOnlinePlayers().values().stream().filter(s -> s.startsWith(args[1])).collect(Collectors.toList());
+        if(args.length > 0 && sender.hasPermission(CommandPermission.LANG_ADMIN.getPermission())) return minetasiaCore.getOnlinePlayersForTab();
         return null;
     }
 }

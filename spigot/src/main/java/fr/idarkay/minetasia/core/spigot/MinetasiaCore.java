@@ -483,17 +483,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     @NotNull
     public List<String> getOnlinePlayersForTab() {
-        try {
-           Map<UUID, String>  v = onlinePlayer.get(1, () -> null);
-           if(v == null)
-           {
-               return getServer().getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
-           }
-           else return new ArrayList<>(v.values());
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
+       Map<UUID, String>  v = onlinePlayer.getIfPresent(1);
+       if(v == null)
+       {
+           return getServer().getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
+       }
+       else return new ArrayList<>(v.values());
     }
 
     @Override
