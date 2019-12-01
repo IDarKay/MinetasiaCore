@@ -6,7 +6,6 @@ import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +70,7 @@ public abstract class Command {
         final String lang = getLangOfSender(sender);
 
         //get already enter cmd
-        final String cmd = "/" + label + concat(args, " ", 0, length - 2) + " ";
+        final String cmd = "/" + label + " " + concat(args, " ", 0, length - 2);
 
         //add all children command
         u.add(ChatColor.RED + "-----------" + cmd + "-----------");
@@ -80,7 +79,7 @@ public abstract class Command {
             {
                 StringBuilder l = new StringBuilder();
                 l.append(ChatColor.AQUA).append(cmd).append(" ");
-                l.append(getLabel());
+                l.append(v.getLabel());
                 if (v.getDescription() != null) {
                     l.append(" : ").append(ChatColor.GREEN);
                     l.append(v.getDescription().getWithoutPrefix(lang));
@@ -89,6 +88,13 @@ public abstract class Command {
             }
         }
         return u;
+    }
+
+    protected List<String> getMultiCompleter(@NotNull CommandSender sender, @NotNull String[] args, Collection<String> elements, boolean filter)
+    {
+        List<String> back = getBasicTabCompleter(sender, args); // get create cmd
+        back.addAll(getCustomCompleter(sender, args, elements, filter)); //get all group name
+        return back;
     }
 
     protected List<String> getBasicTabCompleter( @NotNull CommandSender sender,  @NotNull String[] args)
@@ -117,13 +123,11 @@ public abstract class Command {
         {
             final List<String> b = new ArrayList<>();
             elements.forEach(v -> {
-
                 if (!filter
                         || args.length < length
                         || v.equalsIgnoreCase(args[length -1])
-                        || v.startsWith(args[length - 1].toLowerCase()))
+                        || v.toLowerCase().startsWith(args[length - 1].toLowerCase()))
                     b.add(v);
-
             });
             return b;
         }

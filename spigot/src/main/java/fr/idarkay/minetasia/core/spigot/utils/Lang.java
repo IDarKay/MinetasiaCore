@@ -50,19 +50,21 @@ public enum Lang implements IMinetasiaLang {
     GROUP_DISPLAY_CHANGE                        ("&a group %1$s has now display %2$s"),
     GROUP_PRIORITY_CHANGE                       ("&a group %1$s has now priority %2$s"),
     GROUP_SAVE                                  ("&aGroup %1$s saved !"),
+    GROUP_DELETE                                ("&aGroup %1$s delete !"),
     GROUP_NO_ENOUGH_CHAR                        ("&c name to short please set more than %1$s char!"),
     GROUP_PERMISSION_ADD                        ("&aPermission %1$s add to %2$s"),
     GROUP_PERMISSION_REMOVE                     ("&aPermission %1$s remove to %2$s"),
     GROUP_PERMISSION_CANT_REMOVE                ("&cGroup %1$s don't have permission %2$s"),
     GROUP_PARENT_ADD                            ("&aParent %1$s add to %2$s"),
+    GROUP_PARENT_CANT_ADD                       ("&ccan't add Parent %1$s to %2$s because %2$s have ealready %1$s for parent"),
     GROUP_PARENT_REMOVE                         ("&aParent %1$s remove to %2$s"),
     GROUP_PARENT_CANT_REMOVE                    ("&cGroup %1$s don't have parent %2$s"),
 
         //user
     USER_PERMISSION_ADD                         ("&aPermission %1$s add to %2$s"),
     USER_PERMISSION_REMOVE                      ("&aPermission %1$s remove to %2$s"),
-    USER_GROUP_ADD                              ("&aGroup %1$s add to £2$s"),
-    USER_GROUP_REMOVE                           ("&aGroup %1$s remove to £2$s"),
+    USER_GROUP_ADD                              ("&aGroup %1$s add to %2$s"),
+    USER_GROUP_REMOVE                           ("&aGroup %1$s remove to %2$s"),
 
     //command description
     DESC_PERMISSION                             ("first step for all commands for edit permission"),
@@ -73,6 +75,7 @@ public enum Lang implements IMinetasiaLang {
     DESC_PERMISSION_GROUP_CREATE_NAME           ("for create new group"),
     DESC_PERMISSION_GROUP_NAME                  ("for mange a group (enter valid group name for more information)"),
     DESC_PERMISSION_GROUP_DISPLAY               ("<name> / for change the display of the group (you can set space and color)"),
+    DESC_PERMISSION_GROUP_DELETE               ("for delete th group"),
     DESC_PERMISSION_GROUP_DISPLAY_NAME          ("for change the display of the group (you can set space and color)"),
     DESC_PERMISSION_GROUP_PRIORITY              ("<priority> / for change the priority of the group"),
     DESC_PERMISSION_GROUP_PRIORITY_VALUE        ("for change the priority of the group"),

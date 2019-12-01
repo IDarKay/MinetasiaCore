@@ -42,11 +42,11 @@ public final class CreateGroupNameCommand extends SubCommand implements Flexible
     @Override
     public void execute(@NotNull MinetasiaCore plugin, @NotNull CommandSender sender, @NotNull String[] args, @NotNull String label) {
         final String lang = sender instanceof Player ? plugin.getPlayerLang(((Player) sender).getUniqueId()) : MinetasiaLang.BASE_LANG;
-        if(!permissionManager.groups.containsKey(args[rank]))
+        if(!permissionManager.groups.containsKey(args[rank].toLowerCase()))
         {
             if(args[rank].length() > 1)
             {
-                permissionManager.createGroup(args[rank]);
+                permissionManager.createGroup(args[rank].toLowerCase());
                 sender.sendMessage(Lang.GROUP_CREATE.get(lang, args[rank]));
             }
             else sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, 2));

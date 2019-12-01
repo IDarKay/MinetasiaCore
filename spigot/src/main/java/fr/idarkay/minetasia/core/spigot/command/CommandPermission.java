@@ -40,6 +40,7 @@ public enum CommandPermission {
 
     PERMISSION_GROUP("permission.group", ALL_PERMISSION),
     PERMISSION_GROUP_CREATE("permission.create", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_DELETE("permission.delete", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_PERMISSION("permission.create.permission", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_DISPLAY("permission.create.display", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_PRIORITY("permission.create.priority", ALL_PERMISSION_GROUP),

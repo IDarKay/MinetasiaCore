@@ -35,7 +35,7 @@ public class HelpCommand extends SubCommand implements FixCommand {
 
     @Override
     public void execute(@NotNull MinetasiaCore plugin, @NotNull CommandSender sender, @NotNull String[] args, @NotNull String label) {
-        Command c = plugin.getCommandManager().getCommand(label, new String[] {}, false, sender);
+        Command c = plugin.getCommandManager().getCommand("permission", new String[] {}, false, sender);
         getChild(c, new ArrayList<>(), plugin, sender, args, label);
     }
 
@@ -45,7 +45,7 @@ public class HelpCommand extends SubCommand implements FixCommand {
         {
             if(sender.hasPermission(ch.getPermission().getPermission()))
             {
-                for(String m : getUsage(plugin, sender, args, label)) sender.sendMessage(m);
+                for(String m : ch.getUsage(plugin, sender, args, label)) sender.sendMessage(m);
                 getChild(ch, l, plugin, sender, args, label);
             }
         }

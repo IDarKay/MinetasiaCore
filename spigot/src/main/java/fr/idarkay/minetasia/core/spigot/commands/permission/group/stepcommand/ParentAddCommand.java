@@ -6,7 +6,10 @@ import fr.idarkay.minetasia.core.spigot.command.abstraction.FixCommand;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.StepCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.group.ParentAddValueCommand;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
+import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 /**
  * File <b>ParentAddCommand</b> located on fr.idarkay.minetasia.core.spigot.commands.permission.group.stepcommand
@@ -23,6 +26,11 @@ public class ParentAddCommand extends StepCommand implements FixCommand {
     public ParentAddCommand(@NotNull MinetasiaCore plugin) {
         super(plugin, Lang.DESC_PERMISSION_GROUP_PARENT_ADD, CommandPermission.PERMISSION_GROUP_PARENT, 5);
         child.add(new ParentAddValueCommand(plugin));
+    }
+
+    @Override
+    public List<String> tabComplete(@NotNull MinetasiaCore plugin, @NotNull CommandSender sender, @NotNull String[] args, @NotNull String label) {
+        return getMultiCompleter(sender, args, plugin.getPermissionManager().groups.keySet(), true);
     }
 
     @Override

@@ -46,16 +46,23 @@ public final class ProxyManager {
 
         for(String serverName : frsClient.getFields("server"))
         {
-            JsonObject server = new JsonParser().parse(frsClient.getValue("server", serverName)).getAsJsonObject();
-            String sIp = server.get("ip").getAsString();
-            int sPort = server.get("port").getAsInt();
-
-            if(!plugin.getProxy().getServers().containsKey(serverName))
+            try
             {
-                ServerInfo serverinfo = plugin.getProxy().constructServerInfo(serverName, InetSocketAddress.createUnresolved(sIp, sPort),
-                                motd.replace("%s", serverName) , false);
-                plugin.getProxy().getServers().put(serverName, serverinfo);
+                JsonObject server = new JsonParser().parse(frsClient.getValue("server", serverName)).getAsJsonObject();
+                String sIp = server.get("ip").getAsString();
+                int sPort = server.get("port").getAsInt();
+
+                if(!plugin.getProxy().getServers().containsKey(serverName))
+                {
+                    ServerInfo serverinfo = plugin.getProxy().constructServerInfo(serverName, InetSocketAddress.createUnresolved(sIp, sPort),
+                            motd.replace("%s", serverName) , false);
+                    plugin.getProxy().getServers().put(serverName, serverinfo);
+                }
+            } catch (Exception e)
+            {
+                System.out.println("rappeller à emilien de fix FRS");
             }
+
         }
     }
 

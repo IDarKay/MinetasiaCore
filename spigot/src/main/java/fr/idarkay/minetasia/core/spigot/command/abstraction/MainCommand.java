@@ -34,12 +34,7 @@ public abstract class MainCommand extends Command {
     public List<String> tabComplete(@NotNull MinetasiaCore plugin, @NotNull CommandSender sender, @NotNull String[] args, @NotNull String label) {
         if(sender.hasPermission(permission.getPermission()))
         {
-            final List<String> b = new ArrayList<>();
-            getChild().forEach(v -> {
-                if(sender.hasPermission(v.permission.getPermission()))
-                    b.add(v.getLabel());
-            });
-            return b;
+            return getBasicTabCompleter(sender, args);
         }
         else return Collections.emptyList();
     }
@@ -59,7 +54,7 @@ public abstract class MainCommand extends Command {
                 {
                     StringBuilder l = new StringBuilder();
                     l.append(ChatColor.AQUA).append(cmd).append(" ");
-                    l.append(getLabel());
+                    l.append(v.getLabel());
                     if (v.getDescription() != null) {
                         l.append(" ; ").append(ChatColor.GREEN);
                         l.append(v.getDescription().getWithoutPrefix(lang));

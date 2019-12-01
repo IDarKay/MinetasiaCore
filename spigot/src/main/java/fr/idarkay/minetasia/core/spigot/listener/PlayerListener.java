@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
 
@@ -29,10 +30,17 @@ public class PlayerListener implements Listener {
 
 
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoinEvent(PlayerJoinEvent e)
     {
         e.setJoinMessage(null);
+        plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerQuitEvent(PlayerQuitEvent e)
+    {
+        plugin.getPermissionManager().removePlayer(e.getPlayer().getUniqueId());
     }
 
 }

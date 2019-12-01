@@ -11,4 +11,4 @@ commands:
   lang:
     aliases: [langue, lengua, sprache]
   permission:
-    aliases: [perm, perms, permissions]
+    aliases: [perm, perms, permissions, group, groups]
