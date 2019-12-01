@@ -98,8 +98,9 @@ public final class Player {
     }
 
 
-    public void setData(@NotNull String key, @NotNull String value) {
-        data.put(key, value);
+    public void setData(@NotNull String key, String value) {
+        if(value == null)  data.remove(key);
+        else data.put(key, value);
     }
 
 
@@ -135,6 +136,10 @@ public final class Player {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 
     public String getJson()

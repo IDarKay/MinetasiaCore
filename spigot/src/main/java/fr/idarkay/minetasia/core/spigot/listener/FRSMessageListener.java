@@ -1,8 +1,10 @@
 package fr.idarkay.minetasia.core.spigot.listener;
 
+import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.permission.Group;
 import fr.idarkay.minetasia.core.spigot.server.Server;
 import fr.idarkay.minetasia.core.spigot.user.Player;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
@@ -35,6 +37,21 @@ public final class FRSMessageListener implements Listener {
     {
         switch (e.getChanel())
         {
+            case "core-group":
+            {
+                String[] msg = e.getValue().split(";", 3);
+                if (msg.length > 2) {
+                    if(msg[0].equals("group"))
+                    {
+                        if(!msg[2].equals("null"))
+                        {
+                            plugin.getPermissionManager().groups.put(msg[1], new Group(msg[2], plugin.getPermissionManager()));
+                            plugin.getPermissionManager().updateGroupToPlayer(msg[1]);
+                        }
+                    }
+                }
+                break;
+            }
             case "core-data":
             {
                 String[] msg = e.getValue().split(";");
@@ -72,9 +89,14 @@ public final class FRSMessageListener implements Listener {
                         UUID u = UUID.fromString(msg[2]);
                         org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
                         if (p != null) {
-                            if ("friends".equals(msg[0])) {
-                                if (plugin.isFriendsOn())
+                            if ("friends".equals(msg[0]))
+                            {
+                                if (plugin.isCommandEnable(Command.FRIEND))
                                     plugin.getFriendsExecutor().newRequest(u, UUID.fromString(msg[1]), p);
+                            }
+                            else if("permission".equals(msg[0]))
+                            {
+                                plugin.getPermissionManager().loadUser(u, true);
                             }
                         }
 
@@ -122,7 +144,8 @@ public final class FRSMessageListener implements Listener {
     {
         StringBuilder result = new StringBuilder();
         for(int i = indexFrom; i < array.length; i++) result.append(i != indexFrom && split != null ? split : "").append(array[i]);
-        return result.toString();
+        String r = result.toString();
+        return r.equals("null") ? null : r;
     }
 
 }

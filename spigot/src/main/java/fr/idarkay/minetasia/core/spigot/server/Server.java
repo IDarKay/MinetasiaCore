@@ -75,6 +75,7 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
         return type;
     }
 
+    @NotNull
     public String  getName() {
         return type + "#" + uuid.toString();
     }

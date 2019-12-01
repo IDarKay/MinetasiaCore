@@ -16,19 +16,41 @@ import java.util.UUID;
  */
 public interface Server {
 
+    /**
+     * get the time in millis of when the server was created
+     * @return long time in millis
+     */
     long getCreatTime();
 
+    /**
+     * @return the ip of the server
+     */
     @NotNull
     String getIp();
 
+    /**
+     * @return the server port
+     */
     int getPort();
 
+    /**
+     * @return the uuid of the server
+     */
     @NotNull
     UUID getUuid();
 
+    /**
+     * get the type of the server
+     * the type represent what is the server : hub , sheepWars ...
+     * @return the type of the server
+     */
     @NotNull
     String getType();
 
+    /**
+     * get the full name of the server, the name is : {@link Server#getType()} + # + {@link Server#getUuid()}
+      * @return the full name of the server
+     */
     @NotNull
     String getName();
 

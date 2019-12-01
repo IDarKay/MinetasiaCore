@@ -7,10 +7,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * File <b>MinetasiaCoreApi</b> located on fr.idarkay.minetasia.core.api
@@ -73,7 +70,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @throws IllegalStateException if one or more parameter are null
      * @since 1.0
      */
-    public abstract void setPlayerData(@NotNull UUID uuid, @NotNull String key, @NotNull String value);
+    public abstract void setPlayerData(@NotNull UUID uuid, @NotNull String key, String value);
 
     /**
      * get a data of a specific player and key
@@ -191,11 +188,11 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * the message will be get by all only server with the {@link fr.idarkay.minetasia.core.api.event.FRSMessageEvent}
      *
      * @param chanel  {@link NotNull} chanel of the message
-     * @param message  {@link NotNull} message
+     * @param message  message
      * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
      * @since 1.0
      */
-    public abstract void publish(@NotNull String chanel, @NotNull String message, boolean... sync);
+    public abstract void publish(@NotNull String chanel, String message, boolean... sync);
 
     public abstract String getValue(String key, String field);
 
@@ -246,6 +243,13 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract Map<UUID, String> getOnlinePlayers();
 
     /**
+     * get all only player use this for tab and not {@link MinetasiaCoreApi#getOnlinePlayers()}
+     * @return {@code HashMap<UUID, String>}
+     */
+    @NotNull
+    public abstract List<String> getOnlinePlayersForTab();
+
+    /**
      * get the type of the server (hub or name of the mini game)
      * @return the type of the server
      */
@@ -272,6 +276,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     /**
      * get all {@link Server}
      * @return {@code Map<String, Server> }
+     * @since 1.0
      */
     @NotNull
     public abstract Map<String, Server> getServers();
@@ -280,11 +285,20 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * get all {@link Server} of a type
      * @param type  the type of the {@link Server}
      * @return {@code Map<String, Server> }
+     * @since 1.0
      */
     @NotNull
     public abstract Map<String, Server> getServers(String type);
 
+    public abstract boolean isCommandEnable(byte b);
 
+    /**
+     * get if commands is enable
+     * @param c {@link Command} to check
+     * @return if enable
+     * @since 1.0
+     */
+    public abstract boolean isCommandEnable(Command c);
 
 
 
