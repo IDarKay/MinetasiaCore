@@ -10,17 +10,5 @@ commands:
     aliases: [friend, f, amis, freunde, amigos]
   lang:
     aliases: [langue, lengua, sprache]
-permissions:
-  core.friends:
-    description: allow /friends <add / remove / accept>
-  core.lang:
-    description: allow /lang (gui)
-  core.lang.admin:
-      description: allow /lang (gui) and /lang <player name>
-      children:
-        core.lang: true
-  core.*:
-    description: allow all command of the core
-    children:
-      core.friends: true
-      core.lang: true
+  permission:
+    aliases: [perm, perms, permissions]

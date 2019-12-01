@@ -1,6 +1,7 @@
-package fr.idarkay.minetasia.core.spigot.executor;
+package fr.idarkay.minetasia.core.spigot.Executor;
 
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.bukkit.Bukkit;
@@ -37,9 +38,9 @@ public final class LangExecutor implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         Bukkit.getScheduler().runTaskAsynchronously(minetasiaCore, () -> {
-            if(sender.hasPermission("core.lang"))
+            if(sender.hasPermission(CommandPermission.LANG.getPermission()))
             {
-                if (sender.hasPermission("core.friends.admin") && args.length > 0)
+                if (sender.hasPermission(CommandPermission.LANG_ADMIN.getPermission()) && args.length > 0)
                 {
                     UUID uuid = minetasiaCore.getPlayerUUID(args[0]);
                     if(uuid != null)
@@ -61,7 +62,7 @@ public final class LangExecutor implements TabExecutor {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if(args.length > 0 && sender.hasPermission("core.lang.admin")) return minetasiaCore.getOnlinePlayers().values().stream().filter(s -> s.startsWith(args[1])).collect(Collectors.toList());
+        if(args.length > 0 && sender.hasPermission(CommandPermission.LANG_ADMIN.getPermission())) return minetasiaCore.getOnlinePlayers().values().stream().filter(s -> s.startsWith(args[1])).collect(Collectors.toList());
         return null;
     }
 }

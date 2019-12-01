@@ -15,12 +15,15 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.sql.BatchUpdateException;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -69,7 +72,72 @@ public final class MinetasiaCoreBungee extends Plugin {
                 configuration.getString("frs.password"));
 
         sqlManager = new SQLManager(this);
-        sqlManager.update("CREATE TABLE IF NOT EXISTS `online_player` ( `uuid` VARCHAR(36) NOT NULL , `username` VARCHAR(16) NOT NULL , `proxy` VARCHAR(36) NOT NULL , `server` VARCHAR(64) NOT NULL , PRIMARY KEY (`uuid`)) ENGINE = MEMORY;");
+        String sqlFileName = "fr/idarkay/minetasia/core/sql/" + configuration.getString("db.system") + ".sql";
+        try (InputStream is = getResourceAsStream(sqlFileName)) {
+            if (is == null) {
+                throw new Exception("Couldn't locate schema file for " + sqlFileName);
+            }
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                List<String> queries = new LinkedList<>();
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("--") || line.startsWith("#")) {
+                        continue;
+                    }
+
+                    sb.append(line);
+
+                    // check for end of declaration
+                    if (line.endsWith(";")) {
+                        sb.deleteCharAt(sb.length() - 1);
+
+                        String result = getStatementProcessor().apply(sb.toString().trim());
+                        if (!result.isEmpty()) {
+                            queries.add(result);
+                        }
+
+                        // reset
+                        sb = new StringBuilder();
+                    }
+                }
+
+                try (Connection connection = sqlManager.getSQL()) {
+                    boolean utf8mb4Unsupported = false;
+
+                    try (Statement s = connection.createStatement()) {
+                        for (String query : queries) {
+                            s.addBatch(query);
+                        }
+
+                        try {
+                            s.executeBatch();
+                        } catch (BatchUpdateException e) {
+                            if (e.getMessage().contains("Unknown character set")) {
+                                utf8mb4Unsupported = true;
+                            } else {
+                                throw e;
+                            }
+                        }
+                    }
+
+                    // try again
+                    if (utf8mb4Unsupported) {
+                        try (Statement s = connection.createStatement()) {
+                            for (String query : queries) {
+                                s.addBatch(query.replace("utf8mb4", "utf8"));
+                            }
+
+                            s.executeBatch();
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -171,6 +239,10 @@ public final class MinetasiaCoreBungee extends Plugin {
                 frsClient.setValue("usersData", uuid.toString(), p.getJson());
             }
         });
+    }
+
+    private Function<String, String> getStatementProcessor() {
+        return s -> s.replace("'", "`"); // use backticks for quotes
     }
 
 }

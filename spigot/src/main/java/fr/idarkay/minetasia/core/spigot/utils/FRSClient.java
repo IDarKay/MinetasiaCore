@@ -293,7 +293,7 @@ public class FRSClient
 		{
 			try
 			{
-				send("publish " + channel + " " + message, false);
+				send("publish " + channel + " " + (message == null ? "null" : message), false);
 			}
 			catch (IOException e) { e.printStackTrace(); }
 		};

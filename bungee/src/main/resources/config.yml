@@ -3,12 +3,14 @@
 # login: login for connect need have permission to create and edit table                                      #
 # password: password of the login                                                                             #
 # dbname: name of the db need be created always                                                               #
+# system: mysql -
 # =========================================================================================================== #
 db: # NO value here !
   host: ''
   login: ''
   password: ''
   dbname: ''
+  system: 'mysql'
   connexion_args: '?allowMultiQueries=true&useSSL=false'
 
 # =========================================================================================================== #
@@ -29,6 +31,6 @@ cache:
   user: 2
 
 # =========================================================================================================== #
-# time in second between player count update                                                                  #
-# =========================================================================================================== #
+  # time in second between player count update                                                                  #
+  # =========================================================================================================== #
 player_count_update: 30

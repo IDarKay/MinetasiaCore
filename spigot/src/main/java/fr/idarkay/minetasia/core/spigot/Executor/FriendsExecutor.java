@@ -1,8 +1,9 @@
-package fr.idarkay.minetasia.core.spigot.executor;
+package fr.idarkay.minetasia.core.spigot.Executor;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -48,7 +49,7 @@ public final class FriendsExecutor implements TabExecutor {
         {
             Bukkit.getScheduler().runTaskAsynchronously(minetasiaCore, () -> {
                 Player player = (Player) sender;
-                if(player.hasPermission("core.friends"))
+                if(player.hasPermission(CommandPermission.FRIEND.getPermission()))
                 {
                     String lang = minetasiaCore.getPlayerLang(player.getUniqueId());
                     if(args.length > 0)
