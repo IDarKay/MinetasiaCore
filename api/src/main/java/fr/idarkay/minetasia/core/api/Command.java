@@ -15,7 +15,9 @@ public enum Command {
     FRIEND(((byte) (0))),
     LANG(((byte) (1))),
     PERMISSION(((byte) (2))),
+    HUB(((byte) (3))),
     ;
+
     public final byte by;
 
     Command(byte by)

@@ -54,4 +54,14 @@ public interface Server {
     @NotNull
     String getName();
 
+    /**
+     * get the player count of the server
+     * the player count is update all 10 second
+     * @return the number of player of the server
+     */
+    int getPlayerCount();
+
+     void setPlayerCount(int playerCount);
+
+
 }

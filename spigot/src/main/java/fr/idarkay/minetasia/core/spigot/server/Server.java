@@ -22,6 +22,7 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
     private final UUID uuid;
     private final String ip, type;
     private final int port;
+    private int playerCount = 0;
 
     public Server(@NotNull String ip, int port, String type)
     {
@@ -48,36 +49,54 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
                 , UUID.fromString(server.get("uuid").getAsString()), server.get("createTime").getAsLong());
     }
 
+    @Override
     public long getCreatTime()
     {
         return creatTime;
     }
 
+    @Override
     @NotNull
     public String getIp()
     {
         return ip;
     }
 
+    @Override
     public int getPort()
     {
         return port;
     }
 
+    @Override
     @NotNull
     public UUID getUuid()
     {
         return uuid;
     }
 
+    @Override
     @NotNull
-    public String getType() {
+    public String getType()
+    {
         return type;
     }
 
+    @Override
     @NotNull
-    public String  getName() {
+    public String  getName()
+    {
         return type + "#" + uuid.toString();
+    }
+
+    @Override
+    public int getPlayerCount()
+    {
+        return playerCount;
+    }
+
+    public void setPlayerCount(int playerCount) {
+        this.playerCount = playerCount;
     }
 
     @NotNull

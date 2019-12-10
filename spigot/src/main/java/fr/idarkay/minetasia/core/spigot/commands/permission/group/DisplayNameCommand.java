@@ -46,7 +46,7 @@ public final class DisplayNameCommand extends SubCommand implements FlexibleComm
                 String name = concat(args, " ", 3, -1);
                 if(name.trim().length() > 0 )
                 {
-                    g.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+                    g.setDisplayName(name);
                     sender.sendMessage(Lang.GROUP_DISPLAY_CHANGE.get(lang, args[1], name));
                 }
                 else sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, 1));

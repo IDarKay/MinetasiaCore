@@ -48,7 +48,11 @@ public enum CommandPermission {
     PERMISSION_GROUP_INFO("permission.create.info", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_SAVE("permission.create.save", ALL_PERMISSION_GROUP),
 
+    UTILS_CHAT_COLOR("utils.chat.color", ALL),
+    UTILS_CHAT_MAGIC("utils.chat.magic", ALL),
+    UTILS_CHAT_WHITE("utils.chat.white", ALL),
 
+    HUB("hub", ALL)
 
     ;
 

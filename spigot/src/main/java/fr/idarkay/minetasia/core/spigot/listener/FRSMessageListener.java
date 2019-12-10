@@ -135,6 +135,15 @@ public final class FRSMessageListener implements Listener {
                     {
                         plugin.getServerManager().removeServer(concat(msg, ";", 1));
                     }
+                    else if (msg[0].equalsIgnoreCase("playerCount"))
+                    {
+                        try
+                        {
+                            plugin.getServer(msg[1]).setPlayerCount(Integer.parseInt(msg[2]));
+                        }
+                        catch (Exception ignore) { }
+
+                    }
                 }
             }
         }
