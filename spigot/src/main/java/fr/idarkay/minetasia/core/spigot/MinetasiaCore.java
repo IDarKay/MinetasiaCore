@@ -2,22 +2,24 @@ package fr.idarkay.minetasia.core.spigot;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
+import fr.idarkay.minetasia.core.api.utils.Group;
 import fr.idarkay.minetasia.core.api.utils.Server;
+import fr.idarkay.minetasia.core.spigot.Executor.HubExecutor;
 import fr.idarkay.minetasia.core.spigot.Executor.PermissionExecutor;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.Executor.FriendsExecutor;
 import fr.idarkay.minetasia.core.spigot.Executor.LangExecutor;
+import fr.idarkay.minetasia.core.spigot.listener.*;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
-import fr.idarkay.minetasia.core.spigot.listener.FRSMessageListener;
-import fr.idarkay.minetasia.core.spigot.listener.InventoryClickListener;
-import fr.idarkay.minetasia.core.spigot.listener.PlayerListener;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
 import fr.idarkay.minetasia.core.spigot.user.Player;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
@@ -26,7 +28,6 @@ import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -57,6 +58,8 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 public class MinetasiaCore extends MinetasiaCoreApi {
+
+    public final static String HUB_NAME = "hub";
 
     private SQLManager sqlManager;
     private FRSClient frsClient;
@@ -205,11 +208,30 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         }
 
 
+        setCommandsIsEnable(Command.HUB.by, getConfig().getBoolean("commands.hub", false));
+        if(isCommandEnable(Command.HUB))
+        {
+            Objects.requireNonNull(getCommand("hub")).setExecutor(new HubExecutor(this));
+        }
+
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new PluginMessageReceivedListener());
+
         //register Listener
         getServer().getPluginManager().registerEvents(new FRSMessageListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
+        getServer().getPluginManager().registerEvents(new AsyncPlayerChatListener(this), this);
 
+        startPlayerCountSchedule();
+
+    }
+
+    private void startPlayerCountSchedule()
+    {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> publish("core-server"
+                , "playerCount;" + getServer().getName() + ";" + Bukkit.getServer().getOnlinePlayers().size()),
+        20, 20 * 10);
     }
 
     @Override
@@ -432,7 +454,28 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public void movePlayerToHub(@NotNull org.bukkit.entity.Player player) {
-        player.kickPlayer("Disconnect hub function not set");
+
+        int i = -1;
+        Server sr = null;
+
+        for(Server s : getServers(HUB_NAME).values())
+        {
+            if(sr == null || i == -1 || s.getPlayerCount() < i) {
+                sr = s;
+                i = s.getPlayerCount();
+            }
+        }
+        if(sr == null) player.kickPlayer("No valid hub");
+         else movePlayerToServer(player, sr);
+    }
+
+    @Override
+    public void movePlayerToServer(@NotNull org.bukkit.entity.Player player, Server server) {
+        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+        output.writeUTF("Connect");
+        output.writeUTF(server.getName());
+
+        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
 
     @Override
@@ -525,6 +568,28 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public boolean isCommandEnable(Command c) {
         return isCommandEnable(c.by);
+    }
+
+    @Override
+    @NotNull
+    public String getGroupDisplay(UUID player) {
+
+        byte p = Byte.MIN_VALUE;
+        Group g = null;
+
+        for(String gs : getPermissionManager().getGroupOfUser(player))
+        {
+            Group group = getPermissionManager().groups.get(gs);
+            byte i = group.getPriority();
+            if(g == null || i > p)
+            {
+                p = i;
+                g = group;
+            }
+        }
+
+        if(g == null) return "";
+        else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
     }
 
     private void setCommandsIsEnable(byte b, boolean value)

@@ -12,3 +12,4 @@ commands:
     aliases: [langue, lengua, sprache]
   permission:
     aliases: [perm, perms, permissions, group, groups]
+  hub:

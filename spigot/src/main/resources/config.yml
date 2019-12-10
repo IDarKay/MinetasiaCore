@@ -38,6 +38,7 @@ commands:
   friends: true
   lang: true
   permission: true
+  hub: true
 
 gui:
   lang:
@@ -58,6 +59,7 @@ gui:
 
 
 prefix: "&9Mine&6Tasia&7>>"
+chat_char: ' > '
 
 # Defines if "opped" players should be able to use all LuckPerms commands by default.
 #

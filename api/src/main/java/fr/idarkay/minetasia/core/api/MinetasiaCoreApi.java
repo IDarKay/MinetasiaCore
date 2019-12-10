@@ -210,6 +210,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract void movePlayerToHub(@NotNull Player player);
 
+    public abstract void movePlayerToServer(@NotNull Player player, Server server);
+
     /**
      * get the lang of player in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
      * @param uuid of the player to get the lang
@@ -300,6 +302,16 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract boolean isCommandEnable(Command c);
 
+    /**
+     * get the display group  of a user
+     * if player have more than one group will be take group
+     * with the biggest priority
+     * return {@code ""} if player d'ont have group
+     * @param player uuid of the player
+     * @return String display group
+     */
+    @NotNull
+    public abstract String getGroupDisplay(UUID player);
 
 
 }

@@ -265,6 +265,14 @@ public class PermissionManager {
         return getThinkOfUSer(uuid, "group", false, false);
     }
 
+    public List<fr.idarkay.minetasia.core.api.utils.Group> getGroupFromName(List<String> g)
+    {
+        List<fr.idarkay.minetasia.core.api.utils.Group> l = new ArrayList<>();
+        for(String s : g)
+            l.add(groups.get(s));
+        return l;
+    }
+
     public List<String> getPermissionOfUser(@NotNull UUID uuid)
     {
         return getThinkOfUSer(uuid, "permission", false, true);
