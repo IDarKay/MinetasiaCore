@@ -7,6 +7,7 @@ import fr.idarkay.minetasia.core.spigot.command.abstraction.Command;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.FixCommand;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.FlexibleCommand;
 import fr.idarkay.minetasia.core.spigot.commands.NoPermissionCommand;
+import fr.idarkay.minetasia.core.spigot.commands.money.MoneyCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.PermissionCommand;
 import org.bukkit.command.CommandSender;
 
@@ -30,6 +31,7 @@ public class CommandManager {
     public CommandManager(MinetasiaCore plugin) {
         baseCommand = ImmutableList.<Command>builder()
                 .add(new PermissionCommand(plugin))
+                .add(new MoneyCommand(plugin))
                 .build();
         np = new NoPermissionCommand(plugin);;
     }
@@ -70,7 +72,7 @@ public class CommandManager {
                     }
                 } else if(c instanceof FlexibleCommand)
                 {
-                    if(sender.hasPermission(c.getPermission().getPermission()) && (((FlexibleCommand) c).isAllPossibilities() || ((FlexibleCommand) c).getPossibilities().contains(s.toLowerCase())))
+                    if(sender.hasPermission(c.getPermission().getPermission()) && (((FlexibleCommand) c).isAllPossibilities() || containsIgnoreCase(((FlexibleCommand) c).getPossibilities(), s)))
                     {
                         back = c;
                         up = true;
@@ -83,6 +85,16 @@ public class CommandManager {
             }
         }
         return back;
+    }
+
+
+    private boolean containsIgnoreCase(List<String> list, String element)
+    {
+        if(list.contains(element)) return true;
+
+        for(String s : list) if (s.equalsIgnoreCase(element)) return true;
+
+        return false;
     }
 
 }

@@ -84,8 +84,12 @@ public final class Player {
             } else throw new NoEnoughMoneyException("cant remove "+ amount + " " + economy.displayName + " to " + username);
 
         }
-        else moneys.put(economy, 0F);
-        if (amount != 0) throw new NoEnoughMoneyException("cant remove "+ amount + " " + economy.displayName + " to " + username);
+        else
+        {
+            moneys.put(economy, 0F);
+            if (amount != 0) throw new NoEnoughMoneyException("cant remove "+ amount + " " + economy.displayName + " to " + username);
+        }
+
     }
 
     public void setMoney(@NotNull Economy economy, float amount) {

@@ -109,8 +109,9 @@ public abstract class Command {
                             || v.getLabel().equalsIgnoreCase(args[length -1])
                             || v.getLabel().startsWith(args[length - 1].toLowerCase())  )
                         b.add(v.getLabel());
+                    if(v instanceof FlexibleCommand && !((FlexibleCommand) v).isAllPossibilities())
+                        b.addAll(((FlexibleCommand) v).getPossibilities());
                 }
-
             });
             return b;
         }

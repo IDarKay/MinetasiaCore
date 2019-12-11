@@ -39,6 +39,7 @@ commands:
   lang: true
   permission: true
   hub: true
+  money: true
 
 gui:
   lang:

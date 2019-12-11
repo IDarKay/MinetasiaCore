@@ -16,6 +16,7 @@ public enum Command {
     LANG(((byte) (1))),
     PERMISSION(((byte) (2))),
     HUB(((byte) (3))),
+    MONEY(((byte) (4))),
     ;
 
     public final byte by;

@@ -12,7 +12,7 @@ import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.Group;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.Executor.HubExecutor;
-import fr.idarkay.minetasia.core.spigot.Executor.PermissionExecutor;
+import fr.idarkay.minetasia.core.spigot.Executor.CustomCommandExecutor;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.Executor.FriendsExecutor;
@@ -187,6 +187,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         gui = new GUI(this);
 
         // register command
+
+        CustomCommandExecutor customCommandExecutor = new CustomCommandExecutor(this);
+
         setCommandsIsEnable(Command.FRIEND.by, getConfig().getBoolean("commands.friends", false));
         if(isCommandEnable(Command.FRIEND))
         {
@@ -197,7 +200,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         setCommandsIsEnable(Command.PERMISSION.by, getConfig().getBoolean("commands.permission", false));
         if(isCommandEnable(Command.PERMISSION))
         {
-            Objects.requireNonNull(getCommand("permission")).setExecutor(new PermissionExecutor(this));
+            Objects.requireNonNull(getCommand("permission")).setExecutor(customCommandExecutor);
+        }
+
+        setCommandsIsEnable(Command.MONEY.by, getConfig().getBoolean("commands.permission", false));
+        if(isCommandEnable(Command.MONEY))
+        {
+            Objects.requireNonNull(getCommand("money")).setExecutor(customCommandExecutor);
         }
 
         setCommandsIsEnable(Command.LANG.by, getConfig().getBoolean("commands.lang", false));

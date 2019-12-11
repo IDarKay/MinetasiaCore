@@ -4,8 +4,6 @@ import fr.idarkay.minetasia.normes.IMinetasiaLang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 /**
  * File <b>Lang</b> located on fr.idarkay.mintasia.core.common.utils
  * Lang is a part of MinetasiaCore.
@@ -42,6 +40,14 @@ public enum Lang implements IMinetasiaLang {
     NO_PERMISSION                               ( "&cYou don't have permission"),
     ILLEGAL_NUMBER_VALUE                        ("&cPlease set valid number"),
 
+    //money
+    MONEY_WRONG_TYPE                            ("&cInvalid money type"),
+    MONEY_GET                                   ("&a%1$s has %2$s %3$s"),
+    MONEY_ADD                                   ("&a%1$s %2$s add to %3$s"),
+    MONEY_REMOVE                                ("&a%1$s %2$s remove to %3$s"),
+    MONEY_SET                                   ("&a%1$s %2$s set to %3$s"),
+    NO_AMOUNT_MONEY                             ("&a%1$s dont have enough money"),
+
     // /permission
         //group
     GROUP_CREATE                                ("&aThe group %1$s was created !"),
@@ -75,7 +81,7 @@ public enum Lang implements IMinetasiaLang {
     DESC_PERMISSION_GROUP_CREATE_NAME           ("for create new group"),
     DESC_PERMISSION_GROUP_NAME                  ("for mange a group (enter valid group name for more information)"),
     DESC_PERMISSION_GROUP_DISPLAY               ("<name> / for change the display of the group (you can set space and color)"),
-    DESC_PERMISSION_GROUP_DELETE               ("for delete th group"),
+    DESC_PERMISSION_GROUP_DELETE                ("for delete th group"),
     DESC_PERMISSION_GROUP_DISPLAY_NAME          ("for change the display of the group (you can set space and color)"),
     DESC_PERMISSION_GROUP_PRIORITY              ("<priority> / for change the priority of the group"),
     DESC_PERMISSION_GROUP_PRIORITY_VALUE        ("for change the priority of the group"),
@@ -106,6 +112,15 @@ public enum Lang implements IMinetasiaLang {
     DESC_PERMISSION_USER_GROUP_ADD_VALUE_TEMP   ("add temp group to a user"),
     DESC_PERMISSION_USER_GROUP_REMOVE           ("<permission> / remove group to a user"),
     DESC_PERMISSION_USER_GROUP_REMOVE_VALUE     ("remove group to a user"),
+
+    DESC_MONEY                                  ("first step for all commands for edit money of user"),
+    DESC_MONEY_TYPE                             ("type of money to edit"),
+    DESC_MONEY_PLAYER                           ("target player"),
+    DESC_MONEY_AMOUNT                           ("amount of money to add / remove / set"),
+    DESC_MONEY_ADD                              ("add money to user"),
+    DESC_MONEY_REMOVE                           ("remove money to user"),
+    DESC_MONEY_SET                              ("set money to user"),
+    DESC_MONEY_GET                              ("get money og user"),
 
     ;
 
