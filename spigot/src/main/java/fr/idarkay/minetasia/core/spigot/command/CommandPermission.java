@@ -19,14 +19,24 @@ public enum CommandPermission {
     // general permission
     NO_PERMISSION(""),
     ALL("*", "all permission for the core (not for other plugin)"),
-    ALL_PERMISSION("permission.*", ALL, "all permission for /permission"),
-    ALL_PERMISSION_GROUP("permission.group.*", ALL_PERMISSION, "all permission for /permission group"),
-    ALL_PERMISSION_USER("permission.user.*", ALL_PERMISSION, "all permission for /permission user"),
+
+
+    ALL_MONEY("money.*", ALL),
+
+    MONEY("money", ALL_MONEY),
+    MONEY_ADD("money.add", ALL_MONEY),
+    MONEY_SET("money.set", ALL_MONEY),
+    MONEY_REMOVE("money.remove", ALL_MONEY),
+    MONEY_GET("money.get", ALL_MONEY),
 
     FRIEND("friend", ALL),
 
     LANG("lang", ALL),
     LANG_ADMIN("lang.admin", ALL),
+
+    ALL_PERMISSION("permission.*", ALL, "all permission for /permission"),
+    ALL_PERMISSION_GROUP("permission.group.*", ALL_PERMISSION, "all permission for /permission group"),
+    ALL_PERMISSION_USER("permission.user.*", ALL_PERMISSION, "all permission for /permission user"),
 
     PERMISSION("permission", ALL_PERMISSION),
     PERMISSION_HELP("permission.help", ALL_PERMISSION),

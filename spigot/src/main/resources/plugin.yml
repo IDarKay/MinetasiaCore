@@ -13,3 +13,6 @@ commands:
   permission:
     aliases: [perm, perms, permissions, group, groups]
   hub:
+    aliases: []
+  money:
+    aliases: []

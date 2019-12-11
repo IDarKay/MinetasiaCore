@@ -21,12 +21,12 @@ import java.util.List;
  * @author alice. B. (IDarKay),
  * Created the 30/11/2019 at 23:21
  */
-public class PermissionExecutor implements TabExecutor {
+public class CustomCommandExecutor implements TabExecutor {
 
     private final MinetasiaCore plugin;
     private final CommandManager commandManager;
 
-    public PermissionExecutor(MinetasiaCore plugin)
+    public CustomCommandExecutor(MinetasiaCore plugin)
     {
         this.plugin = plugin;
         this.commandManager = plugin.getCommandManager();
