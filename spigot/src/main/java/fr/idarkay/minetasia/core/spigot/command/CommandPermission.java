@@ -61,8 +61,11 @@ public enum CommandPermission {
     UTILS_CHAT_COLOR("utils.chat.color", ALL),
     UTILS_CHAT_MAGIC("utils.chat.magic", ALL),
     UTILS_CHAT_WHITE("utils.chat.white", ALL),
+    UTILS_CHAT_MSG("utils.chat.msg", ALL),
+    UTILS_CHAT_SOCIALSPY("utils.chat.socialspy", ALL), // register her but use in bungee
 
-    HUB("hub", ALL)
+    TP("tp", ALL),
+    HUB("hub", ALL),
 
     ;
 

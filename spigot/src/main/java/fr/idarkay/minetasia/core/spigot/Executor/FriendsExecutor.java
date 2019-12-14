@@ -102,7 +102,7 @@ public final class FriendsExecutor implements TabExecutor {
                                 friendRequest.invalidate(player.getUniqueId());
                                 minetasiaCore.addFriend(player.getUniqueId(), u);
                                 sender.sendMessage(Lang.NEW_FRIEND.get(lang, minetasiaCore.getPlayerName(u)));
-                                minetasiaCore.publish("core-msg",  "NEW_FRIEND;" + u.toString() +";" + player.getName());
+                                minetasiaCore.publish("core-msg",  "NEW_FRIEND;" + u.toString() +";true;" + player.getName());
                             }
                         }
                         else sendHelpMsg(player, lang);

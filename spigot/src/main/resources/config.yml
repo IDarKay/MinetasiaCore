@@ -40,6 +40,8 @@ commands:
   permission: true
   hub: true
   money: true
+  msg: true
+  tp: true
 
 gui:
   lang:

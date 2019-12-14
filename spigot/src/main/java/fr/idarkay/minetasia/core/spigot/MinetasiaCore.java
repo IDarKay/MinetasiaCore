@@ -10,13 +10,11 @@ import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.Group;
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.api.utils.Server;
-import fr.idarkay.minetasia.core.spigot.Executor.HubExecutor;
-import fr.idarkay.minetasia.core.spigot.Executor.CustomCommandExecutor;
+import fr.idarkay.minetasia.core.spigot.Executor.*;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
-import fr.idarkay.minetasia.core.spigot.Executor.FriendsExecutor;
-import fr.idarkay.minetasia.core.spigot.Executor.LangExecutor;
 import fr.idarkay.minetasia.core.spigot.listener.*;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
@@ -25,6 +23,7 @@ import fr.idarkay.minetasia.core.spigot.user.Player;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
 import fr.idarkay.minetasia.core.spigot.utils.FRSClient;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
+import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -60,6 +59,7 @@ import java.util.stream.Collectors;
 public class MinetasiaCore extends MinetasiaCoreApi {
 
     public final static String HUB_NAME = "hub";
+    public final List<org.bukkit.entity.Player> socialSpyPlayer = new ArrayList<>();
 
     private SQLManager sqlManager;
     private FRSClient frsClient;
@@ -190,26 +190,32 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         CustomCommandExecutor customCommandExecutor = new CustomCommandExecutor(this);
 
-        setCommandsIsEnable(Command.FRIEND.by, getConfig().getBoolean("commands.friends", false));
+        setCommandsIsEnable(Command.FRIEND.by, getConfig().getBoolean("commands.friends", true));
         if(isCommandEnable(Command.FRIEND))
         {
             friendsExecutor = new FriendsExecutor(this);
             Objects.requireNonNull(getCommand("friends")).setExecutor(friendsExecutor);
         }
 
-        setCommandsIsEnable(Command.PERMISSION.by, getConfig().getBoolean("commands.permission", false));
+        setCommandsIsEnable(Command.PERMISSION.by, getConfig().getBoolean("commands.permission", true));
         if(isCommandEnable(Command.PERMISSION))
         {
             Objects.requireNonNull(getCommand("permission")).setExecutor(customCommandExecutor);
         }
 
-        setCommandsIsEnable(Command.MONEY.by, getConfig().getBoolean("commands.permission", false));
+        setCommandsIsEnable(Command.MONEY.by, getConfig().getBoolean("commands.permission", true));
         if(isCommandEnable(Command.MONEY))
         {
             Objects.requireNonNull(getCommand("money")).setExecutor(customCommandExecutor);
         }
 
-        setCommandsIsEnable(Command.LANG.by, getConfig().getBoolean("commands.lang", false));
+        setCommandsIsEnable(Command.TP.by, getConfig().getBoolean("commands.permission", true));
+        if(isCommandEnable(Command.TP))
+        {
+            Objects.requireNonNull(getCommand("tp")).setExecutor(customCommandExecutor);
+        }
+
+        setCommandsIsEnable(Command.LANG.by, getConfig().getBoolean("commands.lang", true));
         if(isCommandEnable(Command.LANG))
         {
             gui.createLangInventory();
@@ -217,10 +223,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         }
 
 
-        setCommandsIsEnable(Command.HUB.by, getConfig().getBoolean("commands.hub", false));
+        setCommandsIsEnable(Command.HUB.by, getConfig().getBoolean("commands.hub", true));
         if(isCommandEnable(Command.HUB))
         {
             Objects.requireNonNull(getCommand("hub")).setExecutor(new HubExecutor(this));
+        }
+
+        setCommandsIsEnable(Command.MSG.by, getConfig().getBoolean("commands.hub", true));
+        if(isCommandEnable(Command.MSG))
+        {
+            Objects.requireNonNull(getCommand("msg")).setExecutor(new MSGExecutor(this));
+            Objects.requireNonNull(getCommand("r")).setExecutor(new RExecutor(this));
+            Objects.requireNonNull(getCommand("socialspy")).setExecutor(new SocialSpyExecutor(this));
         }
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -405,6 +419,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public boolean isPlayerOnline(@NotNull UUID uuid) {
+        if(Bukkit.getPlayer(uuid) != null) return true;
         sqlManager.getSQL();
         try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE uuid = ?"))
         {
@@ -420,6 +435,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public boolean isPlayerOnline(@NotNull String name) {
+        if(Bukkit.getPlayer(name) != null) return true;
         sqlManager.getSQL();
         try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE username = ?"))
         {
@@ -504,10 +520,50 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public PlayerStatueFix getPlayerStatue(UUID uuid) {
+        sqlManager.getSQL();
+        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE uuid = ?"))
+        {
+            ps.setString(1, uuid.toString());
+            ResultSet rs = ps.executeQuery();
+            if(rs.next())
+            {
+                return new PlayerStatueFixC(uuid, rs.getNString("username"), rs.getString("proxy"), getServer(rs.getString("server")));
+            }
+            else return null;
+        }catch ( SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public PlayerStatueFix getPlayerStatue(String name) {
+        sqlManager.getSQL();
+        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE username = ?"))
+        {
+            ps.setString(1, name);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next())
+            {
+                return new PlayerStatueFixC(UUID.fromString(rs.getString("uuid")), name, rs.getString("proxy"), getServer(rs.getString("server")));
+            }
+            else return null;
+        }catch ( SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public void shutdown() {
         getServer().getOnlinePlayers().forEach(this::movePlayerToHub);
         getServer().shutdown();
     }
+
+    private boolean request = false;
 
     @Override
     @NotNull
@@ -519,6 +575,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 {
                     Map<UUID, String> online = new HashMap<>();
                     while (rs.next()) online.put(UUID.fromString(rs.getString("uuid")), rs.getString("username"));
+                    request = false;
                     return online;
                 }catch ( SQLException e)
                 {
@@ -538,6 +595,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
        Map<UUID, String>  v = onlinePlayer.getIfPresent(1);
        if(v == null)
        {
+           if(!request)
+           {
+               request = true;
+               Bukkit.getScheduler().runTaskAsynchronously(this, this::getOnlinePlayers);
+           }
            return getServer().getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
        }
        else return new ArrayList<>(v.values());
@@ -607,6 +669,20 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             commands |= 1 << b;
         else
             commands &= ~(1 << b);
+    }
+
+    public int setBoolIsValue(int bool, byte b, boolean value)
+    {
+        if(value)
+            bool |= 1 << b;
+        else
+            bool &= ~(1 << b);
+        return bool;
+    }
+
+    public boolean isBollTrue(int bool, byte b)
+    {
+        return ((bool >> b) & 0x1) == 1;
     }
 
     public void setUserName(UUID uuid, String username)
