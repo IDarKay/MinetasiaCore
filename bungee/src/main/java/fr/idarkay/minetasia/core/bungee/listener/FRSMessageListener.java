@@ -6,6 +6,7 @@ import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.bungee.utils.proxy.ProxyManager;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -57,12 +58,15 @@ public class FRSMessageListener implements Listener {
                             {
                                 ServerInfo serverinfo = plugin.getProxy().constructServerInfo(serverName, InetSocketAddress.createUnresolved(sIp, sPort),
                                         ProxyManager.motd.replace("%s", serverName) , false);
+                                ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("["+serverName+"]" + "<-> server registered"));
                                 plugin.getProxy().getServers().put(serverName, serverinfo);
                             }
                         }
                         else if (msg[0].equals("remove"))
                         {
-                            plugin.getProxy().getServers().remove(msg[1]);
+
+                            if(plugin.getProxy().getServers().remove(msg[1]) != null)
+                                ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("["+msg[0]+"]" + "<-> server unregistered"));
                         }
                     }
                 }

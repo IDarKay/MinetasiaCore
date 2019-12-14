@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.utils.FRSClient;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 
 import java.net.InetSocketAddress;
@@ -56,13 +58,12 @@ public final class ProxyManager {
                 {
                     ServerInfo serverinfo = plugin.getProxy().constructServerInfo(serverName, InetSocketAddress.createUnresolved(sIp, sPort),
                             motd.replace("%s", serverName) , false);
+                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("["+serverName+"]" + "<-> server registered"));
                     plugin.getProxy().getServers().put(serverName, serverinfo);
                 }
-            } catch (Exception e)
+            } catch (Exception ignore)
             {
-                System.out.println("rappeller à emilien de fix FRS");
             }
-
         }
     }
 
