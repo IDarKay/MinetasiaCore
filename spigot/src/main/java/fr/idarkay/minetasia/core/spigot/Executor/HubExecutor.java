@@ -34,17 +34,9 @@ public class HubExecutor implements CommandExecutor {
         if(sender instanceof Player)
             if(sender.hasPermission(CommandPermission.LANG.getPermission()))
             {
-                if(minetasiaCore.getServerType().startsWith(MinetasiaCore.HUB_NAME))
-                {
-                    //todo: move to spawn
-                    ((Player) sender).teleport(((Player) sender).getLocation().getWorld().getSpawnLocation());
-                }
-                else
-                {
-                    minetasiaCore.movePlayerToHub((Player) sender);
-                }
-            } else sender.sendMessage(Lang.NO_PERMISSION.get(minetasiaCore.getPlayerLang(((org.bukkit.entity.Player) sender).getUniqueId())));
-
+                minetasiaCore.movePlayerToHub((Player) sender);
+            }
+            else sender.sendMessage(Lang.NO_PERMISSION.get(minetasiaCore.getPlayerLang(((org.bukkit.entity.Player) sender).getUniqueId())));
         return true;
     }
 }

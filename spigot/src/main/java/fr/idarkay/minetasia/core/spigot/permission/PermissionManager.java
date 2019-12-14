@@ -231,7 +231,7 @@ public class PermissionManager {
                     if(isPerm)
                         back.addAll(e.getValue().getPermissions().keySet());
                     else
-                        back.add(e.getKey());
+                        back.add(e.getKey().replace(think + "_", ""));
 
                 }
             }

@@ -34,17 +34,17 @@ public class AsyncPlayerChatListener implements Listener {
     public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent e)
     {
         Player p = e.getPlayer();
-        StringBuilder m = new StringBuilder(plugin.getGroupDisplay(p.getUniqueId()));
-        m.append(" ");
-        m.append(p.getDisplayName());
-        m.append(chatChar);
-        if(p.hasPermission(CommandPermission.UTILS_CHAT_WHITE.getPermission())) m.append(ChatColor.WHITE);
-        else m.append(ChatColor.GRAY);
+        StringBuilder format = new StringBuilder(plugin.getGroupDisplay(p.getUniqueId()));
+        format.append("  %1$s");
+
+        if(p.hasPermission(CommandPermission.UTILS_CHAT_WHITE.getPermission())) format.append(ChatColor.WHITE);
+        else format.append(ChatColor.GRAY);
+        format.append(chatChar).append("%2$s");
         String msg = e.getMessage();
         if(p.hasPermission(CommandPermission.UTILS_CHAT_COLOR.getPermission())) msg = translateColorCodes(msg, true);
         if(p.hasPermission(CommandPermission.UTILS_CHAT_MAGIC.getPermission())) msg = translateColorCodes(msg, false);
-        m.append(msg);
-        e.setMessage(m.toString());
+        e.setFormat(format.toString());
+        e.setMessage(msg);
     }
 
 

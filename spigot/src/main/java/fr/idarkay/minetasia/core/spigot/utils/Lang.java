@@ -18,6 +18,8 @@ public enum Lang implements IMinetasiaLang {
 
     WELCOME                                     ( "&6Welcome to the server :)"),
 
+
+
     // /lang
     SET_LANG                                    ( "&aYour new lang is English"),
     GET_LANG                                    ( "&aThe lang of &6%1$s is &9%2$s"),
@@ -39,6 +41,13 @@ public enum Lang implements IMinetasiaLang {
     NEED_BE_PLAYER                              ( "&cYour not player"),
     NO_PERMISSION                               ( "&cYou don't have permission"),
     ILLEGAL_NUMBER_VALUE                        ("&cPlease set valid number"),
+    MSG_FORMAT                                  ("&6%1$s &c-> &6%2$s : &r%3$s"),
+    MSG_FORMAT_SOCIAL_SPY                       ("&c[SS] &6%1$s &c-> &6%2$s : &r%3$s"),
+    SOCIAL_SPU_ON                               ("&6SocialSpy &2on"),
+    SOCIAL_SPU_OFF                              ("&6SocialSpy &4off"),
+    SERVER_NOT_FOUND                            ("&cServer not found"),
+    WORLD_NOT_FOUND                             ("&cWorld not found"),
+    INCOMPATIBLE_CMD_TP                         ("&cYou can't tp @a to another server"),
 
     //money
     MONEY_WRONG_TYPE                            ("&cInvalid money type"),
@@ -47,6 +56,7 @@ public enum Lang implements IMinetasiaLang {
     MONEY_REMOVE                                ("&a%1$s %2$s remove to %3$s"),
     MONEY_SET                                   ("&a%1$s %2$s set to %3$s"),
     NO_AMOUNT_MONEY                             ("&a%1$s dont have enough money"),
+    NO_PREVIOUS_MSG                             ("&cYou don't have current discussion"),
 
     // /permission
         //group
@@ -121,6 +131,16 @@ public enum Lang implements IMinetasiaLang {
     DESC_MONEY_REMOVE                           ("remove money to user"),
     DESC_MONEY_SET                              ("set money to user"),
     DESC_MONEY_GET                              ("get money og user"),
+
+    DESC_MSG                                    ("&c/msg <player> <msg>"),
+    DESC_R                                      ("&c/r <msg>"),
+
+    DESC_TP                                     ("first step for all commands for tp user"),
+    DESC_TP_USER                                ("if no second argument tp the executor to the player, else tp player to second argument"),
+    DESC_TP_A                                   ("tp all player of the server (no all proxy) to second argument"),
+    DESC_TP_2_USER                              ("tp first argument to selected user"),
+    DESC_TP_2_CORD                              ("tp first argument to cord"),
+    DESC_TP_2_SERVER                            ("tp first argument to server"),
 
     ;
 

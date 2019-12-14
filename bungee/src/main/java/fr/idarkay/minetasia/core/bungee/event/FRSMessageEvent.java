@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.bungee.event;
 
+import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.event.AsyncEvent;
 import net.md_5.bungee.api.plugin.Event;
 import org.jetbrains.annotations.NotNull;
@@ -14,14 +15,14 @@ import org.jetbrains.annotations.NotNull;
  * @author alice. B. (IDarKay),
  * Created the 26/11/2019 at 12:56
  */
-// AsyncEvent<FRSMessageEvent> todo: this
-public final class FRSMessageEvent extends Event {
+public final class FRSMessageEvent extends AsyncEvent<FRSMessageEvent> {
 
     private final String chanel, value;
 
 
     public FRSMessageEvent(@NotNull String chanel, @NotNull String value)
     {
+        super((result, error) -> {});
         this.chanel = chanel;
         this.value = value;
     }

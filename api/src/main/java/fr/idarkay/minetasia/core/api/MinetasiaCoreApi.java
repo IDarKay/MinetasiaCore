@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.api;
 
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.api.utils.SQLManager;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
@@ -228,6 +229,10 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     @Nullable
     public abstract String getPlayerName(UUID uuid);
+
+    public abstract PlayerStatueFix getPlayerStatue(UUID uuid);
+
+    public abstract PlayerStatueFix getPlayerStatue(String name);
 
     /**
      * use this for shutdown your server :

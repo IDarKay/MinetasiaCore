@@ -39,7 +39,7 @@ public final class InfoCommand extends SubCommand implements FixCommand {
         {
             sender.sendMessage(ChatColor.RED + "-----------" + g.getName() + "-----------");
             sender.sendMessage(ChatColor.AQUA + "name : " + ChatColor.GREEN + g.getName());
-            sender.sendMessage(ChatColor.AQUA + "display name : " + ChatColor.GREEN + g.getDisplayName());
+            sender.sendMessage(ChatColor.AQUA + "display name : " + ChatColor.GREEN + ChatColor.translateAlternateColorCodes('&', g.getDisplayName()));
             sender.sendMessage(ChatColor.AQUA + "priority : " + ChatColor.GREEN + g.getPriority());
             sender.sendMessage(ChatColor.AQUA + "permission :");
             for(String p : g.getPermissions()) sender.sendMessage("\t- " + ChatColor.GREEN + p);

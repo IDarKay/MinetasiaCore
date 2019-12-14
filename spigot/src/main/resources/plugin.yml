@@ -16,3 +16,11 @@ commands:
     aliases: []
   money:
     aliases: []
+  msg:
+    aliases: [mp, tell]
+  r:
+    aliases: []
+  socialspy:
+    aliases: []
+  tp:
+    aliases: []
