@@ -4,6 +4,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id "com.github.johnrengelman.shadow" version "5.1.0"
     id "java"
+    id "com.jfrog.artifactory" version "4.4.10"
 }
 
 allprojects {
@@ -19,6 +20,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
         maven {
             name = 'papermc-repo'
             url = 'https://papermc.io/repo/repository/maven-public/'
@@ -31,13 +33,21 @@ allprojects {
             name = 'enginehub-maven'
             url = 'http://maven.enginehub.org/repo/'
         }
+        maven {
+            url "${artifactory_contextUrl}/${artifactory_repo}"
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
 
     }
 
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         compile group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
-
+//        compile(group: 'minetasia', name: 'normes', version: '1.0')
+        compile(group: 'minetasia', name: 'normes', version: '1.0')
     }
 
 
