@@ -27,6 +27,7 @@ import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -59,7 +60,12 @@ import java.util.stream.Collectors;
 public class MinetasiaCore extends MinetasiaCoreApi {
 
     public final static String HUB_NAME = "hub";
+
+    private final static String LOG_PREFIX = "[Minetasia-Core] ";
+
     public final List<org.bukkit.entity.Player> socialSpyPlayer = new ArrayList<>();
+
+    private final ConsoleCommandSender console =  this.getServer().getConsoleSender();
 
     private SQLManager sqlManager;
     private FRSClient frsClient;
@@ -81,17 +87,21 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void onLoad() {
         saveDefaultConfig();
         // init lang file
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load lang file");
         getMinetasiaLang().init();
         Lang.prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));
         serverType = getConfig().getString("server_type");
 
         // init db system
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load SQL");
         sqlManager = new SQLManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load FRS");
         frsClient = new FRSClient(this);
         frsClient.startConnection(System.out, getConfig().getString("frs.host"), getConfig().getInt("frs.port"),
                 getConfig().getString("frs.password"), getConfig().getInt("frs.timeout"));
 
         // execute sql file
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Execute SQL");
         String sqlFileName = "fr/idarkay/minetasia/core/sql/" + getConfig().getString("db.system") + ".sql";
         try (InputStream is = getResource(sqlFileName)) {
             if (is == null) {
@@ -165,6 +175,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
 
         // register permissions
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register permission");
         try {
             PluginManager pm = getServer().getPluginManager();
             PermissionDefault permDefault = getConfig().getBoolean("commands-allow-op") ? PermissionDefault.OP : PermissionDefault.FALSE;
@@ -180,14 +191,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         onlinePlayer = CacheBuilder.newBuilder().expireAfterWrite(getConfig().getLong("cache.online_player"), TimeUnit.MINUTES).maximumSize(1L).build();
 
         // load manager
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init player manager");
         playerManager = new PlayerManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init server manager");
         serverManager = new ServerManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init permission manager");
         permissionManager = new PermissionManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init command manager");
         commandManager = new CommandManager(this);
         gui = new GUI(this);
 
         // register command
-
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init commands");
         CustomCommandExecutor customCommandExecutor = new CustomCommandExecutor(this);
 
         setCommandsIsEnable(Command.FRIEND.by, getConfig().getBoolean("commands.friends", true));
@@ -237,6 +252,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             Objects.requireNonNull(getCommand("socialspy")).setExecutor(new SocialSpyExecutor(this));
         }
 
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "register events");
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new PluginMessageReceivedListener());
 
@@ -246,6 +262,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
         getServer().getPluginManager().registerEvents(new AsyncPlayerChatListener(this), this);
 
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "start player count schedule");
         startPlayerCountSchedule();
 
     }
