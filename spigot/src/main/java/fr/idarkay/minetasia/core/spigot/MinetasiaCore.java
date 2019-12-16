@@ -4,6 +4,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
@@ -58,6 +61,8 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 public class MinetasiaCore extends MinetasiaCoreApi {
+
+    private final static JsonParser JSON_PARSER = new JsonParser();
 
     public final static String HUB_NAME = "hub";
 
@@ -678,6 +683,29 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         if(g == null) return "";
         else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
+    }
+
+    @Override
+    public int getKitLevelOfUser(UUID player, String kitName) {
+        String data = getPlayerData(player, "kits");
+        JsonObject jo;
+        if(data != null) jo = JSON_PARSER.parse(data).getAsJsonObject();
+        else return 0;
+        JsonElement lvl = jo.get(kitName);
+        if(lvl == null) return 0;
+        return lvl.getAsInt();
+    }
+
+    @Override
+    public void setKitLvlOfUser(UUID player, String kitName, int lvl) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            String data = getPlayerData(player, "kits");
+            JsonObject jo;
+            if(data != null) jo = JSON_PARSER.parse(data).getAsJsonObject();
+            else jo = new JsonObject();
+            jo.addProperty(kitName, lvl);
+            setPlayerData(player, "kits", jo.toString());
+        });
     }
 
     private void setCommandsIsEnable(byte b, boolean value)
