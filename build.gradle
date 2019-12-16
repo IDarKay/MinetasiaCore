@@ -1,18 +1,34 @@
 
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url 'http://artifactory.minetasia.dev/artifactory/gradle-dev'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
+        mavenCentral()
+    }
+    dependencies { classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.11.0" }
+}
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id "com.github.johnrengelman.shadow" version "5.1.0"
     id "java"
     id "com.jfrog.artifactory" version "4.4.10"
+    id 'maven-publish'
 }
 
 allprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'java'
     apply plugin: 'maven'
+    apply plugin: 'groovy'
 
-    group 'fr.idarkay.mintasia'
+    group 'minetasia'
     version = '1.0'
 
     sourceCompatibility = '1.8'
@@ -54,6 +70,45 @@ allprojects {
     processResources {
         from(sourceSets.main.resources.srcDirs) {
             filter ReplaceTokens, tokens: [version: version]
+        }
+    }
+}
+
+project('api') {
+
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.artifactory'
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = group
+                artifactId = 'core-api'
+                version = version
+                from components.java
+
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications('mavenJava')
+
+        publishArtifacts = true
+        publishPom = false
+    }
+}
+
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+        repository {
+            repoKey = 'gradle-dev-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+        defaults {
+
         }
     }
 }
