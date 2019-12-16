@@ -1,12 +1,6 @@
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
-    compile name: 'Normes-1.0'
     compile project(":api")
 }
 
