@@ -57,6 +57,7 @@ public class PlayerListener implements Listener {
     {
         plugin.getPermissionManager().removePlayer(e.getPlayer().getUniqueId());
         plugin.socialSpyPlayer.remove(e.getPlayer());
+        e.setQuitMessage(null);
     }
 
 }
