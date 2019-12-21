@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.api;
 
+import fr.idarkay.minetasia.core.api.utils.Kit;
 import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.api.utils.SQLManager;
 import fr.idarkay.minetasia.core.api.utils.Server;
@@ -25,6 +26,7 @@ import java.util.*;
  * you will find all methods for your plugin
  * if you want new methods tell IDarKay !
  */
+@SuppressWarnings("unused")
 public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     private static MinetasiaCoreApi instance;
@@ -195,12 +197,36 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract void publish(@NotNull String chanel, String message, boolean... sync);
 
+    /**
+     * get value of field
+     * @param key - key
+     * @param field - field
+     * @return String data or null
+     */
     public abstract String getValue(String key, String field);
 
+    /**
+     * get all field of a key
+     * @param key - key
+     * @return list of fields or empty list
+     */
     public abstract Set<String> getFields(String key);
 
+    /**
+     * get all values for key and Set of field
+     * @param key - key
+     * @param fields - fields
+     * @return map of fields - value or empty map
+     */
     public abstract Map<String, String> getValues(String key, Set<String> fields);
 
+    /**
+     * set data value
+     * @param key - key
+     * @param field - field
+     * @param value - data
+     * @param sync to do in sync or async
+     */
     public abstract void setValue(String key, String field, String value, boolean... sync);
 
     /**
@@ -211,6 +237,12 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract void movePlayerToHub(@NotNull Player player);
 
+    /**
+     *  move a player to server
+     *  use {@link MinetasiaCoreApi#movePlayerToHub(Player)} to move ot hub !
+     * @param player {@link NotNull}  to move
+     * @param server where move player
+     */
     public abstract void movePlayerToServer(@NotNull Player player, Server server);
 
     /**
@@ -230,9 +262,62 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     @Nullable
     public abstract String getPlayerName(UUID uuid);
 
+    /**
+     * get the statue of the player at a fix moment
+     * the return object will be note update !
+     * @param uuid of the player
+     * @return {@link PlayerStatueFix} of player
+     * @see PlayerStatueFix
+     */
     public abstract PlayerStatueFix getPlayerStatue(UUID uuid);
 
+    /**
+     * get the statue of the player at a fix moment
+     * the return object will be note update !
+     * @param name of the player
+     * @return {@link PlayerStatueFix} of player
+     * @see PlayerStatueFix
+     */
     public abstract PlayerStatueFix getPlayerStatue(String name);
+
+    /**
+     * if player is lvl 0 in a kit , the kti will be not in the list
+     * @param uuid of the player
+     * @return get all kits lvl of the user
+     */
+    public abstract Map<String, Integer> getPlayerKitsLvl(UUID uuid);
+
+    /**
+     * if player is lvl 0 in a kit , the kti will be not in the list
+     * @param uuid of the user
+     * @param gameFilter the kit name need be start by this
+     * @return all Kits with gameFilter
+     */
+    public abstract Map<String, Integer> getPlayerKitsLvl(UUID uuid, String gameFilter);
+
+    /**
+     * get the lvl of a kit of a user
+     * @param uuid of teh player
+     * @param kitName full name of the kit
+     * @return the lvl of the kit or 0 if not found
+     */
+    public abstract int getPlayerKitLvl(UUID uuid, String kitName);
+
+    /**
+     * get a kit with a lang in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a> <br>
+     * if not found will be retail with default lang
+     * @param name name of the kit
+     * @param lang lang of the kit in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
+     * @return Kit or null
+     */
+    public abstract Kit getKitKit(String name, String lang);
+
+    /**
+     * save a kit in frs if not exist  <br>
+     *  in {@link Kit} please not set color char just '&'
+     * @param kit to save
+     */
+    public abstract void saveDefaultKit(Kit kit);
 
     /**
      * use this for shutdown your server :
@@ -297,6 +382,11 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     @NotNull
     public abstract Map<String, Server> getServers(String type);
 
+    /**
+     * check if command is enable
+     * @param b byte of the command use {@link Command}
+     * @return true if enable else false
+     */
     public abstract boolean isCommandEnable(byte b);
 
     /**
@@ -318,8 +408,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     @NotNull
     public abstract String getGroupDisplay(UUID player);
 
-    public abstract int getKitLevelOfUser(UUID player, String kitName);
-
-    public abstract void setKitLvlOfUser(UUID player, String kitName, int lvl);
+//    public abstract int getKitLevelOfUser(UUID player, String kitName);
+//
+//    public abstract void setKitLvlOfUser(UUID player, String kitName, int lvl);
 
 }

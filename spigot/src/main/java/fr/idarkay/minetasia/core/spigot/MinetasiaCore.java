@@ -13,11 +13,13 @@ import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.Group;
+import fr.idarkay.minetasia.core.api.utils.Kit;
 import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.Executor.*;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
+import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
 import fr.idarkay.minetasia.core.spigot.listener.*;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
@@ -28,6 +30,7 @@ import fr.idarkay.minetasia.core.spigot.utils.FRSClient;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
+import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -62,7 +65,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class MinetasiaCore extends MinetasiaCoreApi {
 
-    private final static JsonParser JSON_PARSER = new JsonParser();
+    public final static JsonParser JSON_PARSER = new JsonParser();
 
     public final static String HUB_NAME = "hub";
 
@@ -78,6 +81,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private ServerManager serverManager;
     private PermissionManager permissionManager;
     private CommandManager commandManager;
+    private KitsManager kitsManager;
     private GUI gui;
 
     private FriendsExecutor friendsExecutor;
@@ -204,6 +208,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         permissionManager = new PermissionManager(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init command manager");
         commandManager = new CommandManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init kits manager");
+        kitsManager = new KitsManager(this);
         gui = new GUI(this);
 
         // register command
@@ -580,6 +586,59 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public Map<String, Integer> getPlayerKitsLvl(UUID uuid) {
+        String data = getPlayerData(uuid, "kits");
+        Map<String, Integer> back = new HashMap<>();
+        if(data != null)
+        {
+
+            JsonObject jsonObject = JSON_PARSER.parse(data).getAsJsonObject();
+            for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet())
+            {
+                back.put(entry.getKey(), entry.getValue().getAsInt());
+            }
+        }
+        return back;
+    }
+
+    @Override
+    public Map<String, Integer> getPlayerKitsLvl(UUID uuid, String gameFilter) {
+        String data = getPlayerData(uuid, "kits");
+        Map<String, Integer> back = new HashMap<>();
+        if(data != null)
+        {
+            JsonObject jsonObject = JSON_PARSER.parse(data).getAsJsonObject();
+            for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet())
+            {
+                if(entry.getKey().startsWith(gameFilter))
+                    back.put(entry.getKey(), entry.getValue().getAsInt());
+            }
+        }
+        return back;
+    }
+
+    @Override
+    public int getPlayerKitLvl(UUID uuid, String kitName) {
+
+        return getPlayerKitsLvl(uuid).getOrDefault(kitName, 0);
+    }
+
+    @Override
+    public Kit getKitKit(String name, String lang) {
+        Kit k = kitsManager.getKits().get(name + "_" + lang);
+        if(k == null && !lang.equals(MinetasiaLang.BASE_LANG)) k = kitsManager.getKits().get(name + "_" + MinetasiaLang.BASE_LANG);
+        return k;
+    }
+
+    @Override
+    public void saveDefaultKit(Kit kit) {
+        if(kitsManager.getKits().containsKey(kit.getName() + "_" + kit.getIsoLang()))
+        {
+            kitsManager.getKits().put(kit.getName() + "_" + kit.getIsoLang(), new fr.idarkay.minetasia.core.spigot.kits.Kit(kit));
+        }
+    }
+
+    @Override
     public void shutdown() {
         getServer().getOnlinePlayers().forEach(this::movePlayerToHub);
         getServer().shutdown();
@@ -685,28 +744,28 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
     }
 
-    @Override
-    public int getKitLevelOfUser(UUID player, String kitName) {
-        String data = getPlayerData(player, "kits");
-        JsonObject jo;
-        if(data != null) jo = JSON_PARSER.parse(data).getAsJsonObject();
-        else return 0;
-        JsonElement lvl = jo.get(kitName);
-        if(lvl == null) return 0;
-        return lvl.getAsInt();
-    }
-
-    @Override
-    public void setKitLvlOfUser(UUID player, String kitName, int lvl) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            String data = getPlayerData(player, "kits");
-            JsonObject jo;
-            if(data != null) jo = JSON_PARSER.parse(data).getAsJsonObject();
-            else jo = new JsonObject();
-            jo.addProperty(kitName, lvl);
-            setPlayerData(player, "kits", jo.toString());
-        });
-    }
+//    @Override
+//    public int getKitLevelOfUser(UUID player, String kitName) {
+//        String data = getPlayerData(player, "kits");
+//        JsonObject jo;
+//        if(data != null) jo = JSON_PARSER.parse(data).getAsJsonObject();
+//        else return 0;
+//        JsonElement lvl = jo.get(kitName);
+//        if(lvl == null) return 0;
+//        return lvl.getAsInt();
+//    }
+//
+//    @Override
+//    public void setKitLvlOfUser(UUID player, String kitName, int lvl) {
+//        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+//            String data = getPlayerData(player, "kits");
+//            JsonObject jo;
+//            if(data != null) jo = JSON_PARSER.parse(data).getAsJsonObject();
+//            else jo = new JsonObject();
+//            jo.addProperty(kitName, lvl);
+//            setPlayerData(player, "kits", jo.toString());
+//        });
+//    }
 
     private void setCommandsIsEnable(byte b, boolean value)
     {

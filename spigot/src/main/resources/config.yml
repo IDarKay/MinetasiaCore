@@ -64,6 +64,10 @@ gui:
 prefix: "&9Mine&6Tasia&7>>"
 chat_char: ' > '
 
+# kit to load set * to first for all else the name of the plugin
+kits_load:
+  - '*'
+
 # Defines if "opped" players should be able to use all LuckPerms commands by default.
 #
 # - Set to false to only allow users who have the permissions access to the commands

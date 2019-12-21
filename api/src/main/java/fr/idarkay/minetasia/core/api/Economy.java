@@ -18,25 +18,24 @@ import java.util.stream.Collectors;
  */
 public enum Economy {
 
-    MINECOINS("minecoins", "&6MineCoins", 1_000)
+    MINECOINS("minecoins", "&6MineCoins"),
+    SHOPEX("shopex", "&6Shopex"),
+    STARS("stars", "&6Stars"),
     ;
 
     public final String name;
     public final String displayName;
-    public final float warnNumber;
 
     /**
      * @param name the generic name of the money its preferable to never change this when is create !
      *             its preferable to not set special char or color char
      * @param displayName   the display name can be  change the display name will be show in gui message etc...
-     * @param warnNumber the limits number after that a warn message will be send in log and in to Webhooks.
      * @since 1.0
      */
-    Economy(String name, String displayName, float warnNumber)
+    Economy(String name, String displayName)
     {
         this.name = name;
         this.displayName = displayName;
-        this.warnNumber = warnNumber;
     }
 
     /**

@@ -61,7 +61,7 @@ public interface Server {
      */
     int getPlayerCount();
 
-     void setPlayerCount(int playerCount);
+    void setPlayerCount(int playerCount);
 
 
 }
