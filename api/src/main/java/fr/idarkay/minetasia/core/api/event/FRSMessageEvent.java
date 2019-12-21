@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * Created the 14/11/2019 at 13:48
  * @since 1.0
  *
- * The event call when {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String)} have called
+ * The event call when {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String, boolean...)} (String, String, boolean...)} (String, String)} have called
  * please don't call yourself the event , this very boring
  */
 public final class FRSMessageEvent extends Event {
@@ -33,7 +33,7 @@ public final class FRSMessageEvent extends Event {
     }
 
     /**
-     * get channel of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String)}
+     * get channel of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String, boolean...)} (String, String, boolean...)} (String, String)}
      * @return String channel
      * @since 1.0
      */
@@ -42,7 +42,7 @@ public final class FRSMessageEvent extends Event {
     }
 
     /**
-     * get message of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String)}
+     * get message of the message, it define in {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String, boolean...)} (String, String, boolean...)} (String, String)}
      * @return String message
      * @since 1.0
      */

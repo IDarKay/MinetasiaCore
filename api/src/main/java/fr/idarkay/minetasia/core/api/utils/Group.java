@@ -18,7 +18,7 @@ public interface Group {
 
     /**
      * get all permissions of a group
-     * @return {@code} List<String>}
+     * @return {@code List<String>}
      */
     List<String> getPermissions();
 
@@ -43,7 +43,7 @@ public interface Group {
     /**
      * get all name of parent group
      * a group with a parent group inherited all permission of parent
-     * @return {@code} List<String>}
+     * @return {@code List<String>}
      */
     List<String> getParents();
 
