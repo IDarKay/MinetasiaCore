@@ -14,12 +14,24 @@ import java.util.UUID;
  */
 public interface PlayerStatueFix {
 
+    /**
+     * @return {@link Server} of the player
+     */
     Server getServer();
 
+    /**
+     * @return the full name of the proxy ( can pe transform to {@link UUID}
+     */
     String getProxy();
 
+    /**
+     * @return user name of player
+     */
     String getUserName();
 
+    /**
+     * @return uuid of the player
+     */
     UUID getUUID();
 
 }
