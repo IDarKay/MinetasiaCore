@@ -192,6 +192,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      *
      * @param chanel  {@link NotNull} chanel of the message
      * @param message  message
+     * @param sync if need be sync or not
      * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
      * @since 1.0
      */
@@ -314,7 +315,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     /**
      * save a kit in frs if not exist  <br>
-     *  in {@link Kit} please not set color char just '&'
+     *  in {@link Kit} please not set color char just {@code '&'}
      * @param kit to save
      */
     public abstract void saveDefaultKit(Kit kit);

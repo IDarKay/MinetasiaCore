@@ -49,8 +49,8 @@ public interface Kit {
      * get the description of the kit <br>
      *      {@link org.bukkit.ChatColor#translateAlternateColorCodes(char, String)} } are already applied <br>
      *      return in lang {@link Kit#getIsoLang()} <br>
-     *      elements 0 --> for lvl 0 <br>
-     *      elements 1 --> for lvl 1 <br>
+     *      elements 0 {@code -->} for lvl 0 <br>
+     *      elements 1 {@code -->} for lvl 1 <br>
      *      ... <br>
      *      table.length = {@link Kit#getMaxLevel()} + 1 (lvl 0)
       *
