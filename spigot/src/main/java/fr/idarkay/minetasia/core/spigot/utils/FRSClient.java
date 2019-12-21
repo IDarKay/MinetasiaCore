@@ -29,7 +29,7 @@ public class FRSClient
 {
 	private JavaPlugin plugin;
 	
-	private static boolean enable, connected, fixEnable = false;
+	private static boolean enable = false, connected = false, fixEnable = false;
 	
 	private Runnable runnable;
 	private PrintWriter out;
@@ -83,54 +83,21 @@ public class FRSClient
 			this.port = port;
 			this.timeout = timeout;
 			this.password = password;
-			
-			t1 = new Thread()
-			{
-				@Override
-				public void run()
-				{
-					while(true)
-					{
-						if(enable)
-						{
-							try
-							{
-								if(connected)
-								{
-									connected = false;
-									send("areyouhere", false);
-								}
-								else
-								{
-									FRSClient.this.out.println("Time out");
-									restart();
-								}
-							}
-							catch(Exception ignore) { }
-						}
-						try
-						{
-							Thread.sleep(10_000L);
-						}
-						catch(Exception e) { if(!enable) break; }
-					}
-				}
-			};
-			t1.start();
-			
+
 			runnable = new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					enable = true;
+
 					try
 					{
-						connected = true;
 						s = new Socket();
 						s.setKeepAlive(true);
 						s.connect(new InetSocketAddress(ip, port), 15 * 1000);
 						FRSClient.this.out.println("Connected !");
+						enable = true;
+						connected = true;
 						fixEnable = true;
 						
 						inS = s.getInputStream();
@@ -190,7 +157,40 @@ public class FRSClient
 		
 		t2 = new Thread(runnable);
 		t2.start();
-		
+
+		t1 = new Thread()
+		{
+			@Override
+			public void run()
+			{
+				while(true)
+				{
+					if(enable)
+					{
+						try
+						{
+							if(connected)
+							{
+								connected = false;
+								send("areyouhere", false);
+							}
+							else
+							{
+								FRSClient.this.out.println("Time out");
+								restart();
+							}
+						}
+						catch(Exception ignore) { }
+					}
+					try
+					{
+						Thread.sleep(10_000L);
+					}
+					catch(Exception e) { if(!enable) break; }
+				}
+			}
+		};
+		t1.start();
 		return true;
 	}
 	
