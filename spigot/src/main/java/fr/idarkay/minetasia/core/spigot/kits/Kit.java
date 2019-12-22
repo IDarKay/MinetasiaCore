@@ -27,14 +27,16 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
     private final String[] lvlDesc;
     private final String[] lvlDescWithoutDesc;
     private final int maxLvl;
+    private final int[] price;
 
 
-    public Kit(final String isoLang, final String name, final String displayName, final int maxLvl, final String[] lvlDesc, final String... desc)
+    public Kit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, final String[] lvlDesc, final String... desc)
     {
         this.isoLang = isoLang;
         this.name = name;
         this.displayNameWithouColor = displayName;
         this.displayName = ChatColor.translateAlternateColorCodes('&', displayNameWithouColor);
+        this.price = price;
         this.descWithoutColor = desc;
         if(lvlDesc.length != maxLvl + 1)
         {
@@ -55,7 +57,7 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
 
     public Kit(fr.idarkay.minetasia.core.api.utils.Kit kit)
     {
-        this(kit.getIsoLang(), kit.getName(), kit.getDisplayName(), kit.getMaxLevel(), kit.getDescriptionPerLvl(), kit.getDescription());
+        this(kit.getIsoLang(), kit.getName(), kit.getDisplayName(), kit.getMaxLevel(), kit.getPrice(), kit.getDescriptionPerLvl(), kit.getDescription());
     }
 
     public Kit(JsonObject jsonObject)
@@ -85,6 +87,15 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
         {
             lvlDescWithoutDesc[i] = je.getAsString();
             this.lvlDesc[i] = ChatColor.translateAlternateColorCodes('&', lvlDescWithoutDesc[i]);
+            i++;
+        }
+
+        JsonArray price = jsonObject.get("price").getAsJsonArray();
+        this.price = new int[price.size()];
+        i = 0;
+        for(JsonElement je : price)
+        {
+            this.price[i] = je.getAsInt();
             i++;
         }
 
@@ -120,6 +131,11 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
         return maxLvl;
     }
 
+    @Override
+    public int[] getPrice() {
+        return new int[0];
+    }
+
     public JsonObject getJson()
     {
         JsonObject main = new JsonObject();
@@ -135,7 +151,13 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
         JsonArray lvlDesc = new JsonArray();
         for(String s : lvlDescWithoutDesc) lvlDesc.add(s);
         main.add("lvldescription", lvlDesc);
+
+        JsonArray price = new JsonArray();
+        for(int i : this.price) price.add(i);
+        main.add("price", price);
+
         return main;
+
     }
 
     public String getJsonString()

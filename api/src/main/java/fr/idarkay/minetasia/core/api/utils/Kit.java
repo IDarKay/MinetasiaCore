@@ -63,4 +63,12 @@ public interface Kit {
      */
     int getMaxLevel();
 
+    /**
+     * the element 0 is price for lvl 1
+     * element 1 for lvl 2 etc <br>
+     *  table.length must be equal to {@link Kit#getMaxLevel()}
+     * @return table of int
+     */
+    int[] getPrice();
+
 }
