@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.api.utils;
 
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -70,5 +71,10 @@ public interface Kit {
      * @return table of int
      */
     int[] getPrice();
+
+    /**
+     * @return material wil b show in gui
+     */
+    Material getDisplayMet();
 
 }

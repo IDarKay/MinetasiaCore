@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -28,9 +29,10 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
     private final String[] lvlDescWithoutDesc;
     private final int maxLvl;
     private final int[] price;
+    private final Material mat;
 
 
-    public Kit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, final String[] lvlDesc, final String... desc)
+    public Kit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, Material displayMat, final String[] lvlDesc, final String... desc)
     {
         this.isoLang = isoLang;
         this.name = name;
@@ -38,6 +40,7 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
         this.displayName = ChatColor.translateAlternateColorCodes('&', displayNameWithouColor);
         this.price = price;
         this.descWithoutColor = desc;
+        this.mat = displayMat;
         if(lvlDesc.length != maxLvl + 1)
         {
             throw new IllegalArgumentException("lvlDesc lenght must be equal to maxLvl + 1!");
@@ -57,7 +60,7 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
 
     public Kit(fr.idarkay.minetasia.core.api.utils.Kit kit)
     {
-        this(kit.getIsoLang(), kit.getName(), kit.getDisplayName(), kit.getMaxLevel(), kit.getPrice(), kit.getDescriptionPerLvl(), kit.getDescription());
+        this(kit.getIsoLang(), kit.getName(), kit.getDisplayName(), kit.getMaxLevel(), kit.getPrice(), kit.getDisplayMet(), kit.getDescriptionPerLvl(), kit.getDescription());
     }
 
     public Kit(JsonObject jsonObject)
@@ -67,6 +70,7 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
         displayNameWithouColor = jsonObject.get("displayname").getAsString();
         displayName = ChatColor.translateAlternateColorCodes('&', displayNameWithouColor);
         maxLvl = jsonObject.get("maxlvl").getAsInt();
+        mat = Material.valueOf(jsonObject.get("material").getAsString());
 
         JsonArray desc = jsonObject.get("description").getAsJsonArray();
         descWithoutColor = new String[desc.size()];
@@ -136,6 +140,11 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
         return new int[0];
     }
 
+    @Override
+    public Material getDisplayMet() {
+        return mat;
+    }
+
     public JsonObject getJson()
     {
         JsonObject main = new JsonObject();
@@ -143,6 +152,7 @@ public class Kit implements fr.idarkay.minetasia.core.api.utils.Kit {
         main.addProperty("name", name);
         main.addProperty("displayname", displayNameWithouColor);
         main.addProperty("maxlvl", maxLvl);
+        main.addProperty("material", mat.name());
 
         JsonArray desc = new JsonArray();
         for(String s : descWithoutColor) desc.add(s);
