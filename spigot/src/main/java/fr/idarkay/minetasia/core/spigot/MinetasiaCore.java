@@ -632,9 +632,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public void saveDefaultKit(Kit kit) {
-        if(kitsManager.getKits().containsKey(kit.getName() + "_" + kit.getIsoLang()))
+        if(!kitsManager.getKits().containsKey(kit.getName() + "_" + kit.getIsoLang()))
         {
-            kitsManager.getKits().put(kit.getName() + "_" + kit.getIsoLang(), new fr.idarkay.minetasia.core.spigot.kits.Kit(kit));
+            fr.idarkay.minetasia.core.spigot.kits.Kit k = new fr.idarkay.minetasia.core.spigot.kits.Kit(kit);
+            setValue("kits", kit.getName() + "_" + kit.getIsoLang(), k.getJsonString());
+            kitsManager.getKits().put(kit.getName() + "_" + kit.getIsoLang(), k);
         }
     }
 
