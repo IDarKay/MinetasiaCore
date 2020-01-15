@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.utils.PlayerStats;
+import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.api.exception.NoEnoughMoneyException;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -174,6 +176,11 @@ public final class Player {
         return jsonObject.toString();
     }
 
+    public void upDateStats(@NotNull StatsUpdater updater)
+    {
+        stats.upDate(Objects.requireNonNull(updater));
+    }
+
     public PlayerStats getStats()
     {
         return stats;
@@ -185,16 +192,16 @@ public final class Player {
         return stats.toJsonObject();
     }
 
-    public class Stats implements PlayerStats {
+    private class Stats implements PlayerStats {
 
         private Map<String, Long> stats = new HashMap<>();
 
-        private Stats()
+        Stats()
         {
 
         }
 
-        private Stats(JsonObject data)
+        Stats(JsonObject data)
         {
             data.entrySet().forEach(e -> stats.put(e.getKey(), e.getValue().getAsLong()));
         }
@@ -217,7 +224,13 @@ public final class Player {
             return stats.getOrDefault(statsName, -1L);
         }
 
-        public JsonObject toJsonObject()
+        void upDate(@NotNull StatsUpdater updater)
+        {
+            // add element to map and sum if present
+            updater.getUpdate().forEach((k, v) -> stats.merge(k, v, Long::sum));
+        }
+
+        JsonObject toJsonObject()
         {
             JsonObject obj = new JsonObject();
             stats.forEach(obj::addProperty);
