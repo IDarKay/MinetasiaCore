@@ -35,7 +35,7 @@ public class PlayerManager {
     {
         if(plugin.getFrsClient().isConnected())
             try {
-                return userCache.get(uuid, () -> new Player(plugin.getFrsClient().getValue("usersData", uuid.toString())));
+                return userCache.get(uuid, () -> new Player(plugin.getFrsClient().getValue("usersData", uuid.toString()), plugin.getFrsClient().getValue("userStats", uuid.toString())));
             } catch (ExecutionException e) {
                 return null;
             }

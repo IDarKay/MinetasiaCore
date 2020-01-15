@@ -1,9 +1,7 @@
 package fr.idarkay.minetasia.core.api;
 
-import fr.idarkay.minetasia.core.api.utils.Kit;
-import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
-import fr.idarkay.minetasia.core.api.utils.SQLManager;
-import fr.idarkay.minetasia.core.api.utils.Server;
+import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
+import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -319,6 +317,22 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param kit to save
      */
     public abstract void saveDefaultKit(Kit kit);
+
+    /**
+     * get Stats of a user
+     * @param uuid player UUID
+     * @return {@link PlayerStats} stats , return null if player not found
+     */
+    @Nullable
+    public abstract PlayerStats getPlayerStats(@NotNull UUID uuid);
+
+    /**
+     * add stats to player
+     * @param uuid uuid of the player
+     * @param statsUpdater see {@link StatsUpdater}
+     * @throws PlayerNotFoundException if player not found
+     */
+    public abstract void addStatsToPlayer(@NotNull UUID uuid, @NotNull StatsUpdater statsUpdater);
 
     /**
      * use this for shutdown your server :
