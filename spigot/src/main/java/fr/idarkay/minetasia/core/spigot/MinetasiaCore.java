@@ -12,10 +12,7 @@ import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
-import fr.idarkay.minetasia.core.api.utils.Group;
-import fr.idarkay.minetasia.core.api.utils.Kit;
-import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
-import fr.idarkay.minetasia.core.api.utils.Server;
+import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.Executor.*;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
@@ -31,6 +28,7 @@ import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -637,6 +635,29 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             fr.idarkay.minetasia.core.spigot.kits.Kit k = new fr.idarkay.minetasia.core.spigot.kits.Kit(kit);
             setValue("kits", kit.getName() + "_" + kit.getIsoLang(), k.getJsonString());
             kitsManager.getKits().put(kit.getName() + "_" + kit.getIsoLang(), k);
+        }
+    }
+
+    @Override
+    public PlayerStats getPlayerStats(@NotNull UUID uuid)
+    {
+        Player p = playerManager.get(uuid);
+        if(p != null) return p.getStats();
+        return null;
+    }
+
+    @Override
+    public void addStatsToPlayer(@NotNull UUID uuid, @NotNull StatsUpdater statsUpdater)
+    {
+        Validate.notNull(uuid, "uuid can't be null");
+        Validate.notNull(statsUpdater, "statsUpdater can't be null");
+        try
+        {
+            Objects.requireNonNull(playerManager.get(uuid)).upDateStats(statsUpdater);
+        }
+        catch (NullPointerException e)
+        {
+            throw new PlayerNotFoundException();
         }
     }
 
