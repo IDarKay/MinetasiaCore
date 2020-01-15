@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.core.api.utils.PlayerStats;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.api.exception.NoEnoughMoneyException;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * File <b>Player</b> located on fr.idarkay.minetasia.core.common.user
@@ -25,26 +27,31 @@ import java.util.UUID;
  */
 public final class Player {
 
+    private static final JsonParser PARSER = new JsonParser();
+
+    private Stats stats;
     private HashMap<String, String> data = new HashMap<>();
     private HashMap<UUID, String> friends = new HashMap<>();
     private HashMap<Economy, Float> moneys = new HashMap<>();
     private String username;
     private UUID uuid;
 
-    public Player(String jsonData)
+    public Player(@NotNull String jsonData, @Nullable String jsonDataKit)
     {
         update(jsonData);
+        stats = jsonDataKit == null ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
     }
 
     public Player(UUID uuid, String username)
     {
         this.uuid = uuid;
         this.username = username;
+        this.stats = new Stats();
     }
 
-    public void update(String jsonData)
+    private void update(String jsonData)
     {
-        JsonObject data = new JsonParser().parse(jsonData).getAsJsonObject();
+        JsonObject data = PARSER.parse(jsonData).getAsJsonObject();
 
         username = data.get("username").getAsString();
         uuid = UUID.fromString(data.get("uuid").getAsString());
@@ -165,7 +172,57 @@ public final class Player {
         jsonObject.add("friends", f);
 
         return jsonObject.toString();
+    }
 
+    public PlayerStats getStats()
+    {
+        return stats;
+    }
+
+    @NotNull
+    public JsonObject getJsonStats()
+    {
+        return stats.toJsonObject();
+    }
+
+    public class Stats implements PlayerStats {
+
+        private Map<String, Long> stats = new HashMap<>();
+
+        private Stats()
+        {
+
+        }
+
+        private Stats(JsonObject data)
+        {
+            data.entrySet().forEach(e -> stats.put(e.getKey(), e.getValue().getAsLong()));
+        }
+
+        @Override
+        public @NotNull Map<@NotNull String, @NotNull Long> getAllStats()
+        {
+            return new HashMap<>(stats);
+        }
+
+        @Override
+        public @NotNull Map<@NotNull String, @NotNull Long> getPluginStats(String pluginName)
+        {
+            return stats.entrySet().stream().filter(sle -> sle.getKey().startsWith(pluginName)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+
+        @Override
+        public long getStatsValue(String statsName)
+        {
+            return stats.getOrDefault(statsName, -1L);
+        }
+
+        public JsonObject toJsonObject()
+        {
+            JsonObject obj = new JsonObject();
+            stats.forEach(obj::addProperty);
+            return obj;
+        }
 
     }
 
