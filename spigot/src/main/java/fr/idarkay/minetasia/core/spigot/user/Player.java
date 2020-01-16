@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.core.api.utils.Boost;
 import fr.idarkay.minetasia.core.api.utils.PlayerStats;
 import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
@@ -37,7 +38,7 @@ public final class Player {
     private HashMap<Economy, Float> moneys = new HashMap<>();
     private String username;
     private UUID uuid;
-
+    private Boost personalBoost = HashMap::new, partyBoost = HashMap::new;
     public Player(@NotNull String jsonData, @Nullable String jsonDataKit)
     {
         update(jsonData);
@@ -64,6 +65,27 @@ public final class Player {
 
     }
 
+    @NotNull
+    public Boost getPersonalBoost()
+    {
+        return personalBoost;
+    }
+
+    public void setPersonalBoostBoost(@NotNull Boost boost)
+    {
+        this.personalBoost = Objects.requireNonNull(boost);
+    }
+
+    @NotNull
+    public Boost getPartyBoost()
+    {
+        return partyBoost;
+    }
+
+    public void setPartyBoost(@NotNull Boost partyBoost)
+    {
+        this.partyBoost = partyBoost;
+    }
 
     public float getMoney(@NotNull Economy economy) {
         Float m;

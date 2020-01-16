@@ -48,6 +48,7 @@ public enum Lang implements IMinetasiaLang {
     SERVER_NOT_FOUND                            ("&cServer not found"),
     WORLD_NOT_FOUND                             ("&cWorld not found"),
     INCOMPATIBLE_CMD_TP                         ("&cYou can't tp @a to another server"),
+    PLAYER_BOOST                                ("&6%1$s &aboost %2$s &afor the party (%3$s/%4$s%%)"),
 
     //money
     MONEY_WRONG_TYPE                            ("&cInvalid money type"),
@@ -75,6 +76,11 @@ public enum Lang implements IMinetasiaLang {
     GROUP_PARENT_CANT_ADD                       ("&ccan't add Parent %1$s to %2$s because %2$s have ealready %1$s for parent"),
     GROUP_PARENT_REMOVE                         ("&aParent %1$s remove to %2$s"),
     GROUP_PARENT_CANT_REMOVE                    ("&cGroup %1$s don't have parent %2$s"),
+    GROUP_BOOST                                 ("&c<type> <money type> <value> &a for add boost to group (0 to remove)"),
+    GROUP_BOOST_TYPE0                           ("&c<money type> <value> &a for add boost to group (0 to remove)"),
+    GROUP_BOOST_TYPE                            ("&c<value> &a for add boost to group (0 to remove)"),
+    GROUP_BOOST_VALID                           ("&a for add boost to group (0 to remove)"),
+    GROUP_BOOST_INVALID_TYPE                    ("&c type of the boost is invalid"),
 
         //user
     USER_PERMISSION_ADD                         ("&aPermission %1$s add to %2$s"),
