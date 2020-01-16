@@ -51,6 +51,11 @@ public final class Player {
         this.stats = new Stats();
     }
 
+    public void upDateStats( @Nullable String jsonDataKit)
+    {
+        stats = jsonDataKit == null ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
+    }
+
     private void update(String jsonData)
     {
         JsonObject data = PARSER.parse(jsonData).getAsJsonObject();
