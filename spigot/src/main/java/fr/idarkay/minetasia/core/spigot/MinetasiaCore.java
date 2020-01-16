@@ -651,14 +651,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         Validate.notNull(uuid, "uuid can't be null");
         Validate.notNull(statsUpdater, "statsUpdater can't be null");
-        try
-        {
-            Objects.requireNonNull(playerManager.get(uuid)).upDateStats(statsUpdater);
-        }
-        catch (NullPointerException e)
-        {
-            throw new PlayerNotFoundException();
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(this,() -> {
+            try
+            {
+                Player p = Objects.requireNonNull(playerManager.get(uuid));
+                p.upDateStats(statsUpdater);
+                publish("core-data", "stats;" + uuid.toString() + ";" + p.getJsonStats().toString());
+                getFrsClient().setValue("userStats", uuid.toString(), p.getJsonStats().toString());
+            }
+            catch (NullPointerException e)
+            {
+                throw new PlayerNotFoundException();
+            }
+        });
     }
 
     @Override
