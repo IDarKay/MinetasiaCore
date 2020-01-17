@@ -18,13 +18,14 @@ import java.util.stream.Collectors;
  */
 public enum Economy {
 
-    MINECOINS("minecoins", "&6MineCoins"),
-    SHOPEX("shopex", "&6Shopex"),
-    STARS("stars", "&6Stars"),
+    MINECOINS("minecoins", "&6MineCoins", BoostType.MINECOINS),
+    SHOPEX("shopex", "&6Shopex", BoostType.SHOPEX),
+    STARS("stars", "&6Stars", BoostType.STARS),
     ;
 
     public final String name;
     public final String displayName;
+    public final BoostType boostType;
 
     /**
      * @param name the generic name of the money its preferable to never change this when is create !
@@ -32,10 +33,11 @@ public enum Economy {
      * @param displayName   the display name can be  change the display name will be show in gui message etc...
      * @since 1.0
      */
-    Economy(String name, String displayName)
+    Economy(String name, String displayName, BoostType boostType)
     {
         this.name = name;
         this.displayName = displayName;
+        this.boostType = boostType;
     }
 
     /**
