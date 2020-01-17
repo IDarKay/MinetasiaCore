@@ -1,6 +1,5 @@
 package fr.idarkay.minetasia.core.api;
 
-import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import org.bukkit.entity.Player;
@@ -330,9 +329,14 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * add stats to player
      * @param uuid uuid of the player
      * @param statsUpdater see {@link StatsUpdater}
-     * @throws PlayerNotFoundException if player not found
      */
     public abstract void addStatsToPlayer(@NotNull UUID uuid, @NotNull StatsUpdater statsUpdater);
+
+    @NotNull
+    public abstract Boost getPlayerPersonalBoost(@NotNull UUID uuid);
+
+    @NotNull
+    public abstract Boost getPlayerPartyBoost(@NotNull UUID uuid);
 
     /**
      * use this for shutdown your server :
@@ -341,6 +345,13 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      */
     public abstract void shutdown();
+
+    /**
+     * add money to player
+     * @param uuid uuid of the player
+     * @param moneyUpdater see {@link MoneyUpdater}
+     */
+    public abstract void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost);
 
     /**
      * get all uuid and name of all player log in the server

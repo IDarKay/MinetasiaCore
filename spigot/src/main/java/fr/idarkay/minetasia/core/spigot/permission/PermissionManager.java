@@ -265,6 +265,13 @@ public class PermissionManager {
         return getThinkOfUSer(uuid, "group", false, false);
     }
 
+    public List<String> getGroupsOfUser(@NotNull UUID uuid)
+    {
+        List<String> s =  getTempGroupOfUser(uuid);
+        s.addAll(getGroupOfUser(uuid));
+        return s;
+    }
+
     public List<fr.idarkay.minetasia.core.api.utils.Group> getGroupFromName(List<String> g)
     {
         List<fr.idarkay.minetasia.core.api.utils.Group> l = new ArrayList<>();
@@ -311,10 +318,10 @@ public class PermissionManager {
                     if(paa != null) paa.values().forEach(p::removeAttachment);
                 }
                 byte u =0;
-                HashMap<String, PermissionAttachment> map = new HashMap<>();
-                ArrayList<String> groupL = new ArrayList<>();
-                HashMap<String, Long[]> tempgroupH = new HashMap<>();
-                HashMap<String, Long[]> tempPermH = new HashMap<>();
+                final HashMap<String, PermissionAttachment> map = new HashMap<>();
+                final ArrayList<String> groupL = new ArrayList<>();
+                final HashMap<String, Long[]> tempgroupH = new HashMap<>();
+                final HashMap<String, Long[]> tempPermH = new HashMap<>();
                 if(group != null)
                 {
                     for(JsonElement j : group)

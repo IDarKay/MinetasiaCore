@@ -4,10 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import fr.idarkay.minetasia.core.api.BoostType;
+import fr.idarkay.minetasia.core.api.utils.Boost;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * File <b>Group</b> located on fr.idarkay.minetasia.core.spigot.permission
@@ -29,12 +31,15 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
     private final String name;
     private String displayName;
     private byte priority = 0;
+    private Boost personalBoost, partyBoost;
 
     public Group(PermissionManager pm, String name)
     {
         this.name = name;
         this.displayName = name;
         this.pm = pm;
+        this.personalBoost = HashMap::new;
+        this.partyBoost = HashMap::new;
     }
 
     public Group(String jsonS, PermissionManager pm)
@@ -56,6 +61,14 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         {
             parents.add(jsonElement.getAsString());
         }
+
+        JsonObject b0 = json.getAsJsonObject("personalboosts");
+        Map<BoostType, Float> map = b0.entrySet().stream().collect(Collectors.toMap(e -> BoostType.valueOf(e.getKey()), e -> e.getValue().getAsFloat()));
+        personalBoost = () -> map;
+
+        JsonObject pb0 = json.getAsJsonObject("partyboosts");
+        Map<BoostType, Float> map2 = pb0.entrySet().stream().collect(Collectors.toMap(e -> BoostType.valueOf(e.getKey()), e -> e.getValue().getAsFloat()));
+        personalBoost = () -> map2;
 
     }
 
@@ -95,6 +108,37 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
     @Override
     public List<String> getParents() {
         return parents;
+    }
+
+    @Override
+    public Boost getPersonalBoost()
+    {
+        return personalBoost;
+    }
+
+    public void setPersonalBoost(@NotNull BoostType type, float amount)
+    {
+        Map<BoostType, Float> m = personalBoost.getBoost();
+        if(amount == 0)
+        {
+            m.remove(type);
+        }
+        else
+            m.put(Objects.requireNonNull(type), amount);
+        personalBoost = () -> m;
+    }
+
+    @Override
+    public Boost getPartyBoost()
+    {
+        return partyBoost;
+    }
+
+    public void setPartyBoost(@NotNull BoostType type, float amount)
+    {
+        Map<BoostType, Float> m = partyBoost.getBoost();
+        m.put(Objects.requireNonNull(type), amount);
+        partyBoost = () -> m;
     }
 
     public void addPermissions(String... permissions)
@@ -139,6 +183,14 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         JsonArray b = new JsonArray();
         parents.forEach(b::add);
         p.add("parents", b);
+
+        JsonObject bo = new JsonObject();
+        personalBoost.getBoost().forEach((k, v) -> bo.addProperty(k.name(), v));
+        p.add("personalboosts", bo);
+
+        JsonObject pbo = new JsonObject();
+        partyBoost.getBoost().forEach((k, v) -> pbo.addProperty(k.name(), v));
+        p.add("partyboosts", bo);
 
         return p.toString();
     }
