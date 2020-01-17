@@ -401,8 +401,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public void addPlayerMoney(UUID uuid, Economy economy, float amount) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+    public void addPlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
+
+        Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
             Player p = playerManager.get(uuid);
             if(p != null){
@@ -410,12 +411,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + p.getMoney(economy));
                 getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
             } else throw new PlayerNotFoundException("can't add money to not found user");
-        });
+        };
+
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+            c.accept(null);
     }
 
     @Override
-    public void removePlayerMoney(UUID uuid, Economy economy, float amount) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+    public void removePlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
+
+        Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
             Player p = playerManager.get(uuid);
             if(p != null){
@@ -423,12 +430,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + p.getMoney(economy));
                 getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
             } else throw new PlayerNotFoundException("can't remove money to not found user");
-        });
+        };
+
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+            c.accept(null);
     }
 
     @Override
-    public void setPlayerMoney(UUID uuid, Economy economy, float amount) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+    public void setPlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
+
+        Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
             Player p = playerManager.get(uuid);
             if(p != null){
@@ -436,7 +449,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + amount);
                 getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
             } else throw new PlayerNotFoundException("can't set money to not found user");
-        });
+        };
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+            c.accept(null);
     }
 
     @Override
@@ -754,7 +771,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 moneyUpdater.getUpdate().forEach((k,v) ->{
                     final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
                     System.out.println(b);
-                    addPlayerMoney(uuid, k, v * b);
+                    addPlayerMoney(uuid, k, v * b, false);
                     if(money.length() > 0) money.append(",");
                     money.append(moneyColor).append(v * b).append(" ").append(k.displayName);
                 });
