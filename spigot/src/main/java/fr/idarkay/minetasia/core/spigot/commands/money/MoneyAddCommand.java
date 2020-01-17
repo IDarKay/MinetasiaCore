@@ -60,7 +60,7 @@ public class MoneyAddCommand extends StepCommand implements FixCommand {
                     {
                         float a = Float.parseFloat(args[3]);
                         if (a < 0) throw new IllegalArgumentException("negative number");
-                        plugin.addPlayerMoney(u, e, a);
+                        plugin.addPlayerMoney(u, e, a, true);
                                             //  amount money type player name
                         sender.sendMessage(Lang.MONEY_ADD.get(lang, a, e.displayName, args[1]));
                     }
