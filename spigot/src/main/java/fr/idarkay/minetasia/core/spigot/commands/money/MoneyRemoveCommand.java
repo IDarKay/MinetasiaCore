@@ -64,7 +64,7 @@ public class MoneyRemoveCommand extends StepCommand implements FixCommand {
                         if(m < a) sender.sendMessage(Lang.NO_AMOUNT_MONEY.get(lang, args[1]));
                         else
                         {
-                            plugin.removePlayerMoney(u, e, a);
+                            plugin.removePlayerMoney(u, e, a, true);
                             //  amount money type player name
                             sender.sendMessage(Lang.MONEY_REMOVE.get(lang, a, e.displayName, args[1]));
                         }
