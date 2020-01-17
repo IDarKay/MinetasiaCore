@@ -51,24 +51,39 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         priority = json.get("priority").getAsByte();
 
         JsonArray a = json.getAsJsonArray("permission");
-        for (JsonElement jsonElement : a)
+        if(a != null)
         {
-            permissions.add(jsonElement.getAsString());
+            for (JsonElement jsonElement : a)
+            {
+                permissions.add(jsonElement.getAsString());
+            }
         }
 
         JsonArray b = json.getAsJsonArray("parents");
-        for (JsonElement jsonElement : b)
+        if(b != null)
         {
-            parents.add(jsonElement.getAsString());
+            for (JsonElement jsonElement : b)
+            {
+                parents.add(jsonElement.getAsString());
+            }
         }
 
         JsonObject b0 = json.getAsJsonObject("personalboosts");
-        Map<BoostType, Float> map = b0.entrySet().stream().collect(Collectors.toMap(e -> BoostType.valueOf(e.getKey()), e -> e.getValue().getAsFloat()));
-        personalBoost = () -> map;
+        if(b0 != null)
+        {
+            Map<BoostType, Float> map = b0.entrySet().stream().collect(Collectors.toMap(e -> BoostType.valueOf(e.getKey()), e -> e.getValue().getAsFloat()));
+            personalBoost = () -> map;
+        }
+        else personalBoost = HashMap::new;
+
 
         JsonObject pb0 = json.getAsJsonObject("partyboosts");
-        Map<BoostType, Float> map2 = pb0.entrySet().stream().collect(Collectors.toMap(e -> BoostType.valueOf(e.getKey()), e -> e.getValue().getAsFloat()));
-        personalBoost = () -> map2;
+        if(pb0 != null)
+        {
+            Map<BoostType, Float> map2 = pb0.entrySet().stream().collect(Collectors.toMap(e -> BoostType.valueOf(e.getKey()), e -> e.getValue().getAsFloat()));
+            partyBoost = () -> map2;
+        }
+        else partyBoost = HashMap::new;
 
     }
 

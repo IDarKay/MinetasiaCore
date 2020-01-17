@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.user.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.PermissionAttachment;
 import org.jetbrains.annotations.NotNull;
@@ -35,11 +36,12 @@ public class PermissionManager {
         this.plugin = plugin;
         for(String f : plugin.getFields("group"))
         {
+            System.out.println(f);
             try
             {
                 Group g = new Group(plugin.getValue("group", f), this);
                 groups.put(g.getName(), g);
-            } catch (Exception ignore) { }
+            } catch (Exception ignore) { ignore.printStackTrace();}
 
         }
     }
@@ -265,11 +267,64 @@ public class PermissionManager {
         return getThinkOfUSer(uuid, "group", false, false);
     }
 
+    public List<String> getGroupOfUser(@NotNull Player player)
+    {
+        return getThinkOfUSer(player, "group", false, false);
+    }
+
+    public List<String> getGroupsOfUser(@NotNull Player player)
+    {
+        List<String> s =  getTempGroupOfUser(player);
+        s.addAll(getGroupOfUser(player));
+        return s;
+    }
+
     public List<String> getGroupsOfUser(@NotNull UUID uuid)
     {
         List<String> s =  getTempGroupOfUser(uuid);
         s.addAll(getGroupOfUser(uuid));
         return s;
+    }
+
+    private List<String> getThinkOfUSer(@NotNull Player player, String think, boolean isTemp, boolean isPerm)
+    {
+        List<String> back = new ArrayList<>();
+        if(permissionAttachments.containsKey(player.getUuid()))
+        {
+            for(Map.Entry<String, PermissionAttachment> e : permissionAttachments.get(player.getUuid()).entrySet())
+            {
+                if(e.getKey().startsWith(think))
+                {
+                    if(isPerm)
+                        back.addAll(e.getValue().getPermissions().keySet());
+                    else
+                        back.add(e.getKey().replace(think + "_", ""));
+
+                }
+            }
+        }
+        else
+        {
+            if (isTemp)
+            {
+                String data = player.getData(think);
+                JsonObject tempPermission = data == null ? null : PARSER.parse(data).getAsJsonObject();
+                if(data != null)
+                    for(Map.Entry<String, JsonElement> j : tempPermission.entrySet())
+                    {
+                        back.add(j.getKey());
+                    }
+
+            }
+            else
+            {
+                String data = player.getData(think);
+                JsonArray permission = data == null ? null : PARSER.parse(data).getAsJsonArray();
+                if(data != null)
+                    for (JsonElement j : permission) back.add(j.getAsString());
+            }
+        }
+        return back;
     }
 
     public List<fr.idarkay.minetasia.core.api.utils.Group> getGroupFromName(List<String> g)
@@ -288,6 +343,11 @@ public class PermissionManager {
     public List<String> getTempGroupOfUser(@NotNull UUID uuid)
     {
         return getThinkOfUSer(uuid, "temp_group", true, false);
+    }
+
+    public List<String> getTempGroupOfUser(@NotNull Player player)
+    {
+        return getThinkOfUSer(player, "temp_group", true, false);
     }
 
     public List<String> getTempPermissionOfUser(@NotNull UUID uuid)

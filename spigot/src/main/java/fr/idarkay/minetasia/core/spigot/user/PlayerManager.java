@@ -5,9 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import fr.idarkay.minetasia.core.api.utils.Group;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
-import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
-import sun.plugin2.main.server.Plugin;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -44,8 +42,11 @@ public class PlayerManager {
                     byte p = Byte.MIN_VALUE;
                     Group g = null;
 
-                    for(String gs : plugin.getPermissionManager().getGroupsOfUser(uuid))
+                    plugin.getPermissionManager().groups.forEach((k, v) -> System.out.println(k));
+
+                    for(String gs : plugin.getPermissionManager().getGroupsOfUser(player))
                     {
+                        System.out.println(gs);
                         Group group = plugin.getPermissionManager().groups.get(gs);
                         byte i = group.getPriority();
                         if(g == null || i > p)

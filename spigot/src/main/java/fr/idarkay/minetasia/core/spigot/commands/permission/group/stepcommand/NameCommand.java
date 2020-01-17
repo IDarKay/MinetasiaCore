@@ -48,7 +48,7 @@ public final class NameCommand extends StepCommand implements FlexibleCommand {
         child.add(new InfoCommand(plugin));
         child.add(new ParentCommand(plugin));
         child.add(new DeleteCommand(plugin));
-        child.add(new BoostMoneyTypeCommand(plugin));
+        child.add(new BoostCommand(plugin));
 
     }
 
