@@ -109,7 +109,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param amount of money to add (not negative)
      * @since 1.0
      */
-    public abstract void addPlayerMoney(UUID uuid, Economy economy, float amount);
+    public abstract void addPlayerMoney(UUID uuid, Economy economy, float amount, boolean async);
 
     /**
      * async task
@@ -119,7 +119,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param amount of money to remove  (not negative)
      * @since 1.0
      */
-    public abstract void removePlayerMoney(UUID uuid, Economy economy, float amount);
+    public abstract void removePlayerMoney(UUID uuid, Economy economy, float amount, boolean async);
 
     /**
      * async task
@@ -129,7 +129,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param amount of money to set (not negative)
      * @since 1.0
      */
-    public abstract void setPlayerMoney(UUID uuid, Economy economy, float amount);
+    public abstract void setPlayerMoney(UUID uuid, Economy economy, float amount, boolean async);
 
     /**
      *  get all friend of a player
