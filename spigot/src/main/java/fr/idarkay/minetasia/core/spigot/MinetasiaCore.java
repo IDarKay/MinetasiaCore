@@ -729,6 +729,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         getServer().shutdown();
     }
 
+    private final static ChatColor moneyColor = ChatColor.GREEN;
+
     @Override
     public void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost)
     {
@@ -736,10 +738,17 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         if(isCommandEnable(Command.PARTY_XP_BOOST))
         {
             Boost playerBoost = getPlayerPersonalBoost(uuid);
+            StringBuilder money = new StringBuilder();
             moneyUpdater.getUpdate().forEach((k,v) ->{
                 final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
+                System.out.println(b);
                 addPlayerMoney(uuid, k, v * b);
+                if(money.length() > 0) money.append(",");
+                money.append(moneyColor).append(v * b).append(" ").append(k.displayName);
             });
+            String[] toSend = Lang.GAME_REWARDS.get(getPlayerLang(uuid), serverType, money.toString()).split("\n");
+            org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
+            for(String s : toSend) Objects.requireNonNull(p).sendMessage(s);
         }
         else
             Bukkit.getLogger().warning("plugin :" + getName() + " want give party won money but server have PARTY_XP_BOOST = false");

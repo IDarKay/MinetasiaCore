@@ -9,7 +9,6 @@ import fr.idarkay.minetasia.core.spigot.permission.Group;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class BoostValidCommand extends SubCommand implements FlexibleCommand
 {
     public BoostValidCommand(@NotNull MinetasiaCore plugin)
     {
-        super(plugin, Lang.GROUP_BOOST_VALID, CommandPermission.PERMISSION_GROUP_BOOST, 7);
+        super(plugin, Lang.DESC_PERMISSION_GROUP_BOOST_VALID, CommandPermission.PERMISSION_GROUP_BOOST, 7);
     }
 
     @Override
@@ -50,11 +49,12 @@ public class BoostValidCommand extends SubCommand implements FlexibleCommand
                 if(args[3].equalsIgnoreCase("party"))
                 {
                     g.setPartyBoost(b, f);
-                    //todo: msg
+                    sender.sendMessage(Lang.GROUP_BOOST_ADD.get(lang, f, args[3].toLowerCase(), b, g.getName()));
                 }
                 else if(args[3].equalsIgnoreCase("personal"))
                 {
                     g.setPersonalBoost(b ,f);
+                    sender.sendMessage(Lang.GROUP_BOOST_ADD.get(lang, f, args[3].toLowerCase(), b, g.getName()));
                 }
                 else
                 {

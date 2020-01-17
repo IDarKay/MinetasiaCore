@@ -6,7 +6,6 @@ import fr.idarkay.minetasia.core.spigot.command.abstraction.FlexibleCommand;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.StepCommand;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +24,7 @@ public class BoostTypeCommand extends StepCommand implements FlexibleCommand
 {
     public BoostTypeCommand(@NotNull MinetasiaCore plugin)
     {
-        super(plugin, Lang.GROUP_BOOST_TYPE0, CommandPermission.PERMISSION_GROUP_BOOST, 5);
+        super(plugin, Lang.DESC_PERMISSION_GROUP_BOOST_TYPE0, CommandPermission.PERMISSION_GROUP_BOOST, 5);
         child.add(new BoostMoneyTypeCommand(plugin));
     }
 

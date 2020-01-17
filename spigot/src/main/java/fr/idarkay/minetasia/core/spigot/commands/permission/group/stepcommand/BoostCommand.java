@@ -21,7 +21,7 @@ public class BoostCommand extends StepCommand implements FixCommand
 {
     public BoostCommand(@NotNull MinetasiaCore plugin)
     {
-        super(plugin, Lang.GROUP_BOOST, CommandPermission.PERMISSION_GROUP_BOOST, 4);
+        super(plugin, Lang.DESC_PERMISSION_GROUP_BOOST, CommandPermission.PERMISSION_GROUP_BOOST, 4);
         addChild(new BoostTypeCommand(plugin));
     }
 
