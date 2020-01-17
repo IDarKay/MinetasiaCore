@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.core.api.utils.Boost;
 import fr.idarkay.minetasia.core.api.utils.PlayerStats;
 import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
@@ -37,11 +38,11 @@ public final class Player {
     private HashMap<Economy, Float> moneys = new HashMap<>();
     private String username;
     private UUID uuid;
-
+    private Boost personalBoost = HashMap::new, partyBoost = HashMap::new;
     public Player(@NotNull String jsonData, @Nullable String jsonDataKit)
     {
         update(jsonData);
-        stats = jsonDataKit == null ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
+        stats = jsonDataKit == null || jsonDataKit.equalsIgnoreCase("null") ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
     }
 
     public Player(UUID uuid, String username)
@@ -49,6 +50,11 @@ public final class Player {
         this.uuid = uuid;
         this.username = username;
         this.stats = new Stats();
+    }
+
+    public void upDateStats( @Nullable String jsonDataKit)
+    {
+        stats = jsonDataKit == null || jsonDataKit.equalsIgnoreCase("null") ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
     }
 
     private void update(String jsonData)
@@ -64,6 +70,27 @@ public final class Player {
 
     }
 
+    @NotNull
+    public Boost getPersonalBoost()
+    {
+        return personalBoost;
+    }
+
+    public void setPersonalBoostBoost(@NotNull Boost boost)
+    {
+        this.personalBoost = Objects.requireNonNull(boost);
+    }
+
+    @NotNull
+    public Boost getPartyBoost()
+    {
+        return partyBoost;
+    }
+
+    public void setPartyBoost(@NotNull Boost partyBoost)
+    {
+        this.partyBoost = partyBoost;
+    }
 
     public float getMoney(@NotNull Economy economy) {
         Float m;
@@ -77,9 +104,7 @@ public final class Player {
 
 
     public void addMoney(@NotNull Economy economy, float amount) {
-        Float m;
-        if((m = moneys.get(economy)) != null) moneys.put(economy, m + amount);
-        else moneys.put(economy, amount);
+        moneys.merge(economy, amount, Float::sum);
     }
 
     public void removeMooney(@NotNull Economy economy, float amount)

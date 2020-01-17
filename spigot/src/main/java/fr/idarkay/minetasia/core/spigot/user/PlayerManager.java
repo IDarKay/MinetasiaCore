@@ -2,6 +2,7 @@ package fr.idarkay.minetasia.core.spigot.user;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import fr.idarkay.minetasia.core.api.utils.Group;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +36,33 @@ public class PlayerManager {
     {
         if(plugin.getFrsClient().isConnected())
             try {
-                return userCache.get(uuid, () -> new Player(plugin.getFrsClient().getValue("usersData", uuid.toString()), plugin.getFrsClient().getValue("userStats", uuid.toString())));
+                return userCache.get(uuid, () ->{
+
+                    Player player = new Player(plugin.getFrsClient().getValue("usersData", uuid.toString()), plugin.getFrsClient().getValue("userStats", uuid.toString()));
+                    byte p = Byte.MIN_VALUE;
+                    Group g = null;
+
+                    plugin.getPermissionManager().groups.forEach((k, v) -> System.out.println(k));
+
+                    for(String gs : plugin.getPermissionManager().getGroupsOfUser(player))
+                    {
+                        System.out.println(gs);
+                        Group group = plugin.getPermissionManager().groups.get(gs);
+                        byte i = group.getPriority();
+                        if(g == null || i > p)
+                        {
+                            p = i;
+                            g = group;
+                        }
+                    }
+
+                    if(g != null)
+                    {
+                        player.setPartyBoost(g.getPartyBoost());
+                        player.setPersonalBoostBoost(g.getPersonalBoost());
+                    }
+                    return player;
+                });
             } catch (ExecutionException e) {
                 return null;
             }
