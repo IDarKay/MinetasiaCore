@@ -419,6 +419,29 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             c.accept(null);
     }
 
+    public void addPlayerMoneys(UUID uuid, Map<Economy, Float> m, boolean async)
+    {
+        Consumer<BukkitTask> c = bukkitTask -> {
+            Player p = playerManager.get(uuid);
+            if(p != null)
+            {
+                m.forEach((k, v )-> {
+                    if(v < 0) throw new IllegalArgumentException("negative money amount");
+
+                    p.addMoney(k, v);
+                    publish("core-data", "money;" + uuid.toString() + ";" + k.name() + ";" + p.getMoney(k));
+                });
+                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+            }
+            else throw new PlayerNotFoundException("can't add money to not found user");
+        };
+
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+            c.accept(null);
+    }
+
     @Override
     public void removePlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
 
@@ -755,7 +778,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void shutdown() {
         getServer().getOnlinePlayers().forEach(this::movePlayerToHub);
-        getServer().shutdown();
+        Bukkit.getScheduler().runTaskLater(this, () ->  getServer().shutdown(), 20L * 10);
     }
 
     private final static ChatColor moneyColor = ChatColor.GREEN;
@@ -768,14 +791,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             Consumer<BukkitTask> bukkitTaskConsumer = bukkitTask -> {
                 Boost playerBoost = getPlayerPersonalBoost(uuid);
                 StringBuilder money = new StringBuilder();
+
+                Map<Economy, Float> newMap = new HashMap<>();
                 moneyUpdater.getUpdate().forEach((k,v) ->{
                     final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
                     System.out.println(b);
-                    addPlayerMoney(uuid, k, v * b, false);
+                    newMap.put(k, v * b);
                     if(money.length() > 0) money.append(",");
                     money.append(moneyColor).append(v * b).append(" ").append(k.displayName);
                 });
-                String[] toSend = Lang.GAME_REWARDS.get(getPlayerLang(uuid), serverType, money.toString()).split("\n");
+
+                addPlayerMoneys(uuid, newMap, false);
+
+                String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), serverType, money.toString()).split("\n");
                 org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
                 for(String s : toSend) Objects.requireNonNull(p).sendMessage(s);
             };

@@ -104,9 +104,7 @@ public final class Player {
 
 
     public void addMoney(@NotNull Economy economy, float amount) {
-        Float m;
-        if((m = moneys.get(economy)) != null) moneys.put(economy, m + amount);
-        else moneys.put(economy, amount);
+        moneys.merge(economy, amount, Float::sum);
     }
 
     public void removeMooney(@NotNull Economy economy, float amount)

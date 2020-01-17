@@ -49,10 +49,10 @@ public enum Lang implements IMinetasiaLang {
     WORLD_NOT_FOUND                             ("&cWorld not found"),
     INCOMPATIBLE_CMD_TP                         ("&cYou can't tp @a to another server"),
     PLAYER_BOOST                                ("&6%1$s &aboost %2$s &afor the party (%3$s/%4$s%%)"),
-    GAME_REWARDS                                ("&c=================================\n" +
+    GAME_REWARDS                                ("&c==========================================\n" +
                                                             "&6End game of : &a%1$s\n" +
                                                             "&6Rewards: %2$s" +
-                                                            "&c================================="),
+                                                            "&c=========================================="),
 
     //money
     MONEY_WRONG_TYPE                            ("&cInvalid money type"),
