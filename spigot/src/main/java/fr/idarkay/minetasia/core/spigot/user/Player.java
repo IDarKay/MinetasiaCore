@@ -42,7 +42,7 @@ public final class Player {
     public Player(@NotNull String jsonData, @Nullable String jsonDataKit)
     {
         update(jsonData);
-        stats = jsonDataKit == null ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
+        stats = jsonDataKit == null || jsonDataKit.equalsIgnoreCase("null") ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
     }
 
     public Player(UUID uuid, String username)
@@ -54,7 +54,7 @@ public final class Player {
 
     public void upDateStats( @Nullable String jsonDataKit)
     {
-        stats = jsonDataKit == null ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
+        stats = jsonDataKit == null || jsonDataKit.equalsIgnoreCase("null") ? new Stats() : new Stats(PARSER.parse(jsonDataKit).getAsJsonObject());
     }
 
     private void update(String jsonData)
