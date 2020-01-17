@@ -38,6 +38,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,6 +50,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -695,11 +697,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public void addStatsToPlayer(@NotNull UUID uuid, @NotNull StatsUpdater statsUpdater)
+    public void addStatsToPlayer(@NotNull UUID uuid, @NotNull StatsUpdater statsUpdater, boolean async)
     {
         Validate.notNull(uuid, "uuid can't be null");
         Validate.notNull(statsUpdater, "statsUpdater can't be null");
-        Bukkit.getScheduler().runTaskAsynchronously(this,() -> {
+
+        Consumer<BukkitTask> c = bukkitTask -> {
             try
             {
                 Player p = Objects.requireNonNull(playerManager.get(uuid));
@@ -711,7 +714,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             {
                 throw new PlayerNotFoundException();
             }
-        });
+        };
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+        c.accept(null);
     }
 
     @NotNull
@@ -737,23 +744,29 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private final static ChatColor moneyColor = ChatColor.GREEN;
 
     @Override
-    public void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost)
+    public void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
     {
-        //todo: todo
         if(isCommandEnable(Command.PARTY_XP_BOOST))
         {
-            Boost playerBoost = getPlayerPersonalBoost(uuid);
-            StringBuilder money = new StringBuilder();
-            moneyUpdater.getUpdate().forEach((k,v) ->{
-                final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
-                System.out.println(b);
-                addPlayerMoney(uuid, k, v * b);
-                if(money.length() > 0) money.append(",");
-                money.append(moneyColor).append(v * b).append(" ").append(k.displayName);
-            });
-            String[] toSend = Lang.GAME_REWARDS.get(getPlayerLang(uuid), serverType, money.toString()).split("\n");
-            org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
-            for(String s : toSend) Objects.requireNonNull(p).sendMessage(s);
+            Consumer<BukkitTask> bukkitTaskConsumer = bukkitTask -> {
+                Boost playerBoost = getPlayerPersonalBoost(uuid);
+                StringBuilder money = new StringBuilder();
+                moneyUpdater.getUpdate().forEach((k,v) ->{
+                    final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
+                    System.out.println(b);
+                    addPlayerMoney(uuid, k, v * b);
+                    if(money.length() > 0) money.append(",");
+                    money.append(moneyColor).append(v * b).append(" ").append(k.displayName);
+                });
+                String[] toSend = Lang.GAME_REWARDS.get(getPlayerLang(uuid), serverType, money.toString()).split("\n");
+                org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
+                for(String s : toSend) Objects.requireNonNull(p).sendMessage(s);
+            };
+
+            if(async)
+                Bukkit.getScheduler().runTaskAsynchronously(this, bukkitTaskConsumer);
+            else
+                bukkitTaskConsumer.accept(null);
         }
         else
             Bukkit.getLogger().warning("plugin :" + getName() + " want give party won money but server have PARTY_XP_BOOST = false");
