@@ -19,6 +19,7 @@ public enum Command {
     MONEY(((byte) (4))),
     MSG(((byte) (5))),
     TP(((byte) (6))),
+    PARTY_XP_BOOST(((byte) (7))),
     ;
 
     public final byte by;

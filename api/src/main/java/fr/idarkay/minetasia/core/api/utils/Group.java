@@ -47,4 +47,9 @@ public interface Group {
      */
     List<String> getParents();
 
+
+    Boost getPersonalBoost();
+
+    Boost getPartyBoost();
+
 }
