@@ -2,11 +2,13 @@ package fr.idarkay.minetasia.core.spigot;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import fr.idarkay.minetasia.core.api.BoostType;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
@@ -36,6 +38,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,6 +50,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -72,6 +76,51 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public final List<org.bukkit.entity.Player> socialSpyPlayer = new ArrayList<>();
 
     private final ConsoleCommandSender console =  this.getServer().getConsoleSender();
+
+    //boost
+    public static final Map<BoostType, Float> limit = ImmutableMap.<BoostType, Float>builder()
+            .put(BoostType.MINECOINS, 120F)
+            .put(BoostType.SHOPEX, 20F)
+            .put(BoostType.STARS, 10F)
+            .build()
+            ;
+    public class PartyServerBoost implements Boost
+    {
+
+        private final Map<BoostType, Float> boost = new HashMap<>();
+
+        public PartyServerBoost()
+        {
+            for(BoostType b : BoostType.values())
+            {
+                boost.put(b, 0.0f);
+            }
+        }
+
+        @Override
+        public Map<BoostType, Float> getBoost()
+        {
+            return boost;
+        }
+
+        public float getBoost(BoostType type)
+        {
+            float f = boost.get(type);
+            return f > limit.get(type) ? limit.get(type) : f;
+        }
+
+        public void upgrade(Boost boost)
+        {
+            boost.getBoost().forEach((k, v) -> this.boost.merge(k, v, Float::sum));
+        }
+
+        public void downgrade(Boost boost)
+        {
+            boost.getBoost().forEach((k, v) -> this.boost.merge(k, v, (a, b) -> a - b < 0 ? 0 : a - b));
+        }
+    }
+
+    private PartyServerBoost partyServerBoost = new PartyServerBoost();
 
     private SQLManager sqlManager;
     private FRSClient frsClient;
@@ -214,6 +263,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init commands");
         CustomCommandExecutor customCommandExecutor = new CustomCommandExecutor(this);
 
+        setCommandsIsEnable(Command.PARTY_XP_BOOST.by, getConfig().getBoolean("partyxpboost", true));
         setCommandsIsEnable(Command.FRIEND.by, getConfig().getBoolean("commands.friends", true));
         if(isCommandEnable(Command.FRIEND))
         {
@@ -351,8 +401,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public void addPlayerMoney(UUID uuid, Economy economy, float amount) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+    public void addPlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
+
+        Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
             Player p = playerManager.get(uuid);
             if(p != null){
@@ -360,12 +411,41 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + p.getMoney(economy));
                 getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
             } else throw new PlayerNotFoundException("can't add money to not found user");
-        });
+        };
+
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+            c.accept(null);
+    }
+
+    public void addPlayerMoneys(UUID uuid, Map<Economy, Float> m, boolean async)
+    {
+        Consumer<BukkitTask> c = bukkitTask -> {
+            Player p = playerManager.get(uuid);
+            if(p != null)
+            {
+                m.forEach((k, v )-> {
+                    if(v < 0) throw new IllegalArgumentException("negative money amount");
+
+                    p.addMoney(k, v);
+                    publish("core-data", "money;" + uuid.toString() + ";" + k.name() + ";" + p.getMoney(k));
+                });
+                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+            }
+            else throw new PlayerNotFoundException("can't add money to not found user");
+        };
+
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+            c.accept(null);
     }
 
     @Override
-    public void removePlayerMoney(UUID uuid, Economy economy, float amount) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+    public void removePlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
+
+        Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
             Player p = playerManager.get(uuid);
             if(p != null){
@@ -373,12 +453,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + p.getMoney(economy));
                 getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
             } else throw new PlayerNotFoundException("can't remove money to not found user");
-        });
+        };
+
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+            c.accept(null);
     }
 
     @Override
-    public void setPlayerMoney(UUID uuid, Economy economy, float amount) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+    public void setPlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
+
+        Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
             Player p = playerManager.get(uuid);
             if(p != null){
@@ -386,7 +472,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + amount);
                 getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
             } else throw new PlayerNotFoundException("can't set money to not found user");
-        });
+        };
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+            c.accept(null);
     }
 
     @Override
@@ -647,24 +737,84 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public void addStatsToPlayer(@NotNull UUID uuid, @NotNull StatsUpdater statsUpdater)
+    public void addStatsToPlayer(@NotNull UUID uuid, @NotNull StatsUpdater statsUpdater, boolean async)
     {
         Validate.notNull(uuid, "uuid can't be null");
         Validate.notNull(statsUpdater, "statsUpdater can't be null");
-        try
-        {
-            Objects.requireNonNull(playerManager.get(uuid)).upDateStats(statsUpdater);
-        }
-        catch (NullPointerException e)
-        {
-            throw new PlayerNotFoundException();
-        }
+
+        Consumer<BukkitTask> c = bukkitTask -> {
+            try
+            {
+                Player p = Objects.requireNonNull(playerManager.get(uuid));
+                p.upDateStats(statsUpdater);
+                publish("core-data", "stats;" + uuid.toString() + ";" + p.getJsonStats().toString());
+                getFrsClient().setValue("userStats", uuid.toString(), p.getJsonStats().toString());
+            }
+            catch (NullPointerException e)
+            {
+                throw new PlayerNotFoundException();
+            }
+        };
+        if(async)
+            Bukkit.getScheduler().runTaskAsynchronously(this, c);
+        else
+        c.accept(null);
+    }
+
+    @NotNull
+    @Override
+    public Boost getPlayerPersonalBoost(@NotNull UUID uuid)
+    {
+        return validateNotNullPlayer(playerManager.get(uuid)).getPersonalBoost();
+    }
+
+    @Override
+    @NotNull
+    public Boost getPlayerPartyBoost(@NotNull UUID uuid)
+    {
+        return validateNotNullPlayer(playerManager.get(uuid)).getPartyBoost();
     }
 
     @Override
     public void shutdown() {
         getServer().getOnlinePlayers().forEach(this::movePlayerToHub);
-        getServer().shutdown();
+        Bukkit.getScheduler().runTaskLater(this, () ->  getServer().shutdown(), 20L * 10);
+    }
+
+    private final static ChatColor moneyColor = ChatColor.GREEN;
+
+    @Override
+    public void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
+    {
+        if(isCommandEnable(Command.PARTY_XP_BOOST))
+        {
+            Consumer<BukkitTask> bukkitTaskConsumer = bukkitTask -> {
+                Boost playerBoost = getPlayerPersonalBoost(uuid);
+                StringBuilder money = new StringBuilder();
+
+                Map<Economy, Float> newMap = new HashMap<>();
+                moneyUpdater.getUpdate().forEach((k,v) ->{
+                    final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
+                    System.out.println(b);
+                    newMap.put(k, v * b);
+                    if(money.length() > 0) money.append(",");
+                    money.append(moneyColor).append(v * b).append(" ").append(k.displayName);
+                });
+
+                addPlayerMoneys(uuid, newMap, false);
+
+                String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), serverType, money.toString()).split("\n");
+                org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
+                for(String s : toSend) Objects.requireNonNull(p).sendMessage(s);
+            };
+
+            if(async)
+                Bukkit.getScheduler().runTaskAsynchronously(this, bukkitTaskConsumer);
+            else
+                bukkitTaskConsumer.accept(null);
+        }
+        else
+            Bukkit.getLogger().warning("plugin :" + getName() + " want give party won money but server have PARTY_XP_BOOST = false");
     }
 
     private boolean request = false;
@@ -752,7 +902,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         byte p = Byte.MIN_VALUE;
         Group g = null;
 
-        for(String gs : getPermissionManager().getGroupOfUser(player))
+        for(String gs : getPermissionManager().getGroupsOfUser(player))
         {
             Group group = getPermissionManager().groups.get(gs);
             byte i = group.getPriority();
@@ -857,4 +1007,16 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public CommandManager getCommandManager() {
         return commandManager;
     }
+
+    public PartyServerBoost getPartyServerBoost()
+    {
+        return partyServerBoost;
+    }
+
+    public static Player validateNotNullPlayer(@Nullable Player player)
+    {
+        if(player == null) throw new PlayerNotFoundException();
+        return player;
+    }
+
 }

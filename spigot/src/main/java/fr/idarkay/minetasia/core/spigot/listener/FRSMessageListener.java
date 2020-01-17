@@ -79,10 +79,13 @@ public final class FRSMessageListener implements Listener {
                                     break;
                                 case "fadd":
                                     p.addFriends(UUID.fromString(msg[2]));
+                                    break;
+                                case "stats":
+                                    p.upDateStats(concat(msg, ";", 2));
+                                    break;
                             }
                         }
-                    } catch (IllegalArgumentException ignore) {
-                    }
+                    } catch (IllegalArgumentException ignore) { }
                 }
                 break;
             }

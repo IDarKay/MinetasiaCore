@@ -33,6 +33,8 @@ cache: # NO value here !
   friends: 2
   online_player: 5
 
+# turn on for games will give money turn off for hub
+partyxpboost: true
 
 commands:
   friends: true

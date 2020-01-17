@@ -1,6 +1,10 @@
 package fr.idarkay.minetasia.core.spigot.listener;
 
+import fr.idarkay.minetasia.core.api.Command;
+import fr.idarkay.minetasia.core.api.utils.Boost;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.user.Player;
+import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.PlayerStatue;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -47,6 +51,26 @@ public class PlayerListener implements Listener {
 
             } catch (Exception ignore) {
                 plugin.setPlayerData(e.getPlayer().getUniqueId(), "statue", String.valueOf(0x0));
+            }
+
+            if(plugin.isCommandEnable(Command.PARTY_XP_BOOST))
+            {
+                Boost boost = plugin.getPlayerPartyBoost(e.getPlayer().getUniqueId());
+                if(boost.getBoost().size() > 0)
+                {
+                    plugin.getPartyServerBoost().upgrade(boost);
+                    boost.getBoost().forEach((k, v) -> {
+                        if(v > 0)
+                        {
+                            final float a = plugin.getPartyServerBoost().getBoost(k);
+                            final float m = MinetasiaCore.limit.get(k);
+                            Bukkit.getOnlinePlayers().forEach(p -> {
+                                String lang = plugin.getPlayerLang(p.getUniqueId());
+                                p.sendMessage(Lang.PLAYER_BOOST.get(lang, e.getPlayer().getName(), k.name(), a, m));
+                            });
+                        }
+                    });
+                }
             }
 
         });

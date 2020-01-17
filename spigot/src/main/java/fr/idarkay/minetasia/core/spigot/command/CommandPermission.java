@@ -49,14 +49,15 @@ public enum CommandPermission {
 
 
     PERMISSION_GROUP("permission.group", ALL_PERMISSION),
-    PERMISSION_GROUP_CREATE("permission.create", ALL_PERMISSION_GROUP),
-    PERMISSION_GROUP_DELETE("permission.delete", ALL_PERMISSION_GROUP),
-    PERMISSION_GROUP_PERMISSION("permission.create.permission", ALL_PERMISSION_GROUP),
-    PERMISSION_GROUP_DISPLAY("permission.create.display", ALL_PERMISSION_GROUP),
-    PERMISSION_GROUP_PRIORITY("permission.create.priority", ALL_PERMISSION_GROUP),
-    PERMISSION_GROUP_PARENT("permission.create.parent", ALL_PERMISSION_GROUP),
-    PERMISSION_GROUP_INFO("permission.create.info", ALL_PERMISSION_GROUP),
-    PERMISSION_GROUP_SAVE("permission.create.save", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_CREATE("permission.group.create", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_DELETE("permission.group.delete", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_PERMISSION("permission.group.permission", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_DISPLAY("permission.group.display", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_PRIORITY("permission.group.priority", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_PARENT("permission.group.parent", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_INFO("permission.group.info", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_BOOST("permission.group.boost", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_SAVE("permission.group.save", ALL_PERMISSION_GROUP),
 
     UTILS_CHAT_COLOR("utils.chat.color", ALL),
     UTILS_CHAT_MAGIC("utils.chat.magic", ALL),
