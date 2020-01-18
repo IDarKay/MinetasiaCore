@@ -1,9 +1,11 @@
 package fr.idarkay.minetasia.normes;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -256,6 +258,80 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
             }
             return new Schematic(block, data, length, width, height);
         }
+    }
+
+
+    public void saveDataInWorld(@NotNull World world, @NotNull String key, @Nullable String value)
+    {
+        Validate.notNull(world);
+        Validate.notNull(key);
+        Validate.notEmpty(key);
+
+        final File f = new File(world.getWorldFolder(), key + ".dat");
+
+        if(value == null)
+        {
+            if(!f.exists()) f.delete();
+        }
+            else
+        {
+            try
+            {
+                if(!f.exists())
+                {
+                    if(f.getParentFile().exists()) f.getParentFile().mkdirs();
+                }
+                f.createNewFile();
+
+                try(FileOutputStream fos = new FileOutputStream(f))
+                {
+                    final byte[] valueData = value.getBytes();
+
+                    final FileChannel fc = fos.getChannel();
+                    final ByteBuffer buf = ByteBuffer.allocate(valueData.length);
+
+                    buf.put(valueData);
+                    drainBuffer(buf, fc);
+                }
+            }
+                catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    @Nullable
+    public String getDataInWorld(@NotNull World world, @NotNull String key)
+    {
+        Validate.notNull(world);
+        Validate.notNull(key);
+        Validate.notEmpty(key);
+
+        final File f = new File(world.getWorldFolder(), key + ".dat");
+
+        if(f.exists())
+        {
+            try(FileInputStream fis = new FileInputStream(f))
+            {
+                FileChannel fc = fis.getChannel();
+                int size = (int) fc.size();
+                ByteBuffer buf = ByteBuffer.allocate(size);
+
+                fc.read(buf);
+                buf.flip();
+
+                return new String(buf.array());
+
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            return null;
+        }
+        else return  null;
     }
 
 }
