@@ -19,7 +19,7 @@ public interface StatsUpdater
     /**
      * stats format : pluginName_statsName <br>
      * pluginName need be same of server_type in config !
-     * @return Map<String, Long> with all stats to up String -> name of teh stats Long -> value to ADD
+     * @return {@code Map<String, Long> with all stats to up String -> name of teh stats Long -> value to ADD}
      */
     @NotNull
     Map<@NotNull String, @NotNull Long> getUpdate();
