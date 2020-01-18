@@ -107,6 +107,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param uuid uuid of the player
      * @param economy the economy type {@link Economy}
      * @param amount of money to add (not negative)
+     * @param async true for run in async false for sync
      * @since 1.0
      */
     public abstract void addPlayerMoney(UUID uuid, Economy economy, float amount, boolean async);
@@ -117,6 +118,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param uuid uuid of the player
      * @param economy the economy type {@link Economy}
      * @param amount of money to remove  (not negative)
+     * @param async true for run in async false for sync
      * @since 1.0
      */
     public abstract void removePlayerMoney(UUID uuid, Economy economy, float amount, boolean async);
@@ -127,6 +129,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param uuid uuid of the player
      * @param economy the economy type {@link Economy}
      * @param amount of money to set (not negative)
+     * @param async true for run in async false for sync
      * @since 1.0
      */
     public abstract void setPlayerMoney(UUID uuid, Economy economy, float amount, boolean async);
@@ -329,6 +332,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * add stats to player
      * @param uuid uuid of the player
      * @param statsUpdater see {@link StatsUpdater}
+     * @param async true for run in async false for sync
      */
     public abstract void addStatsToPlayer(@NotNull UUID uuid, @NotNull StatsUpdater statsUpdater, boolean async);
 
@@ -350,6 +354,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * add money to player
      * @param uuid uuid of the player
      * @param moneyUpdater see {@link MoneyUpdater}
+     * @param boost false for ignore boost
+     * @param async true for run in async false for sync
      */
     public abstract void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async);
 

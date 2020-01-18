@@ -31,6 +31,7 @@ public enum Economy {
      * @param name the generic name of the money its preferable to never change this when is create !
      *             its preferable to not set special char or color char
      * @param displayName   the display name can be  change the display name will be show in gui message etc...
+     * @param boostType  see {@link BoostType}
      * @since 1.0
      */
     Economy(String name, String displayName, BoostType boostType)
