@@ -1,0 +1,7 @@
+name: MinetasiaCoreTest
+version: @version@
+main: fr.idarkay.minetasia.test.MinetasiaTest
+api-version: 1.15
+authors: [IDarKay]
+load: STARTUP
+description: test plugin
