@@ -68,8 +68,7 @@ allprojects {
 
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
-        compileOnly group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
-        compile group: 'minetasia', name: 'normes', version: '1.0', changing: true
+        compile group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
     }
 
 
@@ -92,8 +91,7 @@ project('api') {
                 groupId = group
                 artifactId = 'core-api'
                 version = version
-                from components.java
-
+                artifact file("./build/libs/MinetasiaCore-Api-1.0-all.jar")
             }
         }
     }

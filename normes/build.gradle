@@ -1,11 +1,9 @@
-
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.15-R0.1-SNAPSHOT'
-    compile project(":normes")
 }
 
 shadowJar {
-    setArchivesBaseName("MinetasiaCore-Api")
+    setArchivesBaseName("MinetasiaCore-normes")
 }
 
 build.dependsOn(shadowJar)
