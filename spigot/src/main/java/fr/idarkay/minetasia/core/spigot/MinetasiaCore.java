@@ -12,6 +12,7 @@ import fr.idarkay.minetasia.core.api.BoostType;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.*;
@@ -596,18 +597,22 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void movePlayerToHub(@NotNull org.bukkit.entity.Player player) {
 
-        int i = -1;
-        Server sr = null;
-
-        for(Server s : getServers(HUB_NAME).values())
+        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
         {
-            if(sr == null || i == -1 || s.getPlayerCount() < i) {
-                sr = s;
-                i = s.getPlayerCount();
+            Bukkit.getPluginManager().callEvent(new PlayerMoveToHubEvent(player));
+            int i = -1;
+            Server sr = null;
+
+            for(Server s : getServers(HUB_NAME).values())
+            {
+                if(sr == null || i == -1 || s.getPlayerCount() < i) {
+                    sr = s;
+                    i = s.getPlayerCount();
+                }
             }
-        }
-        if(sr == null) player.kickPlayer("No valid hub");
-         else movePlayerToServer(player, sr);
+            if(sr == null) Bukkit.getScheduler().runTask(this, () -> player.kickPlayer("No valid hub"));
+            else  movePlayerToServer(player, sr);
+        });
     }
 
     @Override
@@ -797,15 +802,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                     final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
                     System.out.println(b);
                     newMap.put(k, v * b);
-                    if(money.length() > 0) money.append(",");
-                    money.append(moneyColor).append(v * b).append(" ").append(k.displayName);
+                    if(v * b > 0)
+                    {
+                        if(money.length() > 0) money.append(",");
+                        money.append(moneyColor).append(v * b).append(" ").append(k.displayName);
+                    }
                 });
 
                 addPlayerMoneys(uuid, newMap, false);
 
                 String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), serverType, money.toString()).split("\n");
                 org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
-                for(String s : toSend) Objects.requireNonNull(p).sendMessage(s);
+                if(p != null)
+                    for(String s : toSend) p.sendMessage(s);
             };
 
             if(async)
