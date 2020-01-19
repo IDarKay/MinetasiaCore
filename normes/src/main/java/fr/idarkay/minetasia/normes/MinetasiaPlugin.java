@@ -267,11 +267,11 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         Validate.notNull(key);
         Validate.notEmpty(key);
 
-        final File f = new File(world.getWorldFolder(), key + ".dat");
+        final File f = new File(world.getWorldFolder(),  "data/" + key + ".dat");
 
         if(value == null)
         {
-            if(!f.exists()) f.delete();
+            if(f.exists()) f.delete();
         }
             else
         {
@@ -309,7 +309,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         Validate.notNull(key);
         Validate.notEmpty(key);
 
-        final File f = new File(world.getWorldFolder(), key + ".dat");
+        final File f = new File(world.getWorldFolder(), "data/" +key + ".dat");
 
         if(f.exists())
         {

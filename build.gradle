@@ -91,8 +91,7 @@ project('api') {
                 groupId = group
                 artifactId = 'core-api'
                 version = version
-                from components.java
-
+                artifact file("./build/libs/MinetasiaCore-Api-1.0-all.jar")
             }
         }
     }
