@@ -1,7 +1,12 @@
 package fr.idarkay.minetasia.core.spigot.utils;
 
+import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.normes.Args;
 import fr.idarkay.minetasia.normes.IMinetasiaLang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Tuple;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,7 +27,7 @@ public enum Lang implements IMinetasiaLang {
 
     // /lang
     SET_LANG                                    ( "&aYour new lang is English"),
-    GET_LANG                                    ( "&aThe lang of &6%1$s is &9%2$s"),
+    GET_LANG                                    ( "&aThe lang of &6 " + Argument.PLAYER + " is &9" + Argument.LANG),
 
     // /friends
     SELF_ADD_FRIEND                             ( "&cYou really must feel alone to want to add as a friend"),
@@ -156,6 +161,7 @@ public enum Lang implements IMinetasiaLang {
     ;
 
     public static String prefix;
+    public static MinetasiaCoreApi api;
 
     final String path;
     final String defaultMsg;
@@ -166,16 +172,47 @@ public enum Lang implements IMinetasiaLang {
         this.defaultMsg = defaultMsg;
     }
 
+    public static void setApi(MinetasiaCoreApi api)
+    {
+        Lang.api = api;
+    }
 
-    public String getWithoutPrefix(String lang, Object... args)
+    @SafeVarargs
+    public final <T> String getWithoutPrefix(String lang, Tuple<? extends Args, T>... args)
     {
         return MinetasiaLang.get(path, defaultMsg, lang, args);
     }
 
+    @SafeVarargs
     @Override
-    public String get(String lang, Object... args)
+    public final <T> String get(String lang, Tuple<? extends Args, T>... args)
     {
         return prefix + " " + MinetasiaLang.get(path, defaultMsg, lang, args);
     }
 
+    @SafeVarargs
+    public final <T>  void sendToSender(CommandSender sender, Tuple<? extends Args, T>... args)
+    {
+        sender.sendMessage(get(sender instanceof Player ? api.getPlayerLang(((Player) sender).getUniqueId()) : MinetasiaLang.BASE_LANG, args));
+    }
+
+
+    public enum Argument implements Args
+    {
+        PLAYER, LANG
+        ;
+
+        String node;
+
+        Argument()
+        {
+            node = getNode();
+        }
+
+        @Override
+        public String toString()
+        {
+            return node;
+        }
+    }
 }
