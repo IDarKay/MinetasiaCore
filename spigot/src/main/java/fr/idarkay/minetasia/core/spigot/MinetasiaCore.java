@@ -147,6 +147,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load lang file");
         getMinetasiaLang().init();
         Lang.prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));
+        Lang.api = this;
         serverType = getConfig().getString("server_type");
 
         // init db system
@@ -811,7 +812,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
                 addPlayerMoneys(uuid, newMap, false);
 
-                String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), serverType, money.toString()).split("\n");
+                String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), Lang.Argument.SERVER_TYPE.match(serverType), Lang.Argument.MONEY_TYPE.match(money.toString())).split("\n");
                 org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
                 if(p != null)
                     for(String s : toSend) p.sendMessage(s);

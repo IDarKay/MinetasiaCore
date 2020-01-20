@@ -39,7 +39,7 @@ public final class SaveCommand extends SubCommand implements FixCommand {
             if(g != null)
             {
                 plugin.getPermissionManager().updateGroupToFRS(g);
-                sender.sendMessage(Lang.GROUP_SAVE.get(lang, args[1]));
+                sender.sendMessage(Lang.GROUP_SAVE.get(lang, Lang.Argument.GROUP_NAME.match(args[1])));
             }
             else sender.sendMessage(Lang.GROUP_NOT_EXIST.get(lang));
         }

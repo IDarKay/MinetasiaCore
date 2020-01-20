@@ -51,7 +51,7 @@ public class TempGroupAddCommand extends SubCommand implements FlexibleCommand {
             if(u != null)
             {
                 plugin.getPermissionManager().addTempGroup(u, group.getName(), during);
-                sender.sendMessage(Lang.USER_GROUP_ADD.get(lang, permission, args[1]));
+                sender.sendMessage(Lang.USER_GROUP_ADD.get(lang, Lang.Argument.GROUP_NAME.match(permission), Lang.Argument.PLAYER.match(args[1])));
             }
             else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
         } catch (IllegalArgumentException ignore)

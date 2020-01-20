@@ -50,8 +50,8 @@ public class RExecutor implements TabExecutor {
                             if(minetasiaCore.isPlayerOnline(u))
                             {
                                 String msg = concat(args, " ", 1);
-                                sender.sendMessage(Lang.MSG_FORMAT.getWithoutPrefix(lang, sender.getName()));
-                                minetasiaCore.publish("core-msg","MSG_FORMAT;" + u.toString() + ";false;" +  sender.getName() + ";" + args[0] +";" + msg.replace(';', ':'));
+                                sender.sendMessage(Lang.MSG_FORMAT.getWithoutPrefix(lang, Lang.Argument.PLAYER_SENDER.match(sender.getName()), Lang.Argument.PLAYER_RECEIVER.match(args[0]), Lang.Argument.MESSAGE.match(msg)));
+                                minetasiaCore.publish("core-msg","MSG_FORMAT;" + u.toString() + ";false;" + Lang.Argument.PLAYER_SENDER.name() + "\\" + sender.getName() + ";" + Lang.Argument.PLAYER_RECEIVER.name() + "\\" + args[0] + ";" + Lang.Argument.MESSAGE + "\\" + msg.replace(';', ':').replace('\\', '/'));
                             }
                             else sender.sendMessage(Lang.PLAYER_NOT_ONLY.get(lang));
                     }
