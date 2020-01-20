@@ -73,7 +73,7 @@ public final class FriendsExecutor implements TabExecutor {
                                             }
                                             else minetasiaCore.publish("core-cmd", "friends;" + player.getUniqueId().toString() +";" + uuid.toString());
                                         }
-                                        else sender.sendMessage(Lang.PLAYER_NOT_ONLY.get(lang));
+                                        else sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(lang));
                                     }
                                     else sender.sendMessage(Lang.ALREADY_FRIEND.get(lang, Lang.Argument.PLAYER.match( args[1])));
                                 }
