@@ -47,11 +47,11 @@ public final class CreateGroupNameCommand extends SubCommand implements Flexible
             if(args[rank].length() > 1)
             {
                 permissionManager.createGroup(args[rank].toLowerCase());
-                sender.sendMessage(Lang.GROUP_CREATE.get(lang, args[rank]));
+                sender.sendMessage(Lang.GROUP_CREATE.get(lang, Lang.Argument.GROUP_NAME.match(args[rank])));
             }
-            else sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, 2));
+            else sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, Lang.Argument.NUMBER.match(2)));
         }
-        else sender.sendMessage(Lang.GROUP_ALREADY_EXIST.get(lang, args[rank]));
+        else sender.sendMessage(Lang.GROUP_ALREADY_EXIST.get(lang, Lang.Argument.GROUP_NAME.match(args[rank])));
     }
 
     @Override

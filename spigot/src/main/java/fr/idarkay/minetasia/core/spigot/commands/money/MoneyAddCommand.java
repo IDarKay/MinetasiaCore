@@ -62,7 +62,7 @@ public class MoneyAddCommand extends StepCommand implements FixCommand {
                         if (a < 0) throw new IllegalArgumentException("negative number");
                         plugin.addPlayerMoney(u, e, a, true);
                                             //  amount money type player name
-                        sender.sendMessage(Lang.MONEY_ADD.get(lang, a, e.displayName, args[1]));
+                        sender.sendMessage(Lang.MONEY_ADD.get(lang, Lang.Argument.AMOUNT.match(a), Lang.Argument.MONEY_TYPE.match(e.displayName), Lang.Argument.PLAYER.match(args[1])));
                     }
                     catch (IllegalArgumentException ignore)
                     {
