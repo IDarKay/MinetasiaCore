@@ -47,9 +47,9 @@ public final class DisplayNameCommand extends SubCommand implements FlexibleComm
                 if(name.trim().length() > 0 )
                 {
                     g.setDisplayName(name);
-                    sender.sendMessage(Lang.GROUP_DISPLAY_CHANGE.get(lang, args[1], name));
+                    sender.sendMessage(Lang.GROUP_DISPLAY_CHANGE.get(lang, Lang.Argument.GROUP_NAME.match(args[1]), Lang.Argument.DISPLAY.match(name)));
                 }
-                else sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, 1));
+                else sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, Lang.Argument.NUMBER.match(1)));
             }
             else sender.sendMessage(Lang.GROUP_NOT_EXIST.get(lang));
         }

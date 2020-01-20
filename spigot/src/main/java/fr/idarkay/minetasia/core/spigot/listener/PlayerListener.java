@@ -66,7 +66,8 @@ public class PlayerListener implements Listener {
                             final float m = MinetasiaCore.limit.get(k);
                             Bukkit.getOnlinePlayers().forEach(p -> {
                                 String lang = plugin.getPlayerLang(p.getUniqueId());
-                                p.sendMessage(Lang.PLAYER_BOOST.get(lang, e.getPlayer().getName(), k.name(), a, m));
+                                p.sendMessage(Lang.PLAYER_BOOST.get(lang, Lang.Argument.PLAYER.match(e.getPlayer().getName()), Lang.Argument.MONEY_TYPE.match(k.name())
+                                        , Lang.Argument.ACTUAL_BOOST.match(a),  Lang.Argument.MAX_BOOST.match(m)));
                             });
                         }
                     });
