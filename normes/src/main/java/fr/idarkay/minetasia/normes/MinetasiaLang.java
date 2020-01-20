@@ -114,7 +114,8 @@ public class MinetasiaLang {
      * @return String message
      * @since 1.0
      */
-    public static String get(@NotNull String path, @NotNull String defaultMsg, @NotNull String lang, Object... args){
+    @SafeVarargs
+    public static <T> String get(@NotNull String path, @NotNull String defaultMsg, @NotNull String lang, Tuple<? extends Args, T>... args){
 
         if(!isInit)
         {
@@ -122,16 +123,23 @@ public class MinetasiaLang {
             return defaultMsg;
         }
 
-        FileConfiguration l = LANG_CONFIG.getOrDefault(lang, null);
+        final FileConfiguration l = LANG_CONFIG.getOrDefault(lang, null);
 
-        if(l != null && l.contains(path)){
-            if(args.length > 0)
-                return ChatColor.translateAlternateColorCodes('&', String.format(l.getString(path), args));
-            else return ChatColor.translateAlternateColorCodes('&', l.getString(path));
-        } else
-        if(args.length > 0)
-            return ChatColor.translateAlternateColorCodes('&', String.format(defaultMsg, args));
-        else return ChatColor.translateAlternateColorCodes('&', defaultMsg);
+        String msg;
+
+        if(l != null){
+            msg = l.getString(path, defaultMsg);
+        }
+        else
+            msg = defaultMsg;
+
+        for (Tuple<? extends Args, T> arg : args)
+        {
+             msg = Objects.requireNonNull(msg).replace(arg.a().toString(), arg.b().toString());
+        }
+
+        return ChatColor.translateAlternateColorCodes('&', msg);
+
     }
 
 }

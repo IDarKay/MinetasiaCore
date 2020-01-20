@@ -45,7 +45,7 @@ public final class LangExecutor implements TabExecutor {
                     UUID uuid = minetasiaCore.getPlayerUUID(args[0]);
                     if(uuid != null)
                     {
-                        sender.sendMessage(Lang.GET_LANG.get((sender instanceof Player ? minetasiaCore.getPlayerLang(((org.bukkit.entity.Player) sender).getUniqueId()) : MinetasiaLang.BASE_LANG), args[0], minetasiaCore.getPlayerLang(uuid)));
+                        Lang.GET_LANG.sendToSender(sender, Lang.Argument.PLAYER.match(args[0]), Lang.Argument.LANG.match(minetasiaCore.getPlayerLang(uuid)));
                     }
                     else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(sender instanceof Player ? minetasiaCore.getPlayerLang(((org.bukkit.entity.Player) sender).getUniqueId()) : MinetasiaLang.BASE_LANG));
                 }
