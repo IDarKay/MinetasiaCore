@@ -43,7 +43,7 @@ public final class PermissionValueCommand extends SubCommand implements Flexible
         String permission = args[length - 2];
         if(permission.length() == 0)
         {
-            sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, "1"));
+            sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, Lang.Argument.NUMBER.match(1)));
             return;
         }
         if(type.superT.equals(Type.GROUP))
@@ -54,12 +54,12 @@ public final class PermissionValueCommand extends SubCommand implements Flexible
                 if(type.equals(Type.GROUP_ADD))
                 {
                     g.addPermissions(permission);
-                    sender.sendMessage(Lang.GROUP_PERMISSION_ADD.get(lang, permission, args[1]));
+                    sender.sendMessage(Lang.GROUP_PERMISSION_ADD.get(lang, Lang.Argument.PERMISSION_NAME.match(permission), Lang.Argument.PLAYER.match(args[1])));
                 }
                 else
                 {
-                    if(g.removePermissions(permission)) sender.sendMessage(Lang.GROUP_PERMISSION_REMOVE.get(lang, permission, args[1]));
-                    else sender.sendMessage(Lang.GROUP_PERMISSION_CANT_REMOVE.get(lang, args[1], permission));
+                    if(g.removePermissions(permission)) sender.sendMessage(Lang.GROUP_PERMISSION_REMOVE.get(lang,  Lang.Argument.PERMISSION_NAME.match(permission),  Lang.Argument.PLAYER.match(args[1])));
+                    else sender.sendMessage(Lang.GROUP_PERMISSION_CANT_REMOVE.get(lang, Lang.Argument.GROUP_NAME.match(args[1]), Lang.Argument.PERMISSION_NAME.match(permission)));
                 }
             }
             else sender.sendMessage(Lang.GROUP_NOT_EXIST.get(lang));
@@ -72,13 +72,13 @@ public final class PermissionValueCommand extends SubCommand implements Flexible
                 if(type.equals(Type.USER_ADD))
                 {
                     plugin.getPermissionManager().addPermission(u, permission);
-                    sender.sendMessage(Lang.USER_PERMISSION_ADD.get(lang, permission, args[1]));
+                    sender.sendMessage(Lang.USER_PERMISSION_ADD.get(lang,  Lang.Argument.PERMISSION_NAME.match(permission), Lang.Argument.PLAYER.match(args[1])));
                 }
                 else
                 {
                     plugin.getPermissionManager().removePermission(u, permission);
                     plugin.getPermissionManager().removeTempPermission(u, permission);
-                    sender.sendMessage(Lang.USER_PERMISSION_REMOVE.get(lang, permission, args[1]));
+                    sender.sendMessage(Lang.USER_PERMISSION_REMOVE.get(lang,  Lang.Argument.PERMISSION_NAME.match(permission), Lang.Argument.PLAYER.match(args[1])));
                 }
             }
             else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));

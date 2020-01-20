@@ -48,7 +48,8 @@ public class MSGExecutor implements TabExecutor {
                         if(plugin.isPlayerOnline(u))
                         {
                             String msg = concat(args, " ", 1);
-                            sender.sendMessage(Lang.MSG_FORMAT.getWithoutPrefix(lang, sender instanceof Player ? sender.getName() : "console", args[0], msg));
+                            sender.sendMessage(Lang.MSG_FORMAT.getWithoutPrefix(lang, Lang.Argument.PLAYER_SENDER.match(sender instanceof Player ? sender.getName() : "console")
+                                    , Lang.Argument.PLAYER_RECEIVER.match(args[0]), Lang.Argument.MESSAGE.match(msg)));
                             plugin.publish( "core-msg","MSG_FORMAT;" + u.toString() + ";false;" +  (sender instanceof Player ? sender.getName() : "console") + ";" + args[0] +";" + msg.replace(';', ':'));
                             if(sender instanceof Player)
                             {

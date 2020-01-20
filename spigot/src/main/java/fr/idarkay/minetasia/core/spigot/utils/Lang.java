@@ -1,7 +1,12 @@
 package fr.idarkay.minetasia.core.spigot.utils;
 
+import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.normes.Args;
 import fr.idarkay.minetasia.normes.IMinetasiaLang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Tuple;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,22 +21,22 @@ import org.jetbrains.annotations.NotNull;
  */
 public enum Lang implements IMinetasiaLang {
 
-    WELCOME                                     ( "&6Welcome to the server :)"),
+    WELCOME                                     ( "&6Welcome" + Argument.PLAYER + "to the server :)"),
 
 
 
     // /lang
     SET_LANG                                    ( "&aYour new lang is English"),
-    GET_LANG                                    ( "&aThe lang of &6%1$s is &9%2$s"),
+    GET_LANG                                    ( "&aThe lang of &6 " + Argument.PLAYER + " is &9" + Argument.LANG),
 
     // /friends
     SELF_ADD_FRIEND                             ( "&cYou really must feel alone to want to add as a friend"),
-    ALREADY_FRIEND                              ( "&cYour are friend with %1$s !"),
-    REQUEST_SEND_FRIENDS                        ( "&aYour friends request have been send to %1$s !"),
-    REQUEST_FRIEND                              ("&a%1$s send to you a friend request use &6/friends accept&a for accept this else ignore the request but it's very sad"),
-    NEW_FRIEND                                  ( "&aYou are now friend with %1$s !"),
-    REMOVE_FRIEND                               ( "&a%1$s remove to your friend"),
-    NOT_FRIEND                                  ( "&cYou are not friend with %1$s !"),
+    ALREADY_FRIEND                              ( "&cYour are friend with " + Argument.PLAYER + " !"),
+    REQUEST_SEND_FRIENDS                        ( "&aYour friends request have been send to " + Argument.PLAYER + " !"),
+    REQUEST_FRIEND                              ("&a" + Argument.PLAYER + " send to you a friend request use &6/friends accept&a for accept this else ignore the request but it's very sad"),
+    NEW_FRIEND                                  ( "&aYou are now friend with " + Argument.PLAYER + " !"),
+    REMOVE_FRIEND                               ( "&a" + Argument.PLAYER + " remove to your friend"),
+    NOT_FRIEND                                  ( "&cYou are not friend with " + Argument.PLAYER + " !"),
 
     //misc
     PLAYER_NOT_ONLY                             ( "&cSorry this player isn't only !"),
@@ -41,53 +46,53 @@ public enum Lang implements IMinetasiaLang {
     NEED_BE_PLAYER                              ( "&cYour not player"),
     NO_PERMISSION                               ( "&cYou don't have permission"),
     ILLEGAL_NUMBER_VALUE                        ("&cPlease set valid number"),
-    MSG_FORMAT                                  ("&6%1$s &c-> &6%2$s : &r%3$s"),
-    MSG_FORMAT_SOCIAL_SPY                       ("&c[SS] &6%1$s &c-> &6%2$s : &r%3$s"),
+    MSG_FORMAT                                  ("&6" + Argument.PLAYER_SENDER + " &c-> " + Argument.PLAYER_RECEIVER  + " : " + Argument.MESSAGE),
+    MSG_FORMAT_SOCIAL_SPY                       ("&c[SS] &6" + Argument.PLAYER_SENDER + " &c-> " + Argument.PLAYER_RECEIVER  + " : " + Argument.MESSAGE ),
     SOCIAL_SPU_ON                               ("&6SocialSpy &2on"),
     SOCIAL_SPU_OFF                              ("&6SocialSpy &4off"),
     SERVER_NOT_FOUND                            ("&cServer not found"),
     WORLD_NOT_FOUND                             ("&cWorld not found"),
     INCOMPATIBLE_CMD_TP                         ("&cYou can't tp @a to another server"),
-    PLAYER_BOOST                                ("&6%1$s &aboost %2$s &afor the party (%3$s/%4$s%%)"),
+    PLAYER_BOOST                                ("&6 " + Argument.PLAYER + " &aboost " + Argument.MONEY_TYPE + " &afor the party (" + Argument.ACTUAL_BOOST + " /" + Argument.MAX_BOOST + "%)"),
     GAME_REWARDS                                ("&c==========================================\n" +
-                                                            "&6End game of : &a%1$s\n" +
-                                                            "&6Rewards: %2$s" +
+                                                            "&6End game of : &a" + Argument.SERVER_TYPE +
+                                                            "\n&6Rewards: " + Argument.REWARDS +
                                                             "&c=========================================="),
 
     //money
     MONEY_WRONG_TYPE                            ("&cInvalid money type"),
-    MONEY_GET                                   ("&a%1$s has %2$s %3$s"),
-    MONEY_ADD                                   ("&a%1$s %2$s add to %3$s"),
-    MONEY_REMOVE                                ("&a%1$s %2$s remove to %3$s"),
-    MONEY_SET                                   ("&a%1$s %2$s set to %3$s"),
-    NO_AMOUNT_MONEY                             ("&a%1$s dont have enough money"),
+    MONEY_GET                                   ("&a" + Argument.PLAYER + " has "+ Argument.AMOUNT + " " + Argument.MONEY_TYPE),
+    MONEY_ADD                                   ("&a" + Argument.AMOUNT + " " + Argument.MONEY_TYPE + " add to" + Argument.PLAYER),
+    MONEY_REMOVE                                ("&a" + Argument.AMOUNT + " " + Argument.MONEY_TYPE + " remove to" + Argument.PLAYER),
+    MONEY_SET                                   ("&a" + Argument.AMOUNT + " " + Argument.MONEY_TYPE + " set to" + Argument.PLAYER),
+    NO_AMOUNT_MONEY                             ("&a" + Argument.PLAYER + " dont have enough money"),
     NO_PREVIOUS_MSG                             ("&cYou don't have current discussion"),
 
     // /permission
         //group
-    GROUP_CREATE                                ("&aThe group %1$s was created !"),
-    GROUP_ALREADY_EXIST                         ("&cThe group %1$s already exist"),
+    GROUP_CREATE                                ("&aThe group " + Argument.GROUP_NAME + " was created !"),
+    GROUP_ALREADY_EXIST                         ("&cThe group " + Argument.GROUP_NAME + " already exist"),
     GROUP_NOT_EXIST                             ("&cThe group don't exist"),
-    GROUP_DISPLAY_CHANGE                        ("&a group %1$s has now display %2$s"),
-    GROUP_PRIORITY_CHANGE                       ("&a group %1$s has now priority %2$s"),
-    GROUP_SAVE                                  ("&aGroup %1$s saved !"),
-    GROUP_DELETE                                ("&aGroup %1$s delete !"),
-    GROUP_NO_ENOUGH_CHAR                        ("&c name to short please set more than %1$s char!"),
-    GROUP_PERMISSION_ADD                        ("&aPermission %1$s add to %2$s"),
-    GROUP_PERMISSION_REMOVE                     ("&aPermission %1$s remove to %2$s"),
-    GROUP_PERMISSION_CANT_REMOVE                ("&cGroup %1$s don't have permission %2$s"),
-    GROUP_PARENT_ADD                            ("&aParent %1$s add to %2$s"),
-    GROUP_PARENT_CANT_ADD                       ("&ccan't add Parent %1$s to %2$s because %2$s have ealready %1$s for parent"),
-    GROUP_PARENT_REMOVE                         ("&aParent %1$s remove to %2$s"),
-    GROUP_PARENT_CANT_REMOVE                    ("&cGroup %1$s don't have parent %2$s"),
-    GROUP_BOOST_INVALID_TYPE                    ("&c type of the boost is invalid"),
-    GROUP_BOOST_ADD                             ("&b%1$s &a% &b%2$s &aboost for &b%3$s &aadded to &b%4$s"),
+    GROUP_DISPLAY_CHANGE                        ("&a group " + Argument.GROUP_NAME + " has now display" + Argument.DISPLAY),
+    GROUP_PRIORITY_CHANGE                       ("&a group " + Argument.GROUP_NAME + " has now priority" + Argument.VALUE),
+    GROUP_SAVE                                  ("&aGroup " + Argument.GROUP_NAME + " saved !"),
+    GROUP_DELETE                                ("&aGroup " + Argument.GROUP_NAME + " delete !"),
+    GROUP_NO_ENOUGH_CHAR                        ("&c name to short please set more than " + Argument.NUMBER + " char!"),
+    GROUP_PERMISSION_ADD                        ("&aPermission " + Argument.PERMISSION_NAME + " add to" + Argument.PLAYER),
+    GROUP_PERMISSION_REMOVE                     ("&aPermission " + Argument.PERMISSION_NAME + " remove to" + Argument.PLAYER),
+    GROUP_PERMISSION_CANT_REMOVE                ("&cGroup " + Argument.GROUP_NAME + "  don't have permission " + Argument.PERMISSION_NAME),
+    GROUP_PARENT_ADD                            ("&aParent " + Argument.GROUP_PARENT + " add to " + Argument.GROUP_NAME ),
+    GROUP_PARENT_CANT_ADD                       ("&ccan't add Parent " + Argument.GROUP_PARENT + "  to " + Argument.GROUP_NAME + "  because " + Argument.GROUP_NAME + " have ealready " + Argument.GROUP_PARENT + " for parent"),
+    GROUP_PARENT_REMOVE                         ("&aParent " + Argument.GROUP_PARENT + " remove to " + Argument.GROUP_NAME),
+    GROUP_PARENT_CANT_REMOVE                    ("&cGroup " + Argument.GROUP_NAME + " don't have parent " + Argument.GROUP_PARENT),
+    GROUP_BOOST_INVALID_TYPE                    ("&ctype of the boost is invalid"),
+    GROUP_BOOST_ADD                             ("&b" + Argument.BOOST_VALUE + " &a% &b" + Argument.BOOST_TYPE + " &aboost for " + Argument.MONEY_TYPE + " &aadded to " + Argument.GROUP_NAME),
 
         //user
-    USER_PERMISSION_ADD                         ("&aPermission %1$s add to %2$s"),
-    USER_PERMISSION_REMOVE                      ("&aPermission %1$s remove to %2$s"),
-    USER_GROUP_ADD                              ("&aGroup %1$s add to %2$s"),
-    USER_GROUP_REMOVE                           ("&aGroup %1$s remove to %2$s"),
+    USER_PERMISSION_ADD                         ("&aPermission " + Argument.PERMISSION_NAME + " add to " + Argument.PLAYER),
+    USER_PERMISSION_REMOVE                      ("&aPermission " + Argument.PERMISSION_NAME + " remove to " + Argument.PLAYER),
+    USER_GROUP_ADD                              ("&aGroup " + Argument.GROUP_NAME + " add to " + Argument.PLAYER),
+    USER_GROUP_REMOVE                           ("&aGroup " + Argument.GROUP_NAME + " remove to " + Argument.PLAYER),
 
     //command description
     DESC_PERMISSION                             ("first step for all commands for edit permission"),
@@ -156,6 +161,7 @@ public enum Lang implements IMinetasiaLang {
     ;
 
     public static String prefix;
+    public static MinetasiaCoreApi api;
 
     final String path;
     final String defaultMsg;
@@ -166,16 +172,48 @@ public enum Lang implements IMinetasiaLang {
         this.defaultMsg = defaultMsg;
     }
 
+    public static void setApi(MinetasiaCoreApi api)
+    {
+        Lang.api = api;
+    }
 
-    public String getWithoutPrefix(String lang, Object... args)
+    @SafeVarargs
+    public final <T> String getWithoutPrefix(String lang, Tuple<? extends Args, T>... args)
     {
         return MinetasiaLang.get(path, defaultMsg, lang, args);
     }
 
+    @SafeVarargs
     @Override
-    public String get(String lang, Object... args)
+    public final <T> String get(String lang, Tuple<? extends Args, T>... args)
     {
         return prefix + " " + MinetasiaLang.get(path, defaultMsg, lang, args);
     }
 
+    @SafeVarargs
+    public final <T>  void sendToSender(CommandSender sender, Tuple<? extends Args, T>... args)
+    {
+        sender.sendMessage(get(sender instanceof Player ? api.getPlayerLang(((Player) sender).getUniqueId()) : MinetasiaLang.BASE_LANG, args));
+    }
+
+
+    public enum Argument implements Args
+    {
+        PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
+        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE
+        ;
+
+        String node;
+
+        Argument()
+        {
+            node = getNode();
+        }
+
+        @Override
+        public String toString()
+        {
+            return node;
+        }
+    }
 }
