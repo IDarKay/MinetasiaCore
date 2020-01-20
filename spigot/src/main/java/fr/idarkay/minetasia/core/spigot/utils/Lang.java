@@ -39,7 +39,7 @@ public enum Lang implements IMinetasiaLang {
     NOT_FRIEND                                  ( "&cYou are not friend with " + Argument.PLAYER + " !"),
 
     //misc
-    PLAYER_NOT_ONLY                             ( "&cSorry this player isn't only !"),
+    PLAYER_NOT_ONLINE                           ( "&cSorry this player isn't only !"),
     PLAYER_NOT_EXIST                            ( "&cThe player don't exist"),
     ONLINE                                      ( "online"),
     OFFLINE                                     ( "offline"),
