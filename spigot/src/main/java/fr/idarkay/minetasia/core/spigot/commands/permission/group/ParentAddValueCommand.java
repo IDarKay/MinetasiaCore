@@ -44,9 +44,9 @@ public class ParentAddValueCommand extends SubCommand implements FlexibleCommand
                 if(!args[1].equalsIgnoreCase(args[4]) && !g.getParents().contains(args[4]) && noRecursive(g, args[4]))
                 {
                     g.addParents(args[4]);
-                    sender.sendMessage(Lang.GROUP_PARENT_ADD.get(lang, args[4], args[1]));
+                    sender.sendMessage(Lang.GROUP_PARENT_ADD.get(lang, Lang.Argument.GROUP_PARENT.match( args[4]), Lang.Argument.GROUP_NAME.match( args[1])));
                 }
-                else sender.sendMessage(Lang.GROUP_PARENT_CANT_ADD.get(lang, args[4], args[1]));
+                else sender.sendMessage(Lang.GROUP_PARENT_CANT_ADD.get(lang, Lang.Argument.GROUP_PARENT.match( args[4]), Lang.Argument.GROUP_NAME.match( args[1])));
 
             }
             else sender.sendMessage(Lang.GROUP_NOT_EXIST.get(lang));

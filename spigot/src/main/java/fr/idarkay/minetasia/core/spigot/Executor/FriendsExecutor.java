@@ -65,7 +65,7 @@ public final class FriendsExecutor implements TabExecutor {
                                     {
                                         if(minetasiaCore.isPlayerOnline(uuid))
                                         {
-                                            sender.sendMessage(Lang.REQUEST_SEND_FRIENDS.get(lang, args[1]));
+                                            sender.sendMessage(Lang.REQUEST_SEND_FRIENDS.get(lang, Lang.Argument.PLAYER.match( args[1])));
                                             org.bukkit.entity.Player p = minetasiaCore.getServer().getPlayer(uuid);
                                             if(p != null)
                                             {
@@ -75,7 +75,7 @@ public final class FriendsExecutor implements TabExecutor {
                                         }
                                         else sender.sendMessage(Lang.PLAYER_NOT_ONLY.get(lang));
                                     }
-                                    else sender.sendMessage(Lang.ALREADY_FRIEND.get(lang, args[1]));
+                                    else sender.sendMessage(Lang.ALREADY_FRIEND.get(lang, Lang.Argument.PLAYER.match( args[1])));
                                 }
                                 else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
                             }
@@ -88,9 +88,9 @@ public final class FriendsExecutor implements TabExecutor {
                             {
                                 if(minetasiaCore.isFriend(player.getUniqueId(), uuid)) {
                                     minetasiaCore.removeFriend(player.getUniqueId(), uuid);
-                                    sender.sendMessage(Lang.REMOVE_FRIEND.get(lang, args[1]));
+                                    sender.sendMessage(Lang.REMOVE_FRIEND.get(lang, Lang.Argument.PLAYER.match( args[1])));
                                 }
-                                else sender.sendMessage(Lang.NOT_FRIEND.get(lang, args[1]));
+                                else sender.sendMessage(Lang.NOT_FRIEND.get(lang, Lang.Argument.PLAYER.match( args[1])));
                             }
                             else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
                         }
@@ -101,8 +101,8 @@ public final class FriendsExecutor implements TabExecutor {
                             {
                                 friendRequest.invalidate(player.getUniqueId());
                                 minetasiaCore.addFriend(player.getUniqueId(), u);
-                                sender.sendMessage(Lang.NEW_FRIEND.get(lang, minetasiaCore.getPlayerName(u)));
-                                minetasiaCore.publish("core-msg",  "NEW_FRIEND;" + u.toString() +";true;" + player.getName());
+                                sender.sendMessage(Lang.NEW_FRIEND.get(lang, Lang.Argument.PLAYER.match( minetasiaCore.getPlayerName(u))));
+                                minetasiaCore.publish("core-msg",  "NEW_FRIEND;" + u.toString() +";true;" + Lang.Argument.PLAYER.name() + "\\" +  player.getName());
                             }
                         }
                         else sendHelpMsg(player, lang);
@@ -167,7 +167,7 @@ public final class FriendsExecutor implements TabExecutor {
     public void newRequest(UUID uuid, UUID uuid1, Player p)
     {
         friendRequest.put(uuid, uuid1);
-        TextComponent c = new TextComponent(Lang.REQUEST_FRIEND.get(minetasiaCore.getPlayerLang(uuid), minetasiaCore.getPlayerName(uuid1)));
+        TextComponent c = new TextComponent(Lang.REQUEST_FRIEND.get(minetasiaCore.getPlayerLang(uuid), Lang.Argument.PLAYER.match(minetasiaCore.getPlayerName(uuid1))));
         c.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "f accept"));
         p.spigot().sendMessage(c);
     }

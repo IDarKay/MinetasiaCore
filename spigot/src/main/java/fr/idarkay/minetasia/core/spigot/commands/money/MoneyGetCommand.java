@@ -43,7 +43,7 @@ public class MoneyGetCommand extends SubCommand implements FixCommand {
             {
                 float m = plugin.getPlayerMoney(u, e);
                                                         // player name  amount money type
-                sender.sendMessage(Lang.MONEY_GET.get(lang, args[1], m, e.displayName));
+                sender.sendMessage(Lang.MONEY_GET.get(lang, Lang.Argument.PLAYER.match(args[1]), Lang.Argument.AMOUNT.match(m), Lang.Argument.MONEY_TYPE.match(e.displayName)));
             }
             else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
         }

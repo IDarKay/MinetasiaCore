@@ -77,7 +77,7 @@ public final class PlayerListener implements Listener {
                     }
 
                     plugin.getPlayerManager().newPlayer(uuid, proxiedPlayer.getName(), c);
-                    plugin.getFrsClient().publish("core-msg",  "WELCOME;" + uuid.toString() +";true;" + proxiedPlayer.getName());
+                    plugin.getFrsClient().publish("core-msg",  "WELCOME;" + uuid.toString() +";true;PLAYER\\" +proxiedPlayer.getName());
 
                 }
 

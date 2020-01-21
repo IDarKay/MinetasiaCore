@@ -43,14 +43,14 @@ public class TempPermissionAddCommand extends SubCommand implements FlexibleComm
             during *= 60_000L;
             if(permission.length() == 0)
             {
-                sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, "1"));
+                sender.sendMessage(Lang.GROUP_NO_ENOUGH_CHAR.get(lang, Lang.Argument.NUMBER.match(1)));
                 return;
             }
             UUID u = plugin.getPlayerUUID(args[1]);
             if(u != null)
             {
                 plugin.getPermissionManager().addTempPermission(u, permission, during);
-                sender.sendMessage(Lang.USER_PERMISSION_ADD.get(lang, permission, args[1]));
+                sender.sendMessage(Lang.USER_PERMISSION_ADD.get(lang, Lang.Argument.PERMISSION_NAME.match(permission), Lang.Argument.PLAYER.match(args[1])));
             }
             else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
         } catch (IllegalArgumentException ignore)
