@@ -19,7 +19,8 @@ import java.lang.reflect.Method;
  * @author alice. B. (IDarKay),
  * Created the 19/12/2019 at 16:55
  */
-public class Reflexion {
+public class Reflection
+{
 
 
     public static void sendPacket(Player player, Object packet) {

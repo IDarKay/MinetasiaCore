@@ -18,19 +18,20 @@ import java.util.HashMap;
  * @author alice. B. (IDarKay),
  * Created the 23/12/2019 at 11:57
  */
-public class SBBPlayerScoreBoard {
+public class PlayerScoreBoard
+{
 
     private final Player player;
     private HashMap<Integer, String> lines = new HashMap<>();
 
-    public SBBPlayerScoreBoard(Player player, String display)
+    public PlayerScoreBoard(Player player, String display)
     {
         this.player = player;
 
         try
         {
-            Reflexion.sendPacket(player, getEditDisplayPacket(0, display));
-            Reflexion.sendPacket(player, getShowPacket());
+            Reflection.sendPacket(player, getEditDisplayPacket(0, display));
+            Reflection.sendPacket(player, getShowPacket());
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -38,9 +39,9 @@ public class SBBPlayerScoreBoard {
 
     }
 
-    private static final Class<?> packetPlayOutScoreboardScoreClass = Reflexion.getNMSClass("PacketPlayOutScoreboardScore");
-    private static final Class<?> action = Reflexion.getNMSClass("ScoreboardServer$Action");
-    private static final Constructor<?> pPOSSConstructor = Reflexion.getConstructor(packetPlayOutScoreboardScoreClass, false, action, String.class, String.class, int.class);
+    private static final Class<?> packetPlayOutScoreboardScoreClass = Reflection.getNMSClass("PacketPlayOutScoreboardScore");
+    private static final Class<?> action = Reflection.getNMSClass("ScoreboardServer$Action");
+    private static final Constructor<?> pPOSSConstructor = Reflection.getConstructor(packetPlayOutScoreboardScoreClass, false, action, String.class, String.class, int.class);
 
     public void setLine(String text, int line)
     {
@@ -57,7 +58,7 @@ public class SBBPlayerScoreBoard {
 
         try
         {
-            Reflexion.sendPacket(player, pPOSSConstructor.newInstance(Action.CHANGE.asNMS, player.getName(), text, line));
+            Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.CHANGE.asNMS, player.getName(), text, line));
             lines.put(line, text);
         }
         catch(Exception e) { e.printStackTrace(); }
@@ -67,7 +68,7 @@ public class SBBPlayerScoreBoard {
     {
         try
         {
-            Reflexion.sendPacket(player, pPOSSConstructor.newInstance(Action.REMOVE.asNMS, player.getName(), lines.get(line), 0));
+            Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.REMOVE.asNMS, player.getName(), lines.get(line), 0));
             lines.remove(line);
         }
         catch(Exception e) { e.printStackTrace(); }
@@ -78,7 +79,7 @@ public class SBBPlayerScoreBoard {
     {
         try
         {
-            Reflexion.sendPacket(player, getEditDisplayPacket(2, display));
+            Reflection.sendPacket(player, getEditDisplayPacket(2, display));
         }
         catch(Exception e) { e.printStackTrace(); }
     }
@@ -87,22 +88,22 @@ public class SBBPlayerScoreBoard {
     {
         try
         {
-            Reflexion.sendPacket(player, getEditDisplayPacket(1, null));
+            Reflection.sendPacket(player, getEditDisplayPacket(1, null));
         }
         catch(Exception e) { e.printStackTrace(); }
     }
 
-    private static final Class<?> packetPlayOutScoreboardObjectiveClass = Reflexion.getNMSClass("PacketPlayOutScoreboardObjective");
-    private static final Constructor<?> packetPlayOutScoreboardObjectiveClassConstructor = Reflexion.getConstructor(packetPlayOutScoreboardObjectiveClass, false);
-    private static final Field pPOSOFAName = Reflexion.getField(packetPlayOutScoreboardObjectiveClass, "a", true);
-    private static final Field pPOSOFBDisplay = Reflexion.getField(packetPlayOutScoreboardObjectiveClass, "b", true);
-    private static final Field pPOSOFDMode = Reflexion.getField(packetPlayOutScoreboardObjectiveClass, "d", true);
-    private static final Field pPOSOFCType = Reflexion.getField(packetPlayOutScoreboardObjectiveClass, "c", true);
+    private static final Class<?> packetPlayOutScoreboardObjectiveClass = Reflection.getNMSClass("PacketPlayOutScoreboardObjective");
+    private static final Constructor<?> packetPlayOutScoreboardObjectiveClassConstructor = Reflection.getConstructor(packetPlayOutScoreboardObjectiveClass, false);
+    private static final Field pPOSOFAName = Reflection.getField(packetPlayOutScoreboardObjectiveClass, "a", true);
+    private static final Field pPOSOFBDisplay = Reflection.getField(packetPlayOutScoreboardObjectiveClass, "b", true);
+    private static final Field pPOSOFDMode = Reflection.getField(packetPlayOutScoreboardObjectiveClass, "d", true);
+    private static final Field pPOSOFCType = Reflection.getField(packetPlayOutScoreboardObjectiveClass, "c", true);
     private static final Object integerTypeEnum;
 
     static {
         try {
-            integerTypeEnum = Reflexion.getNMSClass("IScoreboardCriteria$EnumScoreboardHealthDisplay").getField("INTEGER").get(null);
+            integerTypeEnum = Reflection.getNMSClass("IScoreboardCriteria$EnumScoreboardHealthDisplay").getField("INTEGER").get(null);
         }
         catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
@@ -119,7 +120,7 @@ public class SBBPlayerScoreBoard {
 
         if(mode == 0 || mode == 2)
         {
-            pPOSOFBDisplay.set(packet, Reflexion.getIChatBaseComponent(name));
+            pPOSOFBDisplay.set(packet, Reflection.getIChatBaseComponent(name));
             pPOSOFCType.set(packet, integerTypeEnum);
         }
 
@@ -127,10 +128,10 @@ public class SBBPlayerScoreBoard {
     }
 
 
-    private static final Class<?> packetPlayOutScoreboardDisplayObjectiveClass = Reflexion.getNMSClass("PacketPlayOutScoreboardDisplayObjective");
-    private static final Constructor<?> packetPlayOutScoreboardDisplayObjectiveConstructor = Reflexion.getConstructor(packetPlayOutScoreboardDisplayObjectiveClass, false);
-    private static final Field pPOSDOFAPosition = Reflexion.getField(packetPlayOutScoreboardDisplayObjectiveClass, "a", true);
-    private static final Field pPOSDOFBName = Reflexion.getField(packetPlayOutScoreboardDisplayObjectiveClass, "b", true);
+    private static final Class<?> packetPlayOutScoreboardDisplayObjectiveClass = Reflection.getNMSClass("PacketPlayOutScoreboardDisplayObjective");
+    private static final Constructor<?> packetPlayOutScoreboardDisplayObjectiveConstructor = Reflection.getConstructor(packetPlayOutScoreboardDisplayObjectiveClass, false);
+    private static final Field pPOSDOFAPosition = Reflection.getField(packetPlayOutScoreboardDisplayObjectiveClass, "a", true);
+    private static final Field pPOSDOFBName = Reflection.getField(packetPlayOutScoreboardDisplayObjectiveClass, "b", true);
 
 
     private Object getShowPacket() throws InstantiationException, IllegalAccessException, InvocationTargetException
