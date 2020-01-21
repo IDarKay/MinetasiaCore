@@ -44,9 +44,9 @@ public class ParentRemoveValueCommand extends SubCommand implements FlexibleComm
                 if(g.getParents().contains(args[4]))
                 {
                     g.removeParent(args[4]);
-                    sender.sendMessage(Lang.GROUP_PARENT_REMOVE.get(lang, args[4], args[1]));
+                    sender.sendMessage(Lang.GROUP_PARENT_REMOVE.get(lang, Lang.Argument.GROUP_PARENT.match(args[4]), Lang.Argument.GROUP_NAME.match(args[1])));
                 }
-                else sender.sendMessage(Lang.GROUP_PARENT_CANT_REMOVE.get(lang, args[1], args[4]));
+                else sender.sendMessage(Lang.GROUP_PARENT_CANT_REMOVE.get(lang,Lang.Argument.GROUP_NAME.match( args[1]), Lang.Argument.GROUP_PARENT.match( args[4])));
             }
             else sender.sendMessage(Lang.GROUP_NOT_EXIST.get(lang));
         }

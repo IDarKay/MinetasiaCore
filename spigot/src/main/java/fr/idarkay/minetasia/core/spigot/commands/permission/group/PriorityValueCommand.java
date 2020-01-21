@@ -52,7 +52,7 @@ public final class PriorityValueCommand extends SubCommand implements FlexibleCo
                 {
                     byte i = Byte.parseByte(args[3]);
                     g.setPriority(i);
-                    sender.sendMessage(Lang.GROUP_PRIORITY_CHANGE.get(lang, args[1], i));
+                    sender.sendMessage(Lang.GROUP_PRIORITY_CHANGE.get(lang, Lang.Argument.GROUP_NAME.match(args[1]), Lang.Argument.VALUE.match(i)));
                 } catch (IllegalArgumentException ignore)
                 {
                     sender.sendMessage(Lang.ILLEGAL_NUMBER_VALUE.get(lang));

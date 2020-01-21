@@ -8,7 +8,9 @@ import fr.idarkay.minetasia.core.spigot.permission.Group;
 import fr.idarkay.minetasia.core.spigot.server.Server;
 import fr.idarkay.minetasia.core.spigot.user.Player;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
+import fr.idarkay.minetasia.normes.Args;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Tuple;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -122,16 +124,27 @@ public final class FRSMessageListener implements Listener {
                         org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
                         if(msg[0].equals(Lang.MSG_FORMAT.name()))
                         {
-                            for(org.bukkit.entity.Player pl : plugin.socialSpyPlayer) pl.sendMessage(Lang.MSG_FORMAT_SOCIAL_SPY.getWithoutPrefix(MinetasiaLang.BASE_LANG, msg[3], msg[4], msg[5]));
+                            for(org.bukkit.entity.Player pl : plugin.socialSpyPlayer) pl.sendMessage(Lang.MSG_FORMAT_SOCIAL_SPY.getWithoutPrefix(MinetasiaLang.BASE_LANG, Lang.Argument.PLAYER_SENDER.match(msg[3])
+                                    , Lang.Argument.PLAYER_RECEIVER.match(msg[4]), Lang.Argument.MESSAGE.match(msg[5])));
                         }
                         if (p != null) {
                             boolean prefix = Boolean.parseBoolean(msg[2]);
-                            Object[] arg = new Object[msg.length - 3];
+                            String[] arg = new String[msg.length - 3];
                             for (int i = 3; i < msg.length; i++) arg[i - 3] = msg[i];
                             String m;
 
-                            if(prefix)  m = Lang.valueOf(msg[0]).get(plugin.getPlayerLang(u), arg);
-                            else m = Lang.valueOf(msg[0]).getWithoutPrefix(plugin.getPlayerLang(u), arg);
+                            Tuple<? extends Args, Object>[] argument = new Tuple[arg.length];
+
+                            int c = 0;
+                            for (String o : arg)
+                            {
+                                String[] split = splitInTow(o, '\\');
+                                argument[c] = Lang.Argument.valueOf(split[0]).match(split[1]);
+                                c++;
+                            }
+
+                            if(prefix)  m = Lang.valueOf(msg[0]).get(plugin.getPlayerLang(u), argument);
+                            else m = Lang.valueOf(msg[0]).getWithoutPrefix(plugin.getPlayerLang(u), argument);
 
                             if(msg[0].equals(Lang.MSG_FORMAT.name()) && !msg[3].equals("console"))
                             {
@@ -184,5 +197,15 @@ public final class FRSMessageListener implements Listener {
         String r = result.toString();
         return r.equals("null") ? null : r;
     }
+
+    private static String[] splitInTow(String s, char spliter)
+    {
+        String[] back = new String[2];
+        int i = s.indexOf(spliter);
+        back[0] = s.substring(0, i);
+        back[1] = s.substring(i + 1);
+        return back;
+    }
+
 
 }

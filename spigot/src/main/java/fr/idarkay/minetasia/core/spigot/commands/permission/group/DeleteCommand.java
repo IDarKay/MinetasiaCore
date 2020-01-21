@@ -38,7 +38,7 @@ public class DeleteCommand extends SubCommand implements FixCommand {
         if(g != null)
         {
             plugin.getPermissionManager().removeGroup(g.getName());
-            sender.sendMessage(Lang.GROUP_DELETE.get(lang, args[1]));
+            sender.sendMessage(Lang.GROUP_DELETE.get(lang, Lang.Argument.GROUP_NAME.match(args[1])));
         }
         else sender.sendMessage(Lang.GROUP_NOT_EXIST.get(lang));
     }
