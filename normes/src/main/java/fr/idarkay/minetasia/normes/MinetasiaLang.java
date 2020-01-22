@@ -59,7 +59,7 @@ public class MinetasiaLang {
         File f2 = new File(f, "en.yml");
         if(!f2.exists()) {
             try {
-                if(f2.createNewFile()) Bukkit.getLogger().warning("[ERROR] can't create " + f2.getAbsolutePath());
+                if(!f2.createNewFile()) Bukkit.getLogger().warning("[ERROR] can't create " + f2.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
