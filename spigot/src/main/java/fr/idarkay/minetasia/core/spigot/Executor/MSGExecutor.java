@@ -60,7 +60,7 @@ public class MSGExecutor implements TabExecutor {
                             }
 
                         }
-                        else sender.sendMessage(Lang.PLAYER_NOT_ONLY.get(lang));
+                        else sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(lang));
                     }
                     else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
                 });

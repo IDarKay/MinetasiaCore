@@ -15,8 +15,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,7 +52,7 @@ public class SecondArgsCommand extends SubCommand implements FlexibleCommand {
                     {
                         plugin.movePlayerToServer(p, s);
                     }
-                    else sender.sendMessage(Lang.PLAYER_NOT_ONLY.get(getLangOfSender(sender)));
+                    else sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(getLangOfSender(sender)));
                 }
                 else sender.sendMessage(Lang.SERVER_NOT_FOUND.get(getLangOfSender(sender)));
             }
@@ -105,7 +103,7 @@ public class SecondArgsCommand extends SubCommand implements FlexibleCommand {
                         Location l = new Location(w, x, y, z);
                         Bukkit.getScheduler().runTask(plugin, () ->  p.teleport(l));
                     }
-                    else sender.sendMessage(Lang.PLAYER_NOT_ONLY.get(getLangOfSender(sender)));
+                    else sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(getLangOfSender(sender)));
                 }
             }
             catch (IllegalArgumentException e)

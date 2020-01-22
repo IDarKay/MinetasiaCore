@@ -39,7 +39,7 @@ public enum Lang implements IMinetasiaLang {
     NOT_FRIEND                                  ( "&cYou are not friend with " + Argument.PLAYER + " !"),
 
     //misc
-    PLAYER_NOT_ONLY                             ( "&cSorry this player isn't only !"),
+    PLAYER_NOT_ONLINE                           ( "&cSorry this player isn't only !"),
     PLAYER_NOT_EXIST                            ( "&cThe player don't exist"),
     ONLINE                                      ( "online"),
     OFFLINE                                     ( "offline"),
@@ -154,9 +154,6 @@ public enum Lang implements IMinetasiaLang {
     DESC_TP                                     ("first step for all commands for tp user"),
     DESC_TP_USER                                ("if no second argument tp the executor to the player, else tp player to second argument"),
     DESC_TP_A                                   ("tp all player of the server (no all proxy) to second argument"),
-    DESC_TP_2_USER                              ("tp first argument to selected user"),
-    DESC_TP_2_CORD                              ("tp first argument to cord"),
-    DESC_TP_2_SERVER                            ("tp first argument to server"),
 
     ;
 
