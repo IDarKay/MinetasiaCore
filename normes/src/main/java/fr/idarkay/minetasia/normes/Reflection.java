@@ -22,7 +22,11 @@ import java.lang.reflect.Method;
 public class Reflection
 {
 
-
+    /**
+     * send packet to player
+     * @param player to send packet
+     * @param packet packet
+     */
     public static void sendPacket(Player player, Object packet) {
         try {
             Object handle = player.getClass().getMethod("getHandle").invoke(player);
@@ -33,6 +37,11 @@ public class Reflection
         }
     }
 
+    /**
+     * get net.minecraft.server Class
+     * @param name name of class
+     * @return Class or null
+     */
     public static Class<?> getNMSClass(String name) {
         try
         {
@@ -45,6 +54,11 @@ public class Reflection
         return null;
     }
 
+    /**
+     * get craftBukkit Class
+     * @param name name of class
+     * @return Class or null
+     */
     public static Class<?> getNMSBClass(String name)
     {
         try
@@ -102,6 +116,13 @@ public class Reflection
     private final static Field packetFieldIWarningDistance = getField(packetPlayOutWorldBorderClass, "i", true);
     private final static Field packetFieldHWarningTime = getField(packetPlayOutWorldBorderClass, "h", true);
 
+    /**
+     * get the packet WorldBorder from {@link BossBar}
+     * @param action action
+     * @param worldBorder worldBorder
+     * @return Packet
+     * @see WorldBorder
+     */
     public static Object getWorldBorderPacket(WorldBorder.EnumWorldBorderAction action, WorldBorder worldBorder)
     {
         try {
@@ -129,6 +150,13 @@ public class Reflection
         }
     }
 
+    /**
+     * send a world border to player
+     * @param action action
+     * @param worldBorder worldBorder to send
+     * @param players all player to send
+     * @see WorldBorder
+     */
     public static void sendWorldBorderPlayer(WorldBorder.EnumWorldBorderAction action, WorldBorder worldBorder, Player... players)
     {
         Object packet = getWorldBorderPacket(action, worldBorder);
@@ -155,7 +183,13 @@ public class Reflection
     private static final Method setDK = getMethod(bossBattleCl0, false, "b", boolean.class);
     private static final Method setPBM = getMethod(bossBattleCl0, false, "c", boolean.class);
 
-    public static Object getBossBarPacket(BossBar.Action actions, BossBar bossBar)
+    /**
+     * get the packet bossabr from {@link BossBar}
+     * @param action action
+     * @param bossBar bossBar
+     * @return Packet
+     */
+    public static Object getBossBarPacket(BossBar.Action action, BossBar bossBar)
     {
         try {
 
@@ -170,7 +204,7 @@ public class Reflection
 
             setPBM.invoke(bossBattleO,bossBar.isFlag(BossBar.Flags.PLAY_BOSS_MUSIC));
 
-            return packetPlayOutBossCo.newInstance(action.getField(actions.name()).get(null), bossBattleO);
+            return packetPlayOutBossCo.newInstance(Reflection.action.getField(action.name()).get(null), bossBattleO);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -178,6 +212,13 @@ public class Reflection
         }
     }
 
+    /**
+     * send a world border to player
+     * @param action action
+     * @param bossBar bossBar to send
+     * @param players all player to send
+     * @see BossBar
+     */
     public static void sendBossBarToPlayer(BossBar.Action action, BossBar bossBar, Player... players)
     {
         Object packet = getBossBarPacket(action, bossBar);
@@ -203,7 +244,13 @@ public class Reflection
     private final static Method hasKey = getMethod(nBTTagCompound, false, "hasKey", String.class);
     private final static Method getString = getMethod(nBTTagCompound, false, "getString", String.class);
 
-
+    /**
+     * add new NBTTag to item
+     * @param itemStack ItemStack to add nbt will be not edit !
+     * @param key key of the nbt
+     * @param values value of the nbt
+     * @return new ItemStack with nbtTag
+     */
     public static ItemStack addNBTTag(final ItemStack itemStack, String key, String values)
     {
         try
@@ -222,7 +269,12 @@ public class Reflection
         }
     }
 
-
+    /**
+     * get the nbtTag of item from key
+     * @param itemStack nbTag of item
+     * @param key of the value
+     * @return value or null if not found
+     */
     public static String getNBTTag(ItemStack itemStack, String key)
     {
         try
@@ -242,6 +294,12 @@ public class Reflection
         }
     }
 
+    /**
+     * check if 2 item have same NBTTag
+     * @param itemStack1 it 1
+     * @param itemStack2 it 2
+     * @return true if same else false
+     */
     public static boolean hasSameCompound(ItemStack itemStack1, ItemStack itemStack2)
     {
         try

@@ -76,7 +76,13 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         if(!f.exists()) if(!f.mkdirs()) Bukkit.getLogger().warning("[ERROR] can't create " + f.getAbsolutePath());
     }
 
-
+    /**
+     * create new schematic from world
+     * @param min location (with minimum x y and z)
+     * @param max location (with maximum x y and z)
+     * @return create schematic
+     * @throws IllegalArgumentException if both location dosen't have same world or loc min > loc max
+     */
     public Schematic createSchematic(Location min, Location max) throws IllegalArgumentException
     {
         World w0 = min.getWorld();
@@ -117,6 +123,11 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         return new Schematic(blocks, data, length, width, height);
     }
 
+    /**
+     * load a schematic in the world
+     * @param schematic schematic to load
+     * @param location location of the minimum location fo the build
+     */
     public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location)
     {
         String[] blocks = schematic.getBlocks();
@@ -146,8 +157,16 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
 
     private static final byte ENTER_CHAR = (byte) 10;
 
-    public void saveSchematic(Schematic schematic, String name) throws IOException
+    /**
+     * save schematic in plugin/{@code <plugin name>}/schematic/{@code <schematic_name>}.minetasiaschem
+     * @param schematic the schematic to save
+     * @param name name of teh file
+     * @throws IOException if error when write data
+     */
+    public void saveSchematic(@NotNull Schematic schematic, @NotNull String name) throws IOException
     {
+        Validate.notNull(schematic);
+        Validate.notNull(name);
         File directory = new File(getDataFolder(), "schematic");
         if(!directory.exists()) directory.mkdirs();
 
@@ -199,6 +218,12 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         return max;
     }
 
+    /**
+     * read schematic from  plugin/{@code <plugin name>}/schematic/{@code <schematic_name>}.minetasiaschem
+     * @param name nam of schematic
+     * @return create schematic from data
+     * @throws IOException if error on read data
+     */
     public Schematic readSchematic(String name) throws IOException
     {
         File file = new File(getDataFolder(), "schematic/" + name + ".minetasiaschem");
@@ -260,7 +285,12 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         }
     }
 
-
+    /**
+     * save data in world folder ( ./world/data/{@code <key>}.dat in file value
+     * @param world world where save data
+     * @param key key of the value need can be a filename
+     * @param value value of the key null for remove data
+     */
     public void saveDataInWorld(@NotNull World world, @NotNull String key, @Nullable String value)
     {
         Validate.notNull(world);
@@ -301,7 +331,12 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         }
     }
 
-
+    /**
+     * get data in world folder ( ./world/data/{@code <key>}.dat in file value
+     * @param world where get the data
+     * @param key key of the data
+     * @return load data or null if not found
+     */
     @Nullable
     public String getDataInWorld(@NotNull World world, @NotNull String key)
     {

@@ -155,6 +155,13 @@ public class MinetasiaGUI {
         return itemStack;
     }
 
+    /**
+     * set lore to item stack
+     * @param itemStack to add the lore
+     * @param lore the lore
+     * @return the ItemStack not the it the same of the given item stack
+     * @since 1.0
+     */
     public static ItemStack setLoreToItem(ItemStack itemStack, String... lore)
     {
         ItemMeta itemMeta = itemStack.hasItemMeta() ? itemStack.getItemMeta() : Bukkit.getItemFactory().getItemMeta(itemStack.getType());
