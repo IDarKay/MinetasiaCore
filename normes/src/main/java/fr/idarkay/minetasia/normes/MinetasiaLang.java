@@ -111,6 +111,7 @@ public class MinetasiaLang {
      * @param defaultMsg the default message to send if no key match
      * @param lang the lang to get the msg in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
      * @param args args of the message
+     * @param <T> type of object
      * @return String message
      * @since 1.0
      */

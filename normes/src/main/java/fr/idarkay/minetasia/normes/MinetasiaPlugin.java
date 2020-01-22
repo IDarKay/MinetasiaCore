@@ -81,7 +81,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      * @param min location (with minimum x y and z)
      * @param max location (with maximum x y and z)
      * @return create schematic
-     * @throws IllegalArgumentException if both location dosen't have same world or loc min > loc max
+     * @throws IllegalArgumentException if both location dosen't have same world or loc min {@code > } loc max
      */
     public Schematic createSchematic(Location min, Location max) throws IllegalArgumentException
     {
