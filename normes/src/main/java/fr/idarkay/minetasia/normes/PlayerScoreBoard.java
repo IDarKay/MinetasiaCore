@@ -43,11 +43,23 @@ public class PlayerScoreBoard
     private static final Class<?> action = Reflection.getNMSClass("ScoreboardServer$Action");
     private static final Constructor<?> pPOSSConstructor = Reflection.getConstructor(packetPlayOutScoreboardScoreClass, false, action, String.class, String.class, int.class);
 
+    /**
+     * set new line to list
+     * @param text test (display)
+     * @param line number of the line
+     * force = false
+     */
     public void setLine(String text, int line)
     {
         setLine(text, line, false);
     }
 
+    /**
+     * set new line to list
+     * @param text test (display)
+     * @param line number of the line
+     * @param force if true if scoreboard have same line force set else no set
+     */
     public void setLine(String text, int line, boolean force)
     {
         if(lines.containsKey(line))
@@ -64,6 +76,10 @@ public class PlayerScoreBoard
         catch(Exception e) { e.printStackTrace(); }
     }
 
+    /**
+     * remove a line of scoreBoard
+     * @param line number of remove ligne
+     */
     public void removeLine(int line)
     {
         try
@@ -74,7 +90,10 @@ public class PlayerScoreBoard
         catch(Exception e) { e.printStackTrace(); }
     }
 
-
+    /**
+     * change the name of the ScoreBoard
+     * @param display name accept ChatColor
+     */
     public void setDisplayName(String display)
     {
         try
@@ -84,6 +103,9 @@ public class PlayerScoreBoard
         catch(Exception e) { e.printStackTrace(); }
     }
 
+    /**
+     * delete the ScoreBoard
+     */
     public void destroy()
     {
         try
@@ -132,7 +154,6 @@ public class PlayerScoreBoard
     private static final Constructor<?> packetPlayOutScoreboardDisplayObjectiveConstructor = Reflection.getConstructor(packetPlayOutScoreboardDisplayObjectiveClass, false);
     private static final Field pPOSDOFAPosition = Reflection.getField(packetPlayOutScoreboardDisplayObjectiveClass, "a", true);
     private static final Field pPOSDOFBName = Reflection.getField(packetPlayOutScoreboardDisplayObjectiveClass, "b", true);
-
 
     private Object getShowPacket() throws InstantiationException, IllegalAccessException, InvocationTargetException
     {

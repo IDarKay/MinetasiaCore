@@ -1,7 +1,5 @@
 package fr.idarkay.minetasia.normes;
 
-import org.bukkit.entity.Player;
-
 /**
  * File <b>IMinetasiaLang</b> located on fr.idarkay.minetasia.normes
  * IMinetasiaLang is a part of Normes.
@@ -15,7 +13,19 @@ import org.bukkit.entity.Player;
  *
  * implements your lang enum with this for get the standard methods
  */
+
+/**
+ * implement your Lang enum with this
+ */
 public interface IMinetasiaLang
 {
+     /**
+      * get the message with lang
+      * @see MinetasiaLang#get(String, String, String, Tuple[])
+      * @param lang lang of user in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
+      * @param args all argument of the message use {@link Args#match(Object)}
+      * @param <T> type of object
+      * @return message
+      */
      <T> String get(String lang, Tuple<? extends Args, T>... args);
 }
