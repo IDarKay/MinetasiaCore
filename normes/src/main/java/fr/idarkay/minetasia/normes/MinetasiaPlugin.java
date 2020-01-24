@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * @author alice B. (IDarKay),
@@ -102,9 +104,9 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
             throw new IllegalArgumentException("min location is superior of max location");
         }
 
-        int height = y1 - y0 + 1, length = x1 - x0 + 1, width = z1 - z0 + 1;
+        short height = (short) (y1 - y0 + 1), length = (short) (x1 - x0 + 1), width = (short) (z1 - z0 + 1);
 
-        String[] blocks = new String[height * length * width];
+        Material[] blocks = new Material[height * length * width];
         String[] data = new String[height * length * width];
         for (int x = x0; x <= x1 ; x++)
         {
@@ -114,8 +116,9 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
                 {
                     Block block = w0.getBlockAt(x, y, z);
                     int i = ((y - y0) * length * width) + ((z - z0) * length) + (x - x0);
-                    data[i] = block.getBlockData().getAsString(true);
-                    blocks[i] = w0.getBlockAt(x, y, z).getType().name();
+                    String d = block.getBlockData().getAsString(true);
+                    data[i] = d.indexOf('[') == -1 ? null : d;
+                    blocks[i] = w0.getBlockAt(x, y, z).getType();
                 }
             }
         }
@@ -123,16 +126,31 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         return new Schematic(blocks, data, length, width, height);
     }
 
+    private static final Material[] AIR = new Material[]{Material.AIR, Material.VOID_AIR, Material.CAVE_AIR};
+
     /**
      * load a schematic in the world
      * @param schematic schematic to load
      * @param location location of the minimum location fo the build
+     *  ignoreAir = true
      */
     public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location)
     {
-        String[] blocks = schematic.getBlocks();
+        loadSchematic(schematic, location, true, Direction.NORTH, null);
+    }
+
+    /**
+     * load a schematic in the world
+     * @param schematic schematic to load
+     * @param location location of the minimum location fo the build
+     * @param ignoreAir if true air block will be not place
+     */
+    public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location, boolean ignoreAir, @NotNull Direction direction, @Nullable Consumer<? super Block> blockConsumer)
+    {
+        Material[] blocks = schematic.getBlocks();
         String[] data = schematic.getData();
         World w = location.getWorld();
+        boolean haveConsumer = blockConsumer != null;
 
         if(w == null) throw new NullPointerException("location haven't world");
 
@@ -145,14 +163,28 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
             {
                 for(int y = 0; y < height; y++)
                 {
-                    Block block = w.getBlockAt(x + x0, y + y0, z + z0);
                     int i = y * length * width + z * length + x;
-                    block.setType(Material.valueOf(blocks[i]), true);
-                    if(data[1] != null && !data[i].equals(""))
-                        block.setBlockData(Bukkit.createBlockData(data[i]));
+                    Material m = blocks[i];
+                    if(!ignoreAir || !isAir(m))
+                    {
+                        Block block = w.getBlockAt(x + x0, y + y0, z + z0);
+                        if(haveConsumer) blockConsumer.accept(block);
+                        block.setType(m, true);
+                        if(data[i] != null)
+                            block.setBlockData(Bukkit.createBlockData(data[i]));
+                    }
                 }
             }
         }
+    }
+
+    private static boolean isAir(Material material)
+    {
+        for(Material m : AIR)
+        {
+            if (m == material) return true;
+        }
+        return false;
     }
 
     private static final byte ENTER_CHAR = (byte) 10;
@@ -175,34 +207,58 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
 
         try(FileOutputStream fos = new FileOutputStream(file))
         {
-            int max = getMaxLen(schematic.getData());
+            short max = (short) getMaxLen(schematic.getData());
             FileChannel fc = fos.getChannel();
             ByteBuffer buf = ByteBuffer.allocate(max);
-            buf.putInt(schematic.getLength());
+            buf.putShort(schematic.getLength());
             drainBuffer(buf, fc);
-            buf.putInt(schematic.getWidth());
+            buf.putShort(schematic.getWidth());
             drainBuffer(buf, fc);
-            buf.putInt(schematic.getHeight());
+            buf.putShort(schematic.getHeight());
             drainBuffer(buf, fc);
             buf.putInt(schematic.getBlocks().length);
             drainBuffer(buf, fc);
             buf.putInt(max);
             drainBuffer(buf, fc);
-            for(String s : schematic.getBlocks())
+            for(Material s : schematic.getBlocks())
             {
-                buf.put(s.getBytes());
-                buf.put(ENTER_CHAR);
+                buf.putShort(MaterialID.valueOf(s.name()).id);
                 drainBuffer(buf, fc);
             }
+            int i = 0;
             for(String s : schematic.getData())
             {
-                buf.put(s.getBytes());
-                buf.put(ENTER_CHAR);
-                drainBuffer(buf, fc);
+                if(s != null)
+                {
+                    String[] split = splitInTow(s,'[');
+                    if(split[1] != null)
+                    {
+                        buf.put((i + ";[" + split[1]).getBytes());
+                        buf.put(ENTER_CHAR);
+                        drainBuffer(buf, fc);
+                    }
+                }
+                i++;
             }
         }
     }
 
+    private static String[] splitInTow(String s, char spliter)
+    {
+        String[] back = new String[2];
+        int i = s.indexOf(spliter);
+        if(i == -1)
+        {
+            back[0] = s;
+            back[1] = null;
+        }
+        else
+        {
+            back[0] = s.substring(0, i);
+            back[1] = s.substring(i + 1);
+        }
+        return back;
+    }
 
     private static void drainBuffer (ByteBuffer buffer, FileChannel fc) throws IOException {
         buffer.flip();
@@ -213,7 +269,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
 
     public int getMaxLen(String[] data)
     {
-        int max = 128;
+        int max = 64;
         for(String s : data) if(s.length() > max) max = s.length();
         return max;
     }
@@ -231,23 +287,29 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
 
         try(FileInputStream fis = new FileInputStream(file))
         {
+            MaterialID[] value = MaterialID.values();
             FileChannel fc = fis.getChannel();
             int size = (int)fc.size();
             ByteBuffer buf = ByteBuffer.allocate(size);
             fc.read(buf);
             buf.flip();
-            int length =  buf.getInt();
-            int width = buf.getInt();
-            int height = buf.getInt();
+            short length =  buf.getShort();
+            short width = buf.getShort();
+            short height = buf.getShort();
             int sizeD = buf.getInt();
             int max = buf.getInt();
 
             String[] data = new String[sizeD];
-            String[] block = new String[sizeD];
+            Material[] block = new Material[sizeD];
 
             byte[] buffer = new byte[max];
             int r = 0;
             int c = 0;
+
+            for(int i = 0; i < sizeD; i++)
+            {
+                block[i] = value[buf.getShort()].material;
+            }
 
             while (buf.hasRemaining()){
                 byte b = buf.get();
@@ -271,10 +333,9 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
 
                     System.arraycopy(buffer, 0, result, 0, len);
 
-                    if(c < sizeD)
-                        block[c] = new String(result);
-                    else
-                        data[c - sizeD] = new String(result);
+                    String[] split = new String(result).split(";", 2);
+
+                    data[Integer.parseInt(split[0])] = "minecraft:" + block[Integer.parseInt(split[0])].name().toLowerCase() + split[1];
                     c++;
 
                     r = 0;
