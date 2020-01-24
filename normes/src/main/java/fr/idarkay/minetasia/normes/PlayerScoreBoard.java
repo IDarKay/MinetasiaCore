@@ -1,11 +1,13 @@
 package fr.idarkay.minetasia.normes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.UUID;
 
 
 /**
@@ -21,12 +23,12 @@ import java.util.HashMap;
 public class PlayerScoreBoard
 {
 
-    private final Player player;
+    private final UUID player;
     private HashMap<Integer, String> lines = new HashMap<>();
 
     public PlayerScoreBoard(Player player, String display)
     {
-        this.player = player;
+        this.player = player.getUniqueId();
 
         try
         {
@@ -37,6 +39,12 @@ public class PlayerScoreBoard
             e.printStackTrace();
         }
 
+    }
+
+
+    private Player getPlayer()
+    {
+        return Bukkit.getPlayer(player);
     }
 
     private static final Class<?> packetPlayOutScoreboardScoreClass = Reflection.getNMSClass("PacketPlayOutScoreboardScore");
@@ -70,6 +78,7 @@ public class PlayerScoreBoard
 
         try
         {
+            Player player = getPlayer();
             Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.CHANGE.asNMS, player.getName(), text, line));
             lines.put(line, text);
         }
@@ -84,6 +93,7 @@ public class PlayerScoreBoard
     {
         try
         {
+            Player player = getPlayer();
             Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.REMOVE.asNMS, player.getName(), lines.get(line), 0));
             lines.remove(line);
         }
@@ -98,7 +108,7 @@ public class PlayerScoreBoard
     {
         try
         {
-            Reflection.sendPacket(player, getEditDisplayPacket(2, display));
+            Reflection.sendPacket(getPlayer(), getEditDisplayPacket(2, display));
         }
         catch(Exception e) { e.printStackTrace(); }
     }
@@ -110,7 +120,7 @@ public class PlayerScoreBoard
     {
         try
         {
-            Reflection.sendPacket(player, getEditDisplayPacket(1, null));
+            Reflection.sendPacket(getPlayer(), getEditDisplayPacket(1, null));
         }
         catch(Exception e) { e.printStackTrace(); }
     }
@@ -137,7 +147,7 @@ public class PlayerScoreBoard
     {
         Object packet = packetPlayOutScoreboardObjectiveClassConstructor.newInstance();
 
-        pPOSOFAName.set(packet, player.getName());
+        pPOSOFAName.set(packet, getPlayer().getName());
         pPOSOFDMode.set(packet, mode);
 
         if(mode == 0 || mode == 2)
@@ -160,7 +170,7 @@ public class PlayerScoreBoard
         Object packet = packetPlayOutScoreboardDisplayObjectiveConstructor.newInstance();
 
         pPOSDOFAPosition.set(packet, 1);
-        pPOSDOFBName.set(packet, player.getName());
+        pPOSDOFBName.set(packet, getPlayer().getName());
         return packet;
     }
 
