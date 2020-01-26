@@ -168,10 +168,10 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
                     if(!ignoreAir || !isAir(m))
                     {
                         Block block = w.getBlockAt(x + x0, y + y0, z + z0);
-                        if(haveConsumer) blockConsumer.accept(block);
                         block.setType(m, true);
                         if(data[i] != null)
                             block.setBlockData(Bukkit.createBlockData(data[i]));
+                        if(haveConsumer) blockConsumer.accept(block);
                     }
                 }
             }
