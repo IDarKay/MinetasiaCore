@@ -30,22 +30,55 @@ public class Particle
     private final float offsetX, offsetY , offsetZ, speed;
     private final int amount;
 
-
+    /**
+     * create new Particle
+     * @param particles particles
+     * @param location location
+     * @see Particle#getParticlePacket(Particles, double, double, double, float, float, float, float, int)
+     */
     public Particle(@NotNull final Particles particles, @NotNull final Location location)
     {
         this(particles, location, 0f, 0f, 0f, 0f, 1);
     }
 
+    /**
+     * create new Particle
+     * @param particles particles
+     * @param location location
+     * @param offsetX offsetX
+     * @param offsetY offsetY
+     * @param offsetZ offsetZ
+     * @see Particle#getParticlePacket(Particles, double, double, double, float, float, float, float, int)
+     */
     public Particle(@NotNull final Particles particles, @NotNull final Location location, final float offsetX, final float offsetY, final float offsetZ)
     {
         this(particles, location, offsetX, offsetZ, offsetY, 0f, 1);
     }
 
+    /**
+     * create new Particle
+     * @param particles particles
+     * @param location location
+     * @param speed speed
+     * @param amount amount
+     * @see Particle#getParticlePacket(Particles, double, double, double, float, float, float, float, int)
+     */
     public Particle(@NotNull final Particles particles, @NotNull final Location location , final float speed, final int amount)
     {
         this(particles, location, 0f, 0f, 0f, speed, amount);
     }
 
+    /**
+     * create new Particle
+     * @param particles particles
+     * @param location location
+     * @param offsetX offsetX
+     * @param offsetY offsetY
+     * @param offsetZ offsetZ
+     * @param speed speed
+     * @param amount amount
+     * @see Particle#getParticlePacket(Particles, double, double, double, float, float, float, float, int)
+     */
     public Particle(@NotNull final Particles particles, @NotNull final Location location, final float offsetX, final float offsetY, final float offsetZ, final float speed, final int amount)
     {
         Validate.notNull(location);
@@ -62,6 +95,10 @@ public class Particle
 
     private Object packet;
 
+    /**
+     * get the equivalent packet of the particle
+     * @return packet
+     */
     public Object toPacket()
     {
         if(packet == null)
@@ -69,6 +106,10 @@ public class Particle
         return packet;
     }
 
+    /**
+     * send the particle to player
+     * @param player player
+     */
     public void sendToPlayer(Player player)
     {
         Reflection.sendPacket(player, toPacket());

@@ -12,5 +12,8 @@ package fr.idarkay.minetasia.normes;
  */
 public interface Particles
 {
+    /**
+     * @return the equivalent Particle in NMS
+     */
     Object getNMSObject();
 }

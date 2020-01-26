@@ -1,5 +1,7 @@
 package fr.idarkay.minetasia.normes;
 
+import org.bukkit.Material;
+
 import java.io.Serializable;
 
 /**
@@ -12,15 +14,16 @@ import java.io.Serializable;
  * @author Alois. B. (IDarKay),
  * Created the 15/12/2019 at 12:46
  */
-public final class Schematic implements Serializable {
+public final class Schematic implements Serializable
+{
 
     private static final long serialVersionUID = 1577258786157412358L;
 
-    private final String[] blocks;
+    private final Material[] blocks;
     private final String[] data;
-    private final int length, width, height;
+    private final short length, width, height;
 
-    public Schematic(String[] blocks, String[] data, int length, int width, int height)
+    public Schematic(Material[] blocks, String[] data, short length, short width, short height)
     {
         this.blocks = blocks;
         this.length = length;
@@ -30,19 +33,19 @@ public final class Schematic implements Serializable {
     }
 
 
-    public String[] getBlocks() {
+    public Material[] getBlocks() {
         return blocks;
     }
 
-    public int getHeight() {
+    public short getHeight() {
         return height;
     }
 
-    public int getLength() {
+    public short getLength() {
         return length;
     }
 
-    public int getWidth() {
+    public short getWidth() {
         return width;
     }
 
