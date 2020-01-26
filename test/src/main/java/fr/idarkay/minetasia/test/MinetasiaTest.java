@@ -492,6 +492,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return maxPlayerCount;
     }
 
+    @Override
+    public boolean isHub()
+    {
+        return false;
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
