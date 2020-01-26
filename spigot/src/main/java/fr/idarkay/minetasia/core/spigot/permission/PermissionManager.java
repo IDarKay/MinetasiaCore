@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import fr.idarkay.minetasia.core.api.event.PlayerPermissionLoadEndEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.Player;
 import org.bukkit.Bukkit;
@@ -475,6 +476,7 @@ public class PermissionManager {
                     plugin.setPlayerData(uuid, "temp_permission", jo.toString());
                 }
                 permissionAttachments.put(uuid, map);
+                Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(new PlayerPermissionLoadEndEvent(p)));
             }
             else Bukkit.getLogger().warning("Can't load permission of " + uuid.toString() + ", he isn't connected");
         });
