@@ -136,7 +136,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private String serverType;
     private boolean isHub;
 
-    private int commands = 0;
+    private int commands = 0, maxPlayerCountAddAdmin;
 
     private Cache<Integer, Map<UUID, String>> onlinePlayer;
 
@@ -148,8 +148,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         getMinetasiaLang().init();
         Lang.prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));
         Lang.api = this;
+
         serverType = getConfig().getString("server_type");
         isHub = serverType.startsWith(HUB_NAME);
+
+        maxPlayerCountAddAdmin = getConfig().getInt("max-player-count-add-admin");
 
         // init db system
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load SQL");
@@ -948,7 +951,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         //check if max player is not -1
         if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
         //add place for admin
-        if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
+        if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + maxPlayerCountAddAdmin, false);
         System.out.println("Server Phase set to " + phase.name());
         //todo: new server system
     }
@@ -969,7 +972,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public int getMaxPlayerCount()
     {
-        return serverPhase == ServerPhase.GAME || serverPhase == ServerPhase.END ? maxPlayerCount -2 : maxPlayerCount;
+        return serverPhase == ServerPhase.GAME || serverPhase == ServerPhase.END ? maxPlayerCount - maxPlayerCountAddAdmin : maxPlayerCount;
     }
 
     @Override
