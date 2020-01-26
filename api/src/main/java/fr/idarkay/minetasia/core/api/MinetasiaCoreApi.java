@@ -442,15 +442,35 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     @NotNull
     public abstract String getGroupDisplay(UUID player);
 
+    /**
+     * can't change phase in hub server
+     * @param phase to set
+     * @see ServerPhase
+     */
     public abstract void setServerPhase(@NotNull ServerPhase phase);
 
+    /**
+     * get the phase of the server
+     * @return {@link ServerPhase}
+     */
     @NotNull
     public abstract ServerPhase getServerPhase();
 
+    /**
+     * need set in {@link ServerPhase#LOAD} set the maximum of player CAN PLAY
+     * @param maxPlayer maximum player can play
+     */
     public abstract void setMaxPlayerCount(int maxPlayer);
 
+    /**
+     * get the maximum of player CAN player admin place not count
+     * @return maximum player can play
+     */
     public abstract int getMaxPlayerCount();
 
+    /**
+     * @return true if server is a hub else false
+     */
     public abstract boolean isHub();
 
 //    public abstract int getKitLevelOfUser(UUID player, String kitName);
