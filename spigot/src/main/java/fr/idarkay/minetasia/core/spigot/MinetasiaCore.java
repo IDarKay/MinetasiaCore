@@ -228,16 +228,24 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void onEnable() {
 
-
-        // register permissions
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register permission");
         try {
             PluginManager pm = getServer().getPluginManager();
             PermissionDefault permDefault = getConfig().getBoolean("commands-allow-op") ? PermissionDefault.OP : PermissionDefault.FALSE;
 
+            // register command permissions (core)
+            console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register core permission");
             for (CommandPermission p : CommandPermission.values()) {
+                console.sendMessage(ChatColor.GRAY + LOG_PREFIX + "Register permission : " + p.getPermission());
                 pm.addPermission(new Permission(p.getPermission(), p.getDescription(), permDefault, p.getALLChild()));
             }
+
+            // register general permissions
+            console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register general permission");
+            for (GeneralPermission p : GeneralPermission.values()) {
+                console.sendMessage(ChatColor.GRAY + LOG_PREFIX + "Register permission : " + p.getPermission());
+                pm.addPermission(new Permission(p.getPermission(), p.getDescription(), permDefault, p.getALLChild()));
+            }
+
         } catch (Exception e) {
             // this throws an exception if the plugin is /reloaded, grr
         }

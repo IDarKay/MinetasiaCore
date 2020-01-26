@@ -1,17 +1,18 @@
 package fr.idarkay.minetasia.test;
 
-import fr.idarkay.minetasia.core.api.Command;
-import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
-import fr.idarkay.minetasia.core.api.ServerPhase;
+import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,9 +87,26 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
     };
 
+    private final static String LOG_PREFIX = "[Minetasia-Core-test]";
+
     @Override
     public void onEnable() {
         Bukkit.getLogger().info("Fake Plugin start");
+        final ConsoleCommandSender console =  this.getServer().getConsoleSender();
+        try {
+            PluginManager pm = getServer().getPluginManager();
+            PermissionDefault permDefault = getConfig().getBoolean("commands-allow-op") ? PermissionDefault.OP : PermissionDefault.FALSE;
+
+            // register general permissions
+            console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register general permission");
+            for (GeneralPermission p : GeneralPermission.values()) {
+                console.sendMessage(ChatColor.GRAY + LOG_PREFIX + "Register permission : " + p.getPermission());
+                pm.addPermission(new Permission(p.getPermission(), p.getDescription(), permDefault, p.getALLChild()));
+            }
+
+        } catch (Exception e) {
+            // this throws an exception if the plugin is /reloaded, grr
+        }
 
     }
 
