@@ -1,11 +1,13 @@
 package fr.idarkay.minetasia.normes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.UUID;
 
 
 /**
@@ -21,12 +23,12 @@ import java.util.HashMap;
 public class PlayerScoreBoard
 {
 
-    private final Player player;
+    private final UUID player;
     private HashMap<Integer, String> lines = new HashMap<>();
 
     public PlayerScoreBoard(Player player, String display)
     {
-        this.player = player;
+        this.player = player.getUniqueId();
 
         try
         {
@@ -39,15 +41,33 @@ public class PlayerScoreBoard
 
     }
 
+
+    private Player getPlayer()
+    {
+        return Bukkit.getPlayer(player);
+    }
+
     private static final Class<?> packetPlayOutScoreboardScoreClass = Reflection.getNMSClass("PacketPlayOutScoreboardScore");
     private static final Class<?> action = Reflection.getNMSClass("ScoreboardServer$Action");
     private static final Constructor<?> pPOSSConstructor = Reflection.getConstructor(packetPlayOutScoreboardScoreClass, false, action, String.class, String.class, int.class);
 
+    /**
+     * set new line to list
+     * @param text test (display)
+     * @param line number of the line
+     * force = false
+     */
     public void setLine(String text, int line)
     {
         setLine(text, line, false);
     }
 
+    /**
+     * set new line to list
+     * @param text test (display)
+     * @param line number of the line
+     * @param force if true if scoreboard have same line force set else no set
+     */
     public void setLine(String text, int line, boolean force)
     {
         if(lines.containsKey(line))
@@ -58,37 +78,49 @@ public class PlayerScoreBoard
 
         try
         {
+            Player player = getPlayer();
             Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.CHANGE.asNMS, player.getName(), text, line));
             lines.put(line, text);
         }
         catch(Exception e) { e.printStackTrace(); }
     }
 
+    /**
+     * remove a line of scoreBoard
+     * @param line number of remove ligne
+     */
     public void removeLine(int line)
     {
         try
         {
+            Player player = getPlayer();
             Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.REMOVE.asNMS, player.getName(), lines.get(line), 0));
             lines.remove(line);
         }
         catch(Exception e) { e.printStackTrace(); }
     }
 
-
+    /**
+     * change the name of the ScoreBoard
+     * @param display name accept ChatColor
+     */
     public void setDisplayName(String display)
     {
         try
         {
-            Reflection.sendPacket(player, getEditDisplayPacket(2, display));
+            Reflection.sendPacket(getPlayer(), getEditDisplayPacket(2, display));
         }
         catch(Exception e) { e.printStackTrace(); }
     }
 
+    /**
+     * delete the ScoreBoard
+     */
     public void destroy()
     {
         try
         {
-            Reflection.sendPacket(player, getEditDisplayPacket(1, null));
+            Reflection.sendPacket(getPlayer(), getEditDisplayPacket(1, null));
         }
         catch(Exception e) { e.printStackTrace(); }
     }
@@ -115,7 +147,7 @@ public class PlayerScoreBoard
     {
         Object packet = packetPlayOutScoreboardObjectiveClassConstructor.newInstance();
 
-        pPOSOFAName.set(packet, player.getName());
+        pPOSOFAName.set(packet, getPlayer().getName());
         pPOSOFDMode.set(packet, mode);
 
         if(mode == 0 || mode == 2)
@@ -133,13 +165,12 @@ public class PlayerScoreBoard
     private static final Field pPOSDOFAPosition = Reflection.getField(packetPlayOutScoreboardDisplayObjectiveClass, "a", true);
     private static final Field pPOSDOFBName = Reflection.getField(packetPlayOutScoreboardDisplayObjectiveClass, "b", true);
 
-
     private Object getShowPacket() throws InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Object packet = packetPlayOutScoreboardDisplayObjectiveConstructor.newInstance();
 
         pPOSDOFAPosition.set(packet, 1);
-        pPOSDOFBName.set(packet, player.getName());
+        pPOSDOFBName.set(packet, getPlayer().getName());
         return packet;
     }
 

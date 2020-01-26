@@ -8,10 +8,7 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import fr.idarkay.minetasia.core.api.BoostType;
-import fr.idarkay.minetasia.core.api.Command;
-import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
@@ -31,6 +28,7 @@ import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Reflection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -46,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
@@ -135,8 +134,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private FriendsExecutor friendsExecutor;
 
     private String serverType;
+    private boolean isHub;
 
-    private int commands = 0;
+    private int commands = 0, maxPlayerCountAddAdmin;
 
     private Cache<Integer, Map<UUID, String>> onlinePlayer;
 
@@ -148,7 +148,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         getMinetasiaLang().init();
         Lang.prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));
         Lang.api = this;
+
         serverType = getConfig().getString("server_type");
+        isHub = serverType.startsWith(HUB_NAME);
+
+        maxPlayerCountAddAdmin = getConfig().getInt("max-player-count-add-admin");
 
         // init db system
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load SQL");
@@ -231,16 +235,24 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void onEnable() {
 
-
-        // register permissions
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register permission");
         try {
             PluginManager pm = getServer().getPluginManager();
             PermissionDefault permDefault = getConfig().getBoolean("commands-allow-op") ? PermissionDefault.OP : PermissionDefault.FALSE;
 
+            // register command permissions (core)
+            console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register core permission");
             for (CommandPermission p : CommandPermission.values()) {
+                console.sendMessage(ChatColor.GRAY + LOG_PREFIX + "Register permission : " + p.getPermission());
                 pm.addPermission(new Permission(p.getPermission(), p.getDescription(), permDefault, p.getALLChild()));
             }
+
+            // register general permissions
+            console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register general permission");
+            for (GeneralPermission p : GeneralPermission.values()) {
+                console.sendMessage(ChatColor.GRAY + LOG_PREFIX + "Register permission : " + p.getPermission());
+                pm.addPermission(new Permission(p.getPermission(), p.getDescription(), permDefault, p.getALLChild()));
+            }
+
         } catch (Exception e) {
             // this throws an exception if the plugin is /reloaded, grr
         }
@@ -812,7 +824,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
                 addPlayerMoneys(uuid, newMap, false);
 
-                String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), Lang.Argument.SERVER_TYPE.match(serverType), Lang.Argument.MONEY_TYPE.match(money.toString())).split("\n");
+                String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), Lang.Argument.SERVER_TYPE.match(serverType), Lang.Argument.REWARDS.match(money.toString())).split("\n");
                 org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
                 if(p != null)
                     for(String s : toSend) p.sendMessage(s);
@@ -925,6 +937,64 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         if(g == null) return "";
         else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
+    }
+
+    private static ServerPhase serverPhase = ServerPhase.LOAD;
+    private int maxPlayerCount = -1;
+
+    @Override
+    public void setServerPhase(@NotNull ServerPhase phase)
+    {
+        Validate.notNull(phase);
+        if(isHub) throw new IllegalArgumentException("cant change phase in hub !");
+        serverPhase = phase;
+        //check if max player is not -1
+        if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
+        //add place for admin
+        if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + maxPlayerCountAddAdmin, false);
+        System.out.println("Server Phase set to " + phase.name());
+        //todo: new server system
+    }
+
+    @Override
+    public @NotNull ServerPhase getServerPhase()
+    {
+        return serverPhase;
+    }
+
+    @Override
+    public void setMaxPlayerCount(int maxPlayer)
+    {
+        if(isHub) throw new IllegalArgumentException("cant set max player in hub with this methods use public void setMaxPlayerCount(int maxPlayer, boolean startup)  !");
+        setMaxPlayerCount(maxPlayer, true);
+    }
+
+    @Override
+    public int getMaxPlayerCount()
+    {
+        return serverPhase == ServerPhase.GAME || serverPhase == ServerPhase.END ? maxPlayerCount - maxPlayerCountAddAdmin : maxPlayerCount;
+    }
+
+    @Override
+    public boolean isHub()
+    {
+        return isHub;
+    }
+
+    public void setMaxPlayerCount(int maxPlayer, boolean startup)
+    {
+        this.maxPlayerCount = maxPlayer;
+        if(startup && serverPhase != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
+        try
+        {
+            Object playerList = Reflection.getNMSBClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
+            Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
+            maxPlayers.set(playerList, maxPlayer);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        //todo: new server system
     }
 
 //    @Override
