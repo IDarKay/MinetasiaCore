@@ -955,6 +955,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         setMaxPlayerCount(maxPlayer, true);
     }
 
+    @Override
+    public int getMaxPlayerCount()
+    {
+        return maxPlayerCount;
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         this.maxPlayerCount = maxPlayer;
