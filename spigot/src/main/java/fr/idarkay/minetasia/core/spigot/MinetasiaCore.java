@@ -8,10 +8,7 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import fr.idarkay.minetasia.core.api.BoostType;
-import fr.idarkay.minetasia.core.api.Command;
-import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
@@ -925,6 +922,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         if(g == null) return "";
         else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
+    }
+
+    @Override
+    public void setServerPhase(ServerPhase phase)
+    {
+        System.out.println("Server Phase set to " + phase.name());
+        //todo: new server system
     }
 
 //    @Override

@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.test;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.api.ServerPhase;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
@@ -441,6 +442,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     public @NotNull String getGroupDisplay(UUID uuid)
     {
         return ChatColor.GOLD + "[test]";
+    }
+
+    @Override
+    public void setServerPhase(ServerPhase phase)
+    {
+        System.out.println("Server Phase set to " + phase.name());
     }
 
 }
