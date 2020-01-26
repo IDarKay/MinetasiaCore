@@ -497,7 +497,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
     @Override
     public int getMaxPlayerCount()
     {
-        return maxPlayerCount;
+        return serverPhase == ServerPhase.GAME || serverPhase == ServerPhase.END ? maxPlayerCount -2 : maxPlayerCount;
     }
 
     @Override
