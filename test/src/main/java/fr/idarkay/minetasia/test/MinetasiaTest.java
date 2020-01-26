@@ -5,6 +5,7 @@ import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -471,6 +472,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
     @Override
     public void setServerPhase(@NotNull ServerPhase phase)
     {
+        Validate.notNull(phase);
         serverPhase = phase;
         //check if max player is not -1
         if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
@@ -478,6 +480,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
         System.out.println("Server Phase set to " + phase.name());
         //todo: new server system
+    }
+
+    @Override
+    public @NotNull ServerPhase getServerPhase()
+    {
+        return serverPhase;
     }
 
     @Override

@@ -444,6 +444,9 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract void setServerPhase(@NotNull ServerPhase phase);
 
+    @NotNull
+    public abstract ServerPhase getServerPhase();
+
     public abstract void setMaxPlayerCount(int maxPlayer);
 
     public abstract int getMaxPlayerCount();

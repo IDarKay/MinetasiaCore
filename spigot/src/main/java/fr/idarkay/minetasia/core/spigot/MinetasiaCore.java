@@ -942,6 +942,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void setServerPhase(@NotNull ServerPhase phase)
     {
+        Validate.notNull(phase);
         if(isHub) throw new IllegalArgumentException("cant change phase in hub !");
         serverPhase = phase;
         //check if max player is not -1
@@ -950,6 +951,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
         System.out.println("Server Phase set to " + phase.name());
         //todo: new server system
+    }
+
+    @Override
+    public @NotNull ServerPhase getServerPhase()
+    {
+        return serverPhase;
     }
 
     @Override
