@@ -1,19 +1,24 @@
 package fr.idarkay.minetasia.test;
 
-import fr.idarkay.minetasia.core.api.Command;
-import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Reflection;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -85,9 +90,26 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
     };
 
+    private final static String LOG_PREFIX = "[Minetasia-Core-test]";
+
     @Override
     public void onEnable() {
         Bukkit.getLogger().info("Fake Plugin start");
+        final ConsoleCommandSender console =  this.getServer().getConsoleSender();
+        try {
+            PluginManager pm = getServer().getPluginManager();
+            PermissionDefault permDefault = getConfig().getBoolean("commands-allow-op") ? PermissionDefault.OP : PermissionDefault.FALSE;
+
+            // register general permissions
+            console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register general permission");
+            for (GeneralPermission p : GeneralPermission.values()) {
+                console.sendMessage(ChatColor.GRAY + LOG_PREFIX + "Register permission : " + p.getPermission());
+                pm.addPermission(new Permission(p.getPermission(), p.getDescription(), permDefault, p.getALLChild()));
+            }
+
+        } catch (Exception e) {
+            // this throws an exception if the plugin is /reloaded, grr
+        }
 
     }
 
@@ -441,6 +463,62 @@ public class MinetasiaTest extends MinetasiaCoreApi
     public @NotNull String getGroupDisplay(UUID uuid)
     {
         return ChatColor.GOLD + "[test]";
+    }
+
+    private static ServerPhase serverPhase = ServerPhase.LOAD;
+
+    private int maxPlayerCount = -1;
+
+    @Override
+    public void setServerPhase(@NotNull ServerPhase phase)
+    {
+        Validate.notNull(phase);
+        serverPhase = phase;
+        //check if max player is not -1
+        if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
+        //add place for admin
+        if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
+        System.out.println("Server Phase set to " + phase.name());
+        //todo: new server system
+    }
+
+    @Override
+    public @NotNull ServerPhase getServerPhase()
+    {
+        return serverPhase;
+    }
+
+    @Override
+    public void setMaxPlayerCount(int maxPlayer)
+    {
+        setMaxPlayerCount(maxPlayer, true);
+    }
+
+    @Override
+    public int getMaxPlayerCount()
+    {
+        return serverPhase == ServerPhase.GAME || serverPhase == ServerPhase.END ? maxPlayerCount -2 : maxPlayerCount;
+    }
+
+    @Override
+    public boolean isHub()
+    {
+        return false;
+    }
+
+    public void setMaxPlayerCount(int maxPlayer, boolean startup)
+    {
+        maxPlayerCount = maxPlayer;
+        if(startup && serverPhase != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
+        try
+        {
+            Object playerList = Reflection.getNMSBClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
+            Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
+            maxPlayers.set(playerList, maxPlayer);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
 }
