@@ -133,7 +133,9 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      * load a schematic in the world
      * @param schematic schematic to load
      * @param location location of the minimum location fo the build
-     *  ignoreAir = true
+     *  ignoreAir = {@code true} <br>
+     *  direction = {@link Direction#NORTH} <br>
+     *  consumer = {@code null}
      */
     public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location)
     {
@@ -145,6 +147,8 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      * @param schematic schematic to load
      * @param location location of the minimum location fo the build
      * @param ignoreAir if true air block will be not place
+     * @param d direction of the build {@link Direction}
+    *  @param blockConsumer action to ably to all block (ignore air if true) if not use set {@code null}
      */
     public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location, boolean ignoreAir, @NotNull Direction d, @Nullable Consumer<? super Block> blockConsumer)
     {
