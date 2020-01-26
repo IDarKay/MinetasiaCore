@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.normes;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Directional;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -145,12 +146,13 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      * @param location location of the minimum location fo the build
      * @param ignoreAir if true air block will be not place
      */
-    public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location, boolean ignoreAir, @NotNull Direction direction, @Nullable Consumer<? super Block> blockConsumer)
+    public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location, boolean ignoreAir, @NotNull Direction d, @Nullable Consumer<? super Block> blockConsumer)
     {
         Material[] blocks = schematic.getBlocks();
         String[] data = schematic.getData();
         World w = location.getWorld();
         boolean haveConsumer = blockConsumer != null;
+        boolean isNorth = d == Direction.NORTH;
 
         if(w == null) throw new NullPointerException("location haven't world");
 
@@ -167,10 +169,15 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
                     Material m = blocks[i];
                     if(!ignoreAir || !isAir(m))
                     {
-                        Block block = w.getBlockAt(x + x0, y + y0, z + z0);
+                        Block block = w.getBlockAt(d.x(x, z, length, width) + x0, y + y0, d.z(x, z, length , width) + z0);
                         block.setType(m, true);
                         if(data[i] != null)
-                            block.setBlockData(Bukkit.createBlockData(data[i]));
+                        {
+                            if(!isNorth &&  block.getBlockData() instanceof Directional)
+                                block.setBlockData(Bukkit.createBlockData(d.rotateData(data[i])));
+                            else
+                                block.setBlockData(Bukkit.createBlockData(data[i]));
+                        }
                         if(haveConsumer) blockConsumer.accept(block);
                     }
                 }
