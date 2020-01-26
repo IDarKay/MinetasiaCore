@@ -1,6 +1,9 @@
 package fr.idarkay.minetasia.core.spigot.listener;
 
 import fr.idarkay.minetasia.core.api.Command;
+import fr.idarkay.minetasia.core.api.GeneralPermission;
+import fr.idarkay.minetasia.core.api.ServerPhase;
+import fr.idarkay.minetasia.core.api.event.PlayerPermissionLoadEndEvent;
 import fr.idarkay.minetasia.core.api.utils.Boost;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.Player;
@@ -84,4 +87,18 @@ public class PlayerListener implements Listener {
         e.setQuitMessage(null);
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerPermissionLoadEndEvent(PlayerPermissionLoadEndEvent e)
+    {
+        if(plugin.getServerPhase() == ServerPhase.GAME)
+        {
+            if(Bukkit.getOnlinePlayers().size() > plugin.getMaxPlayerCount())
+            {
+                if(!e.getPlayer().hasPermission(GeneralPermission.ADMIN_SPECTATOR.getPermission()))
+                {
+                    plugin.movePlayerToHub(e.getPlayer());
+                }
+            }
+        }
+    }
 }
