@@ -28,6 +28,7 @@ import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Reflection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -43,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
@@ -932,10 +934,40 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
     }
 
+    private static ServerPhase serverPhase = ServerPhase.LOAD;
+    private int maxPlayerCount = -1;
+
     @Override
-    public void setServerPhase(ServerPhase phase)
+    public void setServerPhase(@NotNull ServerPhase phase)
     {
+        serverPhase = phase;
+        //check if max player is not -1
+        if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
+        //add place for admin
+        if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
         System.out.println("Server Phase set to " + phase.name());
+        //todo: new server system
+    }
+
+    @Override
+    public void setMaxPlayerCount(int maxPlayer)
+    {
+        setMaxPlayerCount(maxPlayer, true);
+    }
+
+    public void setMaxPlayerCount(int maxPlayer, boolean startup)
+    {
+        this.maxPlayerCount = maxPlayer;
+        if(startup && serverPhase != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
+        try
+        {
+            Object playerList = Reflection.getNMSBClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
+            Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
+            maxPlayers.set(playerList, maxPlayer);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         //todo: new server system
     }
 

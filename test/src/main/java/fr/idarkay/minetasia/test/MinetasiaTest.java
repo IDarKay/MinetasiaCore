@@ -4,6 +4,7 @@ import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -16,6 +17,7 @@ import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -462,10 +464,34 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return ChatColor.GOLD + "[test]";
     }
 
+    private static ServerPhase serverPhase = ServerPhase.LOAD;
+
     @Override
-    public void setServerPhase(ServerPhase phase)
+    public void setServerPhase(@NotNull ServerPhase phase)
     {
+        serverPhase = phase;
         System.out.println("Server Phase set to " + phase.name());
+        //todo: new server system
+    }
+
+    @Override
+    public void setMaxPlayerCount(int maxPlayer)
+    {
+        setMaxPlayerCount(maxPlayer, true);
+    }
+
+    public void setMaxPlayerCount(int maxPlayer, boolean startup)
+    {
+        if(startup && serverPhase != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
+        try
+        {
+            Object playerList = Reflection.getNMSBClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
+            Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
+            maxPlayers.set(playerList, maxPlayer);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
 }
