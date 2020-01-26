@@ -942,6 +942,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void setServerPhase(@NotNull ServerPhase phase)
     {
+        if(isHub) throw new IllegalArgumentException("cant change phase in hub !");
         serverPhase = phase;
         //check if max player is not -1
         if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
@@ -954,6 +955,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void setMaxPlayerCount(int maxPlayer)
     {
+        if(isHub) throw new IllegalArgumentException("cant set max player in hub with this methods use public void setMaxPlayerCount(int maxPlayer, boolean startup)  !");
         setMaxPlayerCount(maxPlayer, true);
     }
 
