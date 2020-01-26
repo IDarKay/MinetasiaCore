@@ -446,6 +446,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract void setMaxPlayerCount(int maxPlayer);
 
+    public abstract int getMaxPlayerCount();
+
 //    public abstract int getKitLevelOfUser(UUID player, String kitName);
 //
 //    public abstract void setKitLvlOfUser(UUID player, String kitName, int lvl);

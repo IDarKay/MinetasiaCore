@@ -466,10 +466,16 @@ public class MinetasiaTest extends MinetasiaCoreApi
 
     private static ServerPhase serverPhase = ServerPhase.LOAD;
 
+    private int maxPlayerCount = -1;
+
     @Override
     public void setServerPhase(@NotNull ServerPhase phase)
     {
         serverPhase = phase;
+        //check if max player is not -1
+        if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
+        //add place for admin
+        if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
         System.out.println("Server Phase set to " + phase.name());
         //todo: new server system
     }
@@ -480,8 +486,15 @@ public class MinetasiaTest extends MinetasiaCoreApi
         setMaxPlayerCount(maxPlayer, true);
     }
 
+    @Override
+    public int getMaxPlayerCount()
+    {
+        return maxPlayerCount;
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
+        maxPlayerCount = maxPlayer;
         if(startup && serverPhase != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
         try
         {
