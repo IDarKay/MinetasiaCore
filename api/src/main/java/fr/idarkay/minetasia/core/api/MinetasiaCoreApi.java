@@ -440,6 +440,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     @NotNull
     public abstract String getGroupDisplay(UUID player);
 
+    public abstract void setServerPhase(ServerPhase phase);
+
 //    public abstract int getKitLevelOfUser(UUID player, String kitName);
 //
 //    public abstract void setKitLvlOfUser(UUID player, String kitName, int lvl);
