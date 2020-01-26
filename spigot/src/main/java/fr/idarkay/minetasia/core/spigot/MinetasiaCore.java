@@ -134,6 +134,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private FriendsExecutor friendsExecutor;
 
     private String serverType;
+    private boolean isHub;
 
     private int commands = 0;
 
@@ -148,6 +149,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Lang.prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));
         Lang.api = this;
         serverType = getConfig().getString("server_type");
+        isHub = serverType.startsWith(HUB_NAME);
 
         // init db system
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load SQL");
@@ -959,6 +961,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public int getMaxPlayerCount()
     {
         return maxPlayerCount;
+    }
+
+    @Override
+    public boolean isHub()
+    {
+        return isHub;
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
