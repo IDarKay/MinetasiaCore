@@ -74,3 +74,6 @@ kits_load:
 #
 # - Set to false to only allow users who have the permissions access to the commands
 commands-allow-op: true
+
+# in phase Game and end add  maxPlayerCount by next number only for admin spectator
+max-player-count-add-admin: 5
