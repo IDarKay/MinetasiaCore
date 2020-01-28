@@ -37,7 +37,6 @@ public class InventoryCloseListener implements Listener
             if(gui != null  && !blackListClazz.contains(gui.getClass()))
                 gui.close(player, e);
 
-            player.updateInventory();
         }
     }
 

@@ -28,21 +28,20 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
 
     protected final T plugin;
     private final boolean isRealInventory;
-    private final String id;
+    private final UUID id;
     private final GUIFlags[] flags;
 
     /**
      *
      * @param plugin plugin class
      * @param isRealInventory set false for custom gui true for other already exist inventory
-     * @param id id of the inventory (pluginName_name)
      * @param guiFlags flags of teh inventory
      */
-    public MinetasiaGUI(T plugin, boolean isRealInventory, String id, GUIFlags... guiFlags)
+    public MinetasiaGUI(T plugin, boolean isRealInventory, GUIFlags... guiFlags)
     {
         this.plugin = plugin;
         this.isRealInventory = isRealInventory;
-        this.id = Objects.requireNonNull(id);
+        this.id = UUID.randomUUID();
         this.flags = Objects.requireNonNull(guiFlags);
     }
 
@@ -97,7 +96,7 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      * @return created inventory
      * @since 1.0
      */
-    public static Inventory createGUI(@NotNull String id, MinetasiaGUI minetasiaGUI , int numberOfRow, @NotNull String name, @NotNull InventoryFileType type, @Nullable ItemStack fileMaterial)
+    public static Inventory createGUI(@NotNull UUID id, MinetasiaGUI minetasiaGUI , int numberOfRow, @NotNull String name, @NotNull InventoryFileType type, @Nullable ItemStack fileMaterial)
     {
         return createGUI(new MinetasiaGuiHolder(id, minetasiaGUI), numberOfRow, name, type, fileMaterial);
     }
@@ -115,7 +114,7 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      * @return created inventory
      * @since 1.0
      */
-    public static Inventory createGUI(@NotNull String id, int numberOfRow, @NotNull String name, @NotNull InventoryFileType type, @Nullable ItemStack fileMaterial)
+    public static Inventory createGUI(@NotNull UUID id, int numberOfRow, @NotNull String name, @NotNull InventoryFileType type, @Nullable ItemStack fileMaterial)
     {
         return createGUI(new MinetasiaGuiHolder(id, null), numberOfRow, name, type, fileMaterial);
     }

@@ -36,7 +36,6 @@ public class InventoryOpenListener implements Listener
             if(gui != null  && !blackListClazz.contains(gui.getClass()))
                 gui.open(player, e);
 
-            player.updateInventory();
         }
     }
 
