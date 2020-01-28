@@ -15,6 +15,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * File <b>InventoryClickListener</b> located on fr.idarkay.minetasia.core.common.listener
@@ -58,7 +59,6 @@ public final class InventoryClickListener implements Listener {
                 final MinetasiaGUI gui = holder.getMinetasiaGUI();
                 if(gui != null && !blackListClazz.contains(gui.getClass()))
                     gui.click(player, e);
-                player.updateInventory();
             }
         }
 
@@ -66,8 +66,8 @@ public final class InventoryClickListener implements Listener {
         Inventory inventory = e.getInventory();
         if(inventory.getHolder() instanceof MinetasiaGuiHolder)
         {
-            String id = ((MinetasiaGuiHolder) inventory.getHolder()).getId();
-            if(id.equals("lang"))
+            UUID id = ((MinetasiaGuiHolder) inventory.getHolder()).getUuid();
+            if(id.equals(GUI.uuid))
             {
                 e.setCancelled(true);
                 Player p = (Player) e.getWhoClicked();

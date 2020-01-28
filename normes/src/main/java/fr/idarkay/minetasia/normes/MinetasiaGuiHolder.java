@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author alice B. (IDarKay),
@@ -17,14 +18,14 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class MinetasiaGuiHolder implements InventoryHolder {
 
-    private final String id;
+    private final UUID uuid;
     private Inventory inventory;
     private final GUIFlags[] flags;
     private final MinetasiaGUI minetasiaGUI;
 
-    public MinetasiaGuiHolder(@NotNull String id, @Nullable MinetasiaGUI minetasiaGUI, @NotNull GUIFlags... flags)
+    public MinetasiaGuiHolder(@NotNull UUID uuid, @Nullable MinetasiaGUI minetasiaGUI, @NotNull GUIFlags... flags)
     {
-        this.id = Objects.requireNonNull(id);
+        this.uuid = Objects.requireNonNull(uuid);
         this.flags = Objects.requireNonNull(flags);
         this.minetasiaGUI = minetasiaGUI;
     }
@@ -38,13 +39,9 @@ public class MinetasiaGuiHolder implements InventoryHolder {
         this.inventory = inventory;
     }
 
-    /**
-     * @return String id of the gui
-     * @since 1.0
-     */
-    @NotNull
-    public String getId() {
-        return id;
+    public UUID getUuid()
+    {
+        return uuid;
     }
 
     @NotNull
