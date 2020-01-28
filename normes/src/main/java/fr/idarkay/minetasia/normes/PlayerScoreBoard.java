@@ -78,11 +78,25 @@ public class PlayerScoreBoard
 
         try
         {
-            Player player = getPlayer();
+            final Player player = getPlayer();
             Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.CHANGE.asNMS, player.getName(), text, line));
             lines.put(line, text);
         }
         catch(Exception e) { e.printStackTrace(); }
+    }
+
+    public void resendAllLine(Action action)
+    {
+        final Player player = getPlayer();
+        lines.forEach((line, text) ->
+        {
+            try
+            {
+                Reflection.sendPacket(player, pPOSSConstructor.newInstance(action.asNMS, player.getName(), text, line));
+            }
+            catch(Exception e) { e.printStackTrace(); }
+        });
+
     }
 
     /**
@@ -174,7 +188,7 @@ public class PlayerScoreBoard
         return packet;
     }
 
-    private enum Action
+    public enum Action
     {
         CHANGE,
         REMOVE,
