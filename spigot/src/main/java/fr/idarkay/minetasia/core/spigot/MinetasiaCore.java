@@ -40,7 +40,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -965,13 +964,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         Validate.notNull(phase);
         if(isHub) throw new IllegalArgumentException("cant change phase in hub !");
-        serverPhase = phase;
         //check if max player is not -1
         if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
+        serverPhase = phase;
         //add place for admin
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + maxPlayerCountAddAdmin, false);
-        System.out.println("Server Phase set to " + phase.name());
-        //todo: new server system
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> serverManager.getServer().updatePhase(sqlManager, phase));
     }
 
     @Override

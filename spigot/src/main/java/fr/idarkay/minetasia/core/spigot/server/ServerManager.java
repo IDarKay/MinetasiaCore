@@ -28,10 +28,11 @@ public final class ServerManager {
         if(ip.equals("")) ip = "127.0.0.1";
         int port = Bukkit.getPort();
 
-        Server server = new Server(ip, port, plugin.getServerType());
+        Server server = new Server(ip, port, plugin.getServerType(), plugin.getServerConfig());
         this.server = server;
         String json = server.toJson();
         plugin.getFrsClient().setValue("server", server.getName(), json);
+        server.initSQL(plugin.getSqlManager());;
         plugin.publish("core-server", "create;" + json);
         plugin.getFrsClient().getValues("server", plugin.getFrsClient().getFields("server")).forEach( (k, v) -> {
             if(v != null && !v.equals("null"))
