@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.api.utils;
 
+import fr.idarkay.minetasia.core.api.ServerPhase;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -63,5 +64,10 @@ public interface Server {
 
     void setPlayerCount(int playerCount);
 
+    ServerPhase getServerPhase();
+
+    void updatePhase(SQLManager sql, ServerPhase phase);
+
+    void setPhase(ServerPhase phase);
 
 }

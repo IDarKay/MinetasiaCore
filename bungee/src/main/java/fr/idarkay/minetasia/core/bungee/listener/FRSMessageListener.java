@@ -43,13 +43,13 @@ public class FRSMessageListener implements Listener {
         plugin.getProxy().getScheduler().runAsync(plugin, () -> {
             try
             {
-                if(e.getChanel().equals("core-server"))
+                if(e.getChanel().equals("core-frs-msg"))
                 {
-                    String[] msg = e.getValue().split(";", 2);
-                    if (msg.length > 1) {
-                        if(msg[0].equals("create"))
+                    String[] msg = e.getValue().split(";", 3);
+                    if (msg.length > 1 && msg[0].equals("core-server")) {
+                        if(msg[1].equals("create"))
                         {
-                            JsonObject server = new JsonParser().parse(msg[1]).getAsJsonObject();
+                            JsonObject server = new JsonParser().parse(msg[2]).getAsJsonObject();
                             String sIp = server.get("ip").getAsString();
                             int sPort = server.get("port").getAsInt();
                             String serverName = server.get("type").getAsString() + "#" + server.get("uuid").getAsString();
@@ -62,11 +62,11 @@ public class FRSMessageListener implements Listener {
                                 plugin.getProxy().getServers().put(serverName, serverinfo);
                             }
                         }
-                        else if (msg[0].equals("remove"))
+                        else if (msg[1].equals("remove"))
                         {
 
-                            if(plugin.getProxy().getServers().remove(msg[1]) != null)
-                                ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("["+msg[0]+"]" + "<-> server unregistered"));
+                            if(plugin.getProxy().getServers().remove(msg[2]) != null)
+                                ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("["+msg[2]+"]" + "<-> server unregistered"));
                         }
                     }
                 }

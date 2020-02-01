@@ -16,6 +16,8 @@ import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.Executor.*;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
+import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
+import fr.idarkay.minetasia.core.spigot.frs.ServerFrsMessage;
 import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
 import fr.idarkay.minetasia.core.spigot.listener.*;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryClickListener;
@@ -359,8 +361,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     private void startPlayerCountSchedule()
     {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> publish("core-server"
-                , "playerCount;" + getServer().getName() + ";" + Bukkit.getServer().getOnlinePlayers().size()),
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, ()
+                -> publish(ServerFrsMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.PLAYER_COUNT, getServer().getName(),  Bukkit.getServer().getOnlinePlayers().size())),
         20, 20 * 10);
     }
 
@@ -969,7 +971,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         serverPhase = phase;
         //add place for admin
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + maxPlayerCountAddAdmin, false);
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> serverManager.getServer().updatePhase(sqlManager, phase));
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            serverManager.getServer().updatePhase(sqlManager, phase);
+            publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.SERVER_STATUE, getThisServer().getName(), phase.name()));
+        });
+
     }
 
     @Override

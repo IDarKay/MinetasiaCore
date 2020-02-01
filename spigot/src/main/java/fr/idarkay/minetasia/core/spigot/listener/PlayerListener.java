@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
@@ -43,8 +44,9 @@ public class PlayerListener implements Listener {
     public void onPlayerJoinEvent(PlayerJoinEvent e)
     {
         e.setJoinMessage(null);
-        plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->{
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
+            plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
             String statue = plugin.getPlayerData(e.getPlayer().getUniqueId(), "statue");
 
             try {
@@ -82,6 +84,7 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuitEvent(PlayerQuitEvent e)
     {
+        plugin.getPlayerManager().removePlayer(e.getPlayer().getUniqueId());
         plugin.getPermissionManager().removePlayer(e.getPlayer().getUniqueId());
         plugin.socialSpyPlayer.remove(e.getPlayer());
         e.setQuitMessage(null);
