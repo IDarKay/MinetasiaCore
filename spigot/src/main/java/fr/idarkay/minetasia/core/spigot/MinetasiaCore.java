@@ -141,7 +141,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     private FriendsExecutor friendsExecutor;
 
-    private String serverType;
+    private String serverType, prefix = "";
     private boolean isHub;
 
     private int commands = 0, maxPlayerCountAddAdmin;
@@ -154,7 +154,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         // init lang file
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load lang file");
         getMinetasiaLang().init();
-        Lang.prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));
+        prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));
+        Lang.prefix = prefix;
         Lang.api = this;
 
         serverType = getConfig().getString("server_type");
@@ -1029,6 +1030,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 }
             }
         }
+    }
+
+    @Override
+    @NotNull
+    public String getPrefix()
+    {
+        return prefix;
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)

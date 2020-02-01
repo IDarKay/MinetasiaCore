@@ -62,7 +62,7 @@ gui:
         slot: 15
         iso: 'en'
 
-
+#prefix show before msg for all plugins
 prefix: "&9Mine&6Tasia&7>>"
 chat_char: ' > '
 
