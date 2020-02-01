@@ -104,6 +104,12 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
         this.playerCount = playerCount;
     }
 
+    @Override
+    public ServerPhase getServerPhase()
+    {
+        return serverPhase;
+    }
+
     public String getServerConfig()
     {
         return serverConfig;
@@ -114,10 +120,17 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
         sql.update("INSERT INTO `online_server`(`id`, `ip`, `port`, `type`, `config_name`) VALUE(?,?,?,?,?)", getName(), getIp(), getPort(), getType(), getServerConfig());
     }
 
+    @Override
     public synchronized void updatePhase(SQLManager sql, ServerPhase phase)
     {
         this.serverPhase = phase;
         sql.update("INSERT INTO `online_server`(`statue`) VALUE(?) WHERE `ìd` = ?", phase.ordinal(), getName());
+    }
+
+    @Override
+    public void setPhase(ServerPhase phase)
+    {
+        this.serverPhase = phase;
     }
 
     @NotNull

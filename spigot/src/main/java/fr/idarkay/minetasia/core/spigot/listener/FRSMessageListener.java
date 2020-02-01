@@ -4,6 +4,7 @@ import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
 import fr.idarkay.minetasia.core.spigot.server.Server;
 import fr.idarkay.minetasia.core.spigot.user.Player;
@@ -164,28 +165,11 @@ public final class FRSMessageListener implements Listener {
                 }
                 break;
             }
-            case "core-server":
+            case CoreFRSMessage.CHANNEL:
             {
-                String[] msg = e.getValue().split(";");
-                if (msg.length > 1) {
-                    if(msg[0].equals("create"))
-                    {
-                        plugin.getServerManager().addServer(Server.getServerFromJson(concat(msg, ";", 1)));
-                    }
-                    else if (msg[0].equals("remove"))
-                    {
-                        plugin.getServerManager().removeServer(concat(msg, ";", 1));
-                    }
-                    else if (msg[0].equalsIgnoreCase("playerCount"))
-                    {
-                        try
-                        {
-                            plugin.getServer(msg[1]).setPlayerCount(Integer.parseInt(msg[2]));
-                        }
-                        catch (Exception ignore) { }
-
-                    }
-                }
+                String[] split = e.getValue().split(";");
+                CoreFRSMessage msg = CoreFRSMessage.MESSAGE.get(split[0]);
+                if(msg != null) msg.actionOnGet(plugin, split);
             }
         }
     }

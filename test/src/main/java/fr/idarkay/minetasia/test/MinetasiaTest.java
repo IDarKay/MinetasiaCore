@@ -95,6 +95,24 @@ public class MinetasiaTest extends MinetasiaCoreApi
         {
 
         }
+
+        @Override
+        public ServerPhase getServerPhase()
+        {
+            return null;
+        }
+
+        @Override
+        public void updatePhase(SQLManager sql, ServerPhase phase)
+        {
+
+        }
+
+        @Override
+        public void setPhase(ServerPhase phase)
+        {
+
+        }
     };
 
     private final static String LOG_PREFIX = "[Minetasia-Core-test]";
