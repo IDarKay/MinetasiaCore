@@ -98,6 +98,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
     };
 
     private final static String LOG_PREFIX = "[Minetasia-Core-test]";
+    @NotNull private String prefix = "";
 
     @Override
     public void onEnable() {
@@ -118,6 +119,8 @@ public class MinetasiaTest extends MinetasiaCoreApi
             // this throws an exception if the plugin is /reloaded, grr
         }
 
+
+        prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));;
 
         getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
@@ -550,6 +553,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
                 }
             }
         }
+    }
+
+    @Override
+    public @NotNull String getPrefix()
+    {
+        return prefix;
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)

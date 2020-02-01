@@ -476,8 +476,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract void registerGui(MinetasiaGUI gui);
 
-//    public abstract int getKitLevelOfUser(UUID player, String kitName);
-//
-//    public abstract void setKitLvlOfUser(UUID player, String kitName, int lvl);
+    @NotNull
+    public abstract String getPrefix();
 
 }
