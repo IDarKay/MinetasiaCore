@@ -28,4 +28,15 @@ public interface IMinetasiaLang
       * @return message
       */
      <T> String get(String lang, Tuple<? extends Args, T>... args);
+
+     /**
+      * get the message with lang
+      * @see MinetasiaLang#get(String, String, String, Tuple[])
+      * @param lang lang of user in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
+      * @param args all argument of the message use {@link Args#match(Object)}
+      * @param <T> type of object
+      * @return message
+      */
+      <T> String getWithoutPrefix(String lang, Tuple<? extends Args, T>... args);
+
 }
