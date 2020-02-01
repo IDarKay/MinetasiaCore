@@ -174,6 +174,7 @@ public enum Lang implements IMinetasiaLang {
         Lang.api = api;
     }
 
+    @Override
     @SafeVarargs
     public final <T> String getWithoutPrefix(String lang, Tuple<? extends Args, T>... args)
     {

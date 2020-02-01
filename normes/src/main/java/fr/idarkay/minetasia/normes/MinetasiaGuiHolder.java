@@ -22,6 +22,7 @@ public class MinetasiaGuiHolder implements InventoryHolder {
     private Inventory inventory;
     private final GUIFlags[] flags;
     private final MinetasiaGUI minetasiaGUI;
+    private Object[] data = new Object[0];
 
     public MinetasiaGuiHolder(@NotNull UUID uuid, @Nullable MinetasiaGUI minetasiaGUI, @NotNull GUIFlags... flags)
     {
@@ -54,5 +55,15 @@ public class MinetasiaGuiHolder implements InventoryHolder {
     public MinetasiaGUI getMinetasiaGUI()
     {
         return minetasiaGUI;
+    }
+
+    public Object[] getData()
+    {
+        return data;
+    }
+
+    public void setData(Object... data)
+    {
+        this.data = data;
     }
 }
