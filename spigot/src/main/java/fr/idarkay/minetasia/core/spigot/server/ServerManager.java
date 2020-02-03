@@ -34,7 +34,6 @@ public final class ServerManager {
         this.server = server;
         String json = server.toJson();
         plugin.getFrsClient().setValue("server", server.getName(), json);
-        server.initSQL(plugin.getSqlManager());
         plugin.publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.CREATE, json));
         plugin.getFrsClient().getValues("server", plugin.getFrsClient().getFields("server")).forEach( (k, v) -> {
             if(v != null && !v.equals("null"))

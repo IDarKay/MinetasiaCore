@@ -971,8 +971,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             setMaxPlayerCount( getThisServer().getMaxPlayerCount() + maxPlayerCountAddAdmin, false);
         }
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            serverManager.getServer().updatePhase(sqlManager, phase);
             publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.SERVER_STATUE, getThisServer().getName(), phase.name()));
+            setValue("server", getThisServer().getName(), serverManager.getServer().toJson());
         });
 
     }
@@ -989,7 +989,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         if(isHub) throw new IllegalArgumentException("cant set max player in hub with this methods use public void setMaxPlayerCount(int maxPlayer, boolean startup)  !");
         setMaxPlayerCount(maxPlayer, true);
         getThisServer().setMaxPlayerCount(maxPlayer);
-        publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.SERVER_MAX_PLAYER, getThisServer().getName(), maxPlayer));
+        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
+        {
+            publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.SERVER_MAX_PLAYER, getThisServer().getName(), maxPlayer));
+            setValue("server", getThisServer().getName(), serverManager.getServer().toJson());
+        });
     }
 
     @Override

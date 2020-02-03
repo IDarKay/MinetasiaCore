@@ -71,7 +71,7 @@ public class    ServerFrsMessage implements CoreFRSMessage
 
     public static boolean goodObject(Object... args)
     {
-        return args.length > 1 && (args[0].equals(CREATE) || args[0].equals(REMOVE) || args[0].equals(PLAYER_COUNT) || args[0].equals(SERVER_STATUE));
+        return args.length > 1 && (args[0].equals(CREATE) || args[0].equals(REMOVE) || args[0].equals(PLAYER_COUNT) || args[0].equals(SERVER_STATUE) || args[0].equals(SERVER_MAX_PLAYER));
     }
 
     public static  @NotNull String getIdentifier()
