@@ -97,9 +97,21 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
+        public int getMaxPlayerCount()
+        {
+            return maxPlayerCount;
+        }
+
+        @Override
+        public void setMaxPlayerCount(int maxPlayerCount)
+        {
+
+        }
+
+        @Override
         public ServerPhase getServerPhase()
         {
-            return null;
+            return serverPhase;
         }
 
         @Override
@@ -113,6 +125,19 @@ public class MinetasiaTest extends MinetasiaCoreApi
         {
 
         }
+
+        @Override
+        public String getServerConfig()
+        {
+            return serverConfig;
+        }
+
+        @Override
+        public int compareTo(@NotNull fr.idarkay.minetasia.core.api.utils.Server server)
+        {
+            return  server.getServerPhase().ordinal() - getServerPhase().ordinal();
+        }
+
     };
 
     private final static String LOG_PREFIX = "[Minetasia-Core-test]";

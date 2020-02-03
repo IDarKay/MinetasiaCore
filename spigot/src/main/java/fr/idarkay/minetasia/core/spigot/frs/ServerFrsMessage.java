@@ -22,6 +22,7 @@ public class    ServerFrsMessage implements CoreFRSMessage
     public static final String REMOVE = "remove";
     public static final String PLAYER_COUNT = "playerCount";
     public static final String SERVER_STATUE = "serverStatue";
+    public static final String SERVER_MAX_PLAYER = "serverMaxPlayer";
 
     @Override
     public void actionOnGet(MinetasiaCore plugin, String... args)
@@ -47,6 +48,14 @@ public class    ServerFrsMessage implements CoreFRSMessage
                 try
                 {
                     plugin.getServer(args[2]).setPhase(ServerPhase.valueOf(args[3]));
+                } catch (Exception ignore)
+                {
+                }
+            } else if(args[1].equals(SERVER_MAX_PLAYER))
+            {
+                try
+                {
+                    plugin.getServer(args[2]).setMaxPlayerCount(Integer.parseInt(args[3]));
                 } catch (Exception ignore)
                 {
                 }
