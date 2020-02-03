@@ -88,13 +88,6 @@ public interface Server extends Comparable<Server> {
     ServerPhase getServerPhase();
 
     /**
-     * update the phase of the sever (only core use this)
-     * @param sql NA
-     * @param phase new phase
-     */
-    void updatePhase(SQLManager sql, ServerPhase phase);
-
-    /**
      * set the phase of the sever (only core use this)
      * @param phase new phase
      */

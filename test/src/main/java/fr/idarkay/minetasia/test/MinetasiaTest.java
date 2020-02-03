@@ -115,12 +115,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
-        public void updatePhase(SQLManager sql, ServerPhase phase)
-        {
-
-        }
-
-        @Override
         public void setPhase(ServerPhase phase)
         {
 

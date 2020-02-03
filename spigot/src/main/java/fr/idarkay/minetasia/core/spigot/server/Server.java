@@ -37,7 +37,7 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
         this.serverConfig = serverConfig;
     }
 
-    private Server(@NotNull String ip, int port, String type, String serverConfig, @NotNull UUID uuid, long creatTime)
+    private Server(@NotNull String ip, int port, String type, String serverConfig, @NotNull UUID uuid, long creatTime, int serverPhase, int maxPlayerCount)
     {
         this.creatTime = creatTime;
         this.uuid = uuid;
@@ -45,13 +45,16 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
         this.port = port;
         this.type = type;
         this.serverConfig = serverConfig;
+        this.serverPhase = ServerPhase.values()[serverPhase];
+        this.maxPlayerCount = maxPlayerCount;
     }
 
     public static Server getServerFromJson(String json)
     {
         JsonObject server = new JsonParser().parse(json).getAsJsonObject();
         return new Server(server.get("ip").getAsString(), server.get("port").getAsInt(), server.get("type").getAsString()
-                ,server.get("server_config").getAsString() , UUID.fromString(server.get("uuid").getAsString()), server.get("createTime").getAsLong());
+                ,server.get("server_config").getAsString() , UUID.fromString(server.get("uuid").getAsString()), server.get("create_time").getAsLong(),
+                server.get("phase").getAsInt(), server.get("max_player_count").getAsInt());
     }
 
     @Override
@@ -128,18 +131,6 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
         return serverConfig;
     }
 
-    public synchronized void initSQL(SQLManager sql)
-    {
-        sql.update("INSERT INTO `online_server`(`id`, `ip`, `port`, `type`, `config_name`) VALUE(?,?,?,?,?)", getName(), getIp(), getPort(), getType(), getServerConfig());
-    }
-
-    @Override
-    public synchronized void updatePhase(SQLManager sql, ServerPhase phase)
-    {
-        this.serverPhase = phase;
-        sql.update("INSERT INTO `online_server`(`statue`) VALUE(?) WHERE `ìd` = ?", phase.ordinal(), getName());
-    }
-
     @Override
     public void setPhase(ServerPhase phase)
     {
@@ -150,12 +141,15 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
     public String toJson()
     {
         JsonObject server = new JsonObject();
-        server.addProperty("createTime", creatTime);
+        server.addProperty("create_time", creatTime);
         server.addProperty("uuid", uuid.toString());
         server.addProperty("ip", ip);
         server.addProperty("port", port);
         server.addProperty("type", type);
         server.addProperty("server_config", serverConfig);
+        server.addProperty("phase", serverPhase.ordinal());
+        server.addProperty("max_player_count", maxPlayerCount);
+        //todo: player count
         return server.toString();
     }
 
