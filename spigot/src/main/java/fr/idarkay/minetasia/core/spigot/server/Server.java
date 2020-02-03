@@ -24,7 +24,7 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
     private final UUID uuid;
     private final String ip, type, serverConfig;
     private final int port;
-    private int playerCount = 0;
+    private int playerCount = 0, maxPlayerCount = -1;
     private ServerPhase serverPhase = ServerPhase.LOAD;
 
     public Server(@NotNull String ip, int port, String type, String serverConfig)
@@ -105,11 +105,24 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
     }
 
     @Override
+    public int getMaxPlayerCount()
+    {
+        return maxPlayerCount;
+    }
+
+    @Override
+    public void setMaxPlayerCount(int maxPlayerCount)
+    {
+        this.maxPlayerCount = maxPlayerCount;
+    }
+
+    @Override
     public ServerPhase getServerPhase()
     {
         return serverPhase;
     }
 
+    @Override
     public String getServerConfig()
     {
         return serverConfig;
@@ -146,4 +159,9 @@ public final class Server implements fr.idarkay.minetasia.core.api.utils.Server 
         return server.toString();
     }
 
+    @Override
+    public int compareTo(@NotNull fr.idarkay.minetasia.core.api.utils.Server server)
+    {
+        return  server.getServerPhase().ordinal() - getServerPhase().ordinal();
+    }
 }

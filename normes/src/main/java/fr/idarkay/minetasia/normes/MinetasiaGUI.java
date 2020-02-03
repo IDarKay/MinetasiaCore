@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -176,7 +177,8 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      * @return {@link ItemStack}
      * @since 1.0
      */
-    public static ItemStack createItemStack(Material material, int amount, String name, String... lore){
+    public static ItemStack createItemStack(Material material, int amount, String name, String... lore)
+    {
         ItemStack back = new ItemStack(material, amount);
         ItemMeta meta = Bukkit.getItemFactory().getItemMeta(material);
         meta.setDisplayName(name);
@@ -184,6 +186,18 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
         back.setItemMeta(meta);
         return back;
     }
+
+    public static ItemStack createItemStack(Material material, int amount, String name, @NotNull ItemFlag[] flags, String... lore)
+    {
+        ItemStack back = new ItemStack(material, amount);
+        ItemMeta meta = Bukkit.getItemFactory().getItemMeta(material);
+        meta.setDisplayName(name);
+        meta.setLore(Arrays.asList(lore));
+        meta.addItemFlags(flags);
+        back.setItemMeta(meta);
+        return back;
+    }
+
 
     /**
      * create a head with many argument
