@@ -187,6 +187,16 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
         return back;
     }
 
+    public static ItemStack createItemStack(Material material, int amount, String name, List<String> lore)
+    {
+        ItemStack back = new ItemStack(material, amount);
+        ItemMeta meta = Bukkit.getItemFactory().getItemMeta(material);
+        meta.setDisplayName(name);
+        meta.setLore(lore);
+        back.setItemMeta(meta);
+        return back;
+    }
+
     public static ItemStack createItemStack(Material material, int amount, String name, @NotNull ItemFlag[] flags, String... lore)
     {
         ItemStack back = new ItemStack(material, amount);
