@@ -35,7 +35,7 @@ public class HubExecutor implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull  String[] args) {
         if(sender instanceof Player)
-            if(sender.hasPermission(CommandPermission.HUB.getPermission()))
+            if(!minetasiaCore.isHub() && sender.hasPermission(CommandPermission.HUB.getPermission()))
             {
                 minetasiaCore.movePlayerToHub((Player) sender);
             }

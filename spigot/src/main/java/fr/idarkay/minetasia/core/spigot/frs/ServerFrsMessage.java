@@ -1,8 +1,12 @@
 package fr.idarkay.minetasia.core.spigot.frs;
 
 import fr.idarkay.minetasia.core.api.ServerPhase;
+import fr.idarkay.minetasia.core.api.event.ServerPlayerCountUpdateEvent;
+import fr.idarkay.minetasia.core.api.event.ServerRegisterEvent;
+import fr.idarkay.minetasia.core.api.event.ServerUnregisterEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.server.Server;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -31,15 +35,31 @@ public class    ServerFrsMessage implements CoreFRSMessage
         {
             if (args[1].equals(CREATE))
             {
-                plugin.getServerManager().addServer(Server.getServerFromJson(CoreFRSMessage.concat(args, ";", 2)));
-            } else if (args[1].equals(REMOVE))
+                final Server server = Server.getServerFromJson(CoreFRSMessage.concat(args, ";", 2));
+                plugin.getServerManager().addServer(server);
+                Bukkit.getPluginManager().callEvent(new ServerRegisterEvent(server));
+            }
+            else if (args[1].equals(REMOVE))
             {
-                plugin.getServerManager().removeServer(CoreFRSMessage.concat(args, ";", 2));
-            } else if (args[1].equals(PLAYER_COUNT))
+                final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(CoreFRSMessage.concat(args, ";", 2));
+                if(server != null)
+                {
+                    Bukkit.getPluginManager().callEvent(new ServerUnregisterEvent(server));
+                    plugin.getServerManager().removeServer(server.getName());
+                }
+            }
+            else if (args[1].equals(PLAYER_COUNT))
             {
                 try
                 {
-                    plugin.getServer(args[2]).setPlayerCount(Integer.parseInt(args[3]));
+                    final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(args[2]);
+                    final int count = Integer.parseInt(args[3]);
+                    if(server.getPlayerCount() != count)
+                    {
+                        server.setPlayerCount(count);
+                        Bukkit.getPluginManager().callEvent(new ServerPlayerCountUpdateEvent(server, count));
+                    }
+
                 } catch (Exception ignore)
                 {
                 }
