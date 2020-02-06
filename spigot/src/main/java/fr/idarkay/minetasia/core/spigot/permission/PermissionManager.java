@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.event.PlayerPermissionLoadEndEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.user.Player;
+import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.PermissionAttachment;
 import org.jetbrains.annotations.NotNull;
@@ -268,14 +268,14 @@ public class PermissionManager {
         return getThinkOfUSer(uuid, "group", false, false);
     }
 
-    public List<String> getGroupOfUser(@NotNull Player player)
+    public List<String> getGroupOfUser(@NotNull MinePlayer player)
     {
         return getThinkOfUSer(player, "group", false, false);
     }
 
-    public List<String> getGroupsOfUser(@NotNull Player player)
+    public List<String> getGroupsOfUser(@NotNull MinePlayer player)
     {
-        List<String> s =  getTempGroupOfUser(player);
+        List<String> s = getTempGroupOfUser(player);
         s.addAll(getGroupOfUser(player));
         return s;
     }
@@ -287,12 +287,12 @@ public class PermissionManager {
         return s;
     }
 
-    private List<String> getThinkOfUSer(@NotNull Player player, String think, boolean isTemp, boolean isPerm)
+    private List<String> getThinkOfUSer(@NotNull MinePlayer player, String think, boolean isTemp, boolean isPerm)
     {
         List<String> back = new ArrayList<>();
-        if(permissionAttachments.containsKey(player.getUuid()))
+        if(permissionAttachments.containsKey(player.getUUID()))
         {
-            for(Map.Entry<String, PermissionAttachment> e : permissionAttachments.get(player.getUuid()).entrySet())
+            for(Map.Entry<String, PermissionAttachment> e : permissionAttachments.get(player.getUUID()).entrySet())
             {
                 if(e.getKey().startsWith(think))
                 {
@@ -346,7 +346,7 @@ public class PermissionManager {
         return getThinkOfUSer(uuid, "temp_group", true, false);
     }
 
-    public List<String> getTempGroupOfUser(@NotNull Player player)
+    public List<String> getTempGroupOfUser(@NotNull MinePlayer player)
     {
         return getThinkOfUSer(player, "temp_group", true, false);
     }
@@ -359,8 +359,8 @@ public class PermissionManager {
 
     public void loadUser(@NotNull UUID uuid, boolean reset)
     {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->{
-
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
+        {
             String data =  plugin.getPlayerData(uuid, "group");
             JsonArray group = data == null ? null : PARSER.parse(data).getAsJsonArray();
             data = plugin.getPlayerData(uuid, "permission");
