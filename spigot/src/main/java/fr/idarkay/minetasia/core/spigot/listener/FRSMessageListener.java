@@ -6,8 +6,6 @@ import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
-import fr.idarkay.minetasia.core.spigot.server.Server;
-import fr.idarkay.minetasia.core.spigot.user.Player;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.Args;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
@@ -15,8 +13,6 @@ import fr.idarkay.minetasia.normes.Tuple;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -57,38 +53,6 @@ public final class FRSMessageListener implements Listener {
                             plugin.getPermissionManager().updateGroupToPlayer(msg[1]);
                         }
                     }
-                }
-                break;
-            }
-            case "core-data":
-            {
-                String[] msg = e.getValue().split(";");
-                if (msg.length > 2) {
-                    try {
-                        Player p;
-                        if ((p = plugin.getPlayerManager().getOnlyInCache(UUID.fromString(msg[1]))) != null) {
-                            switch (msg[0]) {
-                                case "data":
-                                    p.setData(msg[2], concat(msg, ";", 3));
-                                    break;
-                                case "username":
-                                    p.setUsername(concat(msg, ";", 2));
-                                    break;
-                                case "money":
-                                    p.setMoney(Economy.valueOf(msg[2]), Float.parseFloat(msg[3]));
-                                    break;
-                                case "fremove":
-                                    p.removeFriends(UUID.fromString(msg[2]));
-                                    break;
-                                case "fadd":
-                                    p.addFriends(UUID.fromString(msg[2]));
-                                    break;
-                                case "stats":
-                                    p.upDateStats(concat(msg, ";", 2));
-                                    break;
-                            }
-                        }
-                    } catch (IllegalArgumentException ignore) { }
                 }
                 break;
             }

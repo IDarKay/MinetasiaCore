@@ -16,9 +16,12 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -300,18 +303,19 @@ public class FRSClient
 		if(sync.length == 0 || !sync[0]) Bukkit.getScheduler().runTaskAsynchronously(plugin, cons);
 		else cons.accept(null);
 	}
-	
-	public String getValue(String key, String field)
+
+	public String getValue(@NotNull String key)
 	{
+		Validate.notNull(key);
 		try
 		{
-			String result = send("get " + (key != null ? key.replace(' ', '_') : "null") + " " + (field != null ? field.replace(' ', '_') : "null"), true);
+			String result = send("get " + key.replace(' ', '_'), true);
 			if(result == null || result.isEmpty()) return null;
 			return result;
 		}
 		catch(Exception e) { return null; }
 	}
-	
+
 	public Set<String> getFields(String key)
 	{
 		try
@@ -332,25 +336,27 @@ public class FRSClient
 			HashMap<String, String> valuesPerFields = new HashMap<String, String>();
 			for(String field : fields)
 			{
-				String value = getValue(key, field);
+				String value = getValue(key + "/" + field);
 				valuesPerFields.put(field, value);
 			}
 			return valuesPerFields;
 		}
 		catch(Exception e) { return Collections.emptyMap(); }
 	}
-	
-	public void setValue(String key, String field, String value, boolean... sync)
+
+	public void setValue(@NotNull String key, @Nullable String value, boolean sync)
 	{
-		Consumer<BukkitTask> cons = task ->
+		Validate.notNull(key);
+		final Consumer<BukkitTask> cons = task ->
 		{
 			try
 			{
-				send("set " + (key != null ? key.replace(' ', '_') : "null") + " " + (field != null ? field.replace(' ', '_') : "null") + " " + value, false);
+				send("set " +key.replace(' ', '_') + " " +  value, false);
 			}
 			catch (IOException e) { e.printStackTrace(); }
 		};
-		if(sync.length == 0 || !sync[0]) Bukkit.getScheduler().runTaskAsynchronously(plugin, cons);
+		if(!sync) Bukkit.getScheduler().runTaskAsynchronously(plugin, cons);
 		else cons.accept(null);
 	}
+
 }
