@@ -648,17 +648,30 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public String getPlayerLang(@NotNull UUID uuid) {
-        return getPlayerData(uuid, "lang");
+        return getPlayer(uuid).getGeneralData("lang");
     }
 
     @Override
     public @Nullable String getPlayerName(UUID uuid) {
-        org.bukkit.entity.Player pl = Bukkit.getPlayer(uuid);
-        if(pl == null)
+        org.bukkit.entity.Player p;
+        if((p = Bukkit.getPlayer(uuid)) != null) return p.getName();
+        else
         {
-            //todo: sql
-        } else return pl.getName();
-        return null;
+            sqlManager.getSQL();
+            try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT username FROM `uuid_username` WHERE uuid = ?"))
+            {
+                ps.setString(1, uuid.toString());
+                ResultSet rs = ps.executeQuery();
+                if(rs.next())
+                {
+                    return rs.getString("username");
+                }
+            }catch ( SQLException e)
+            {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     @Override
