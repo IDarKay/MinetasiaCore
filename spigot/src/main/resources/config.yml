@@ -1,14 +1,26 @@
-# the type of the server name of the mini game or other
-# Example:
-#  if the server is a hub set : hub
-#   if the server is a sheepwars set : sheepwars
+# =========================================================================================================== #
+# the type of the server name of the mini game or other                                                       #
+# Example:                                                                                                    #
+#  if the server is a hub set : hub                                                                           #
+#   if the server is a sheepwars set : sheepwars                                                              #
+# =========================================================================================================== #
 server_type: "hub"
 
-# host: url of the db (set localhost for local db)
-# login: login for connect need have permission to create and edit table
-# password: password of the login
-# dbname: name of the db need be created always
+# the config name (32 max char);
+# format : {map-name}
+# format : {team-mode}_{map-name}
+# example :
+#   mini games skyblockbattle with 6 team and 2 player per team with hill-island  map : 2-x-6_hill-island
+#   for hub set hub
+config_name: "hub"
+
+# =========================================================================================================== #                                                                 #
+# host: url of the db (set localhost for local db)                                                            #
+# login: login for connect need have permission to create and edit table                                      #
+# password: password of the login                                                                             #
+# dbname: name of the db need be created always                                                               #
 # system: mysql -
+# =========================================================================================================== #
 db: # NO value here !
   host: ''
   login: ''
@@ -17,17 +29,21 @@ db: # NO value here !
   system: 'mysql'
   connexion_args: '?allowMultiQueries=true&useSSL=false'
 
-# host: url of the frs (set 127.0.0.1 for local db)
-# password: password for log          (def 4514)
-# port:port listening by frs
-# timeout: timeout time (def 5000)
+# =========================================================================================================== #
+# host: url of the frs (set 127.0.0.1 for local db)                                                            #
+# password: password for log          (def 4514)                                                              #
+# port:port listening by frs                                                                                    #
+# timeout: timeout time (def 5000)                                                                             #
+# =========================================================================================================== #
 frs: # NO value Here
   host: ''
   port: 4514
   password: ''
   timeout: 5000
 
-# user : in MINUTES the time that a user will be save in cache
+# =========================================================================================================== #
+# user : in MINUTES the time that a user will be save in cache                                                  #
+# =========================================================================================================== #
 cache: # NO value here !
   user: 5
   friends: 2
@@ -62,7 +78,7 @@ gui:
         slot: 15
         iso: 'en'
 
-
+#prefix show before msg for all plugins
 prefix: "&9Mine&6Tasia&7>>"
 chat_char: ' > '
 

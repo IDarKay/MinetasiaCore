@@ -1,6 +1,8 @@
 package fr.idarkay.minetasia.core.spigot.server;
 
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
+import fr.idarkay.minetasia.core.spigot.frs.ServerFrsMessage;
 import org.bukkit.Bukkit;
 
 import java.util.HashMap;
@@ -28,11 +30,11 @@ public final class ServerManager {
         if(ip.equals("")) ip = "127.0.0.1";
         int port = Bukkit.getPort();
 
-        Server server = new Server(ip, port, plugin.getServerType());
+        Server server = new Server(ip, port, plugin.getServerType(), plugin.getServerConfig());
         this.server = server;
         String json = server.toJson();
         plugin.getFrsClient().setValue("server", server.getName(), json);
-        plugin.publish("core-server", "create;" + json);
+        plugin.publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.CREATE, json));
         plugin.getFrsClient().getValues("server", plugin.getFrsClient().getFields("server")).forEach( (k, v) -> {
             if(v != null && !v.equals("null"))
             servers.put(k, Server.getServerFromJson(v));
@@ -42,7 +44,7 @@ public final class ServerManager {
     public void disable()
     {
         plugin.getFrsClient().setValue("server", server.getName(), null, true);
-        plugin.getFrsClient().publish("core-server", "remove;" + server.getName(), true);
+        plugin.getFrsClient().publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.REMOVE,  server.getName()), true);
     }
 
     public Server getServer()

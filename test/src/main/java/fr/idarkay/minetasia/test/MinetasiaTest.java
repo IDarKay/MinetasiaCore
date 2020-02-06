@@ -95,9 +95,47 @@ public class MinetasiaTest extends MinetasiaCoreApi
         {
 
         }
+
+        @Override
+        public int getMaxPlayerCount()
+        {
+            return maxPlayerCount;
+        }
+
+        @Override
+        public void setMaxPlayerCount(int maxPlayerCount)
+        {
+
+        }
+
+        @Override
+        public ServerPhase getServerPhase()
+        {
+            return serverPhase;
+        }
+
+        @Override
+        public void setPhase(ServerPhase phase)
+        {
+
+        }
+
+        @Override
+        public String getServerConfig()
+        {
+            return serverConfig;
+        }
+
+        @Override
+        public int compareTo(@NotNull fr.idarkay.minetasia.core.api.utils.Server server)
+        {
+            return  server.getServerPhase().ordinal() - getServerPhase().ordinal();
+        }
+
     };
 
     private final static String LOG_PREFIX = "[Minetasia-Core-test]";
+    @NotNull private String prefix = "", serverConfig = "";
 
     @Override
     public void onEnable() {
@@ -118,6 +156,9 @@ public class MinetasiaTest extends MinetasiaCoreApi
             // this throws an exception if the plugin is /reloaded, grr
         }
 
+
+        prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));;
+        serverConfig = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("config_name")));
 
         getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
@@ -550,6 +591,18 @@ public class MinetasiaTest extends MinetasiaCoreApi
                 }
             }
         }
+    }
+
+    @Override
+    public @NotNull String getPrefix()
+    {
+        return prefix;
+    }
+
+    @Override
+    public @NotNull String getServerConfig()
+    {
+        return serverConfig;
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
