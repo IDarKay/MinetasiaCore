@@ -3,19 +3,19 @@ package fr.idarkay.minetasia.normes;
 import com.google.common.collect.ForwardingMultimap;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author alice B. (IDarKay),
@@ -24,7 +24,83 @@ import java.util.UUID;
  * </p>
  * @since 1.0
  */
-public class MinetasiaGUI {
+public abstract class MinetasiaGUI<T extends JavaPlugin> {
+
+    protected final T plugin;
+    private final boolean isRealInventory;
+    private final UUID id;
+    private final GUIFlags[] flags;
+
+    /**
+     *
+     * @param plugin plugin class
+     * @param isRealInventory set false for custom gui true for other already exist inventory
+     * @param guiFlags flags of teh inventory
+     */
+    public MinetasiaGUI(T plugin, boolean isRealInventory, GUIFlags... guiFlags)
+    {
+        this.plugin = plugin;
+        this.isRealInventory = isRealInventory;
+        this.id = UUID.randomUUID();
+        this.flags = Objects.requireNonNull(guiFlags);
+    }
+
+    public boolean isRealInventory()
+    {
+        return isRealInventory;
+    }
+
+    public MinetasiaGuiHolder getHolder()
+    {
+        return new MinetasiaGuiHolder(id, this, flags);
+    }
+
+    public abstract void open(Player player);
+
+    public abstract void open(Player player, InventoryOpenEvent event);
+
+    public abstract void close(Player player, InventoryCloseEvent event);
+
+    public abstract void click(Player player, InventoryClickEvent event);
+
+    public abstract void drag(Player player, InventoryDragEvent event);
+
+    public abstract void onOtherEvent(Player player, InventoryEvent event);
+
+    /**
+     * like {@link MinetasiaGUI#createGUI(InventoryHolder, int, String, InventoryFileType, ItemStack)} but
+     * automatic set a custom holder ({@link MinetasiaGuiHolder}) with id
+     * @see MinetasiaGUI#createGUI(InventoryHolder, int, String, InventoryFileType, ItemStack)
+     * @param numberOfRow need in [1;6]
+     * @param name the title of the gui
+     * @param type {@link InventoryFileType}
+     * @param fileMaterial the item stack use for file
+     * @return created inventory
+     * @since 1.0
+     */
+    protected Inventory createGUI(int numberOfRow, @NotNull String name, @NotNull InventoryFileType type, @Nullable ItemStack fileMaterial)
+    {
+        return createGUI(getHolder(), numberOfRow, name, type, fileMaterial);
+    }
+
+    /**
+     * like {@link MinetasiaGUI#createGUI(InventoryHolder, int, String, InventoryFileType, ItemStack)} but
+     * automatic set a custom holder ({@link MinetasiaGuiHolder}) with id
+     * @see MinetasiaGUI#createGUI(InventoryHolder, int, String, InventoryFileType, ItemStack)
+     * @param id set into {@link MinetasiaGuiHolder} use in {@link org.bukkit.event.inventory.InventoryEvent}
+     * @param minetasiaGUI linkedGui
+     * @param numberOfRow need in [1;6]
+     * @param name the title of the gui
+     * @param type {@link InventoryFileType}
+     * @param fileMaterial the item stack use for file
+     * @return created inventory
+     * @since 1.0
+     */
+    public static Inventory createGUI(@NotNull UUID id, MinetasiaGUI minetasiaGUI , int numberOfRow, @NotNull String name, @NotNull InventoryFileType type, @Nullable ItemStack fileMaterial)
+    {
+        return createGUI(new MinetasiaGuiHolder(id, minetasiaGUI), numberOfRow, name, type, fileMaterial);
+    }
+
 
     /**
      * like {@link MinetasiaGUI#createGUI(InventoryHolder, int, String, InventoryFileType, ItemStack)} but
@@ -38,9 +114,9 @@ public class MinetasiaGUI {
      * @return created inventory
      * @since 1.0
      */
-    public static Inventory createGUI(@NotNull String id, int numberOfRow, @NotNull String name, @NotNull InventoryFileType type, @Nullable ItemStack fileMaterial)
+    public static Inventory createGUI(@NotNull UUID id, int numberOfRow, @NotNull String name, @NotNull InventoryFileType type, @Nullable ItemStack fileMaterial)
     {
-        return createGUI(new MinetasiaGuiHolder(id), numberOfRow, name, type, fileMaterial);
+        return createGUI(new MinetasiaGuiHolder(id, null), numberOfRow, name, type, fileMaterial);
     }
 
     /**

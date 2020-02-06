@@ -58,6 +58,7 @@ public class Reflection
      * get craftBukkit Class
      * @param name name of class
      * @return Class or null
+     * @deprecated use {@link Reflection#getCraftBukkitClass(String)}
      */
     public static Class<?> getNMSBClass(String name)
     {
@@ -69,6 +70,20 @@ public class Reflection
         return null;
     }
 
+    /**
+     * get craftBukkit Class
+     * @param name name of class
+     * @return Class or null
+     */
+    public static Class<?> getCraftBukkitClass(String name)
+    {
+        try
+        {
+            return Class.forName("org.bukkit.craftbukkit." + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + "." + name);
+        }
+        catch (ClassNotFoundException ex) { ex.printStackTrace(); }
+        return null;
+    }
 
     private final static Method iChatCon;
 

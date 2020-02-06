@@ -3,6 +3,10 @@ package fr.idarkay.minetasia.normes;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author alice B. (IDarKay),
@@ -14,11 +18,16 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("unused")
 public class MinetasiaGuiHolder implements InventoryHolder {
 
-    private String id;
+    private final UUID uuid;
     private Inventory inventory;
+    private final GUIFlags[] flags;
+    private final MinetasiaGUI minetasiaGUI;
 
-    public MinetasiaGuiHolder(String id){
-        this.id = id;
+    public MinetasiaGuiHolder(@NotNull UUID uuid, @Nullable MinetasiaGUI minetasiaGUI, @NotNull GUIFlags... flags)
+    {
+        this.uuid = Objects.requireNonNull(uuid);
+        this.flags = Objects.requireNonNull(flags);
+        this.minetasiaGUI = minetasiaGUI;
     }
 
     @Override
@@ -30,11 +39,20 @@ public class MinetasiaGuiHolder implements InventoryHolder {
         this.inventory = inventory;
     }
 
-    /**
-     * @return String id of the gui
-     * @since 1.0
-     */
-    public String getId() {
-        return id;
+    public UUID getUuid()
+    {
+        return uuid;
+    }
+
+    @NotNull
+    public GUIFlags[] getFlags()
+    {
+        return flags;
+    }
+
+    @Nullable
+    public MinetasiaGUI getMinetasiaGUI()
+    {
+        return minetasiaGUI;
     }
 }
