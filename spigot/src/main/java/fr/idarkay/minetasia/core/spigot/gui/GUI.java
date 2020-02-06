@@ -9,6 +9,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * File <b>LangGui</b> located on fr.idarkay.minetasia.core.common.gui
@@ -23,6 +24,7 @@ import java.util.HashMap;
 public final class GUI {
 
     public final static HashMap<Integer, String> SLOT_LANG = new HashMap<>();
+    public final static UUID uuid = UUID.randomUUID();
 
     private final Plugin plugin;
 
@@ -36,7 +38,7 @@ public final class GUI {
     public void createLangInventory()
     {
         //lang
-        lang = MinetasiaGUI.createGUI("lang", plugin.getConfig().getInt("gui.lang.size")
+        lang = MinetasiaGUI.createGUI(uuid, plugin.getConfig().getInt("gui.lang.size")
                 , ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("gui.lang.name"))
                 , InventoryFileType.SQUARE, MinetasiaGUI.createItemStack(Material.valueOf(plugin.getConfig().getString("gui.lang.fileMaterial"))
                         , 1, " "));

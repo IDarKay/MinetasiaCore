@@ -18,6 +18,10 @@ import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
 import fr.idarkay.minetasia.core.spigot.listener.*;
+import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryClickListener;
+import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryCloseListener;
+import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener;
+import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
@@ -27,13 +31,16 @@ import fr.idarkay.minetasia.core.spigot.utils.FRSClient;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
+import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
+import fr.idarkay.minetasia.normes.anontation.MinetasiaGuiNoCallEvent;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -45,6 +52,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
@@ -330,14 +338,22 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new PluginMessageReceivedListener());
 
         //register Listener
-        getServer().getPluginManager().registerEvents(new FRSMessageListener(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
-        getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
-        getServer().getPluginManager().registerEvents(new AsyncPlayerChatListener(this), this);
+        registerListener();
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "start player count schedule");
         startPlayerCountSchedule();
 
+    }
+
+    private void registerListener()
+    {
+        getServer().getPluginManager().registerEvents(new FRSMessageListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
+        getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryDragListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryOpenListener(), this);
+        getServer().getPluginManager().registerEvents(new AsyncPlayerChatListener(this), this);
     }
 
     private void startPlayerCountSchedule()
@@ -979,6 +995,40 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public boolean isHub()
     {
         return isHub;
+    }
+
+
+    private final static String OPEN_METHODS_NAME = "open";
+    private final static String CLOSE_METHODS_NAME =  "close";
+    private final static String CLICK_METHODS_NAME =  "click";
+    private final static String DRAG_METHODS_NAME = "drag";
+
+    @Override
+    public void registerGui(MinetasiaGUI gui)
+    {
+        final Class<? extends MinetasiaGUI> clazz = gui.getClass();
+        for(Method method : clazz.getDeclaredMethods())
+        {
+            if(method.getDeclaredAnnotation(MinetasiaGuiNoCallEvent.class) != null)
+            {
+                final String name = method.getName();
+                switch (name)
+                {
+                    case OPEN_METHODS_NAME:
+                        InventoryOpenListener.blackListClazz.add(clazz);
+                        break;
+                    case CLOSE_METHODS_NAME:
+                        InventoryCloseListener.blackListClazz.add(clazz);
+                        break;
+                    case CLICK_METHODS_NAME:
+                        InventoryClickListener.blackListClazz.add(clazz);
+                        break;
+                    case DRAG_METHODS_NAME:
+                        InventoryDragListener.blackListClazz.add(clazz);
+                        break;
+                }
+            }
+        }
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)

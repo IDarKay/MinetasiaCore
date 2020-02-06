@@ -1,6 +1,7 @@
 package fr.idarkay.minetasia.normes;
 
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -113,6 +114,14 @@ public class Particle
     public void sendToPlayer(Player player)
     {
         Reflection.sendPacket(player, toPacket());
+    }
+
+    /**
+     * send the particle to all player
+     */
+    public void sendToAllPlayers()
+    {
+        Bukkit.getOnlinePlayers().forEach(this::sendToPlayer);
     }
 
     /**

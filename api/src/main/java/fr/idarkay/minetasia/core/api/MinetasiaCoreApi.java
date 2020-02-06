@@ -1,6 +1,7 @@
 package fr.idarkay.minetasia.core.api;
 
 import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -472,6 +473,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @return true if server is a hub else false
      */
     public abstract boolean isHub();
+
+    public abstract void registerGui(MinetasiaGUI gui);
 
 //    public abstract int getKitLevelOfUser(UUID player, String kitName);
 //

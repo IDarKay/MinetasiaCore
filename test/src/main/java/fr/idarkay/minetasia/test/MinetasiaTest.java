@@ -3,8 +3,14 @@ package fr.idarkay.minetasia.test;
 import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
+import fr.idarkay.minetasia.normes.anontation.MinetasiaGuiNoCallEvent;
+import fr.idarkay.minetasia.test.listener.inventory.InventoryClickListener;
+import fr.idarkay.minetasia.test.listener.inventory.InventoryCloseListener;
+import fr.idarkay.minetasia.test.listener.inventory.InventoryDragListener;
+import fr.idarkay.minetasia.test.listener.inventory.InventoryOpenListener;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -110,6 +117,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         } catch (Exception e) {
             // this throws an exception if the plugin is /reloaded, grr
         }
+
+
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryDragListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryOpenListener(), this);
 
     }
 
@@ -506,13 +519,46 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return false;
     }
 
+    private final static String OPEN_METHODS_NAME = "open";
+    private final static String CLOSE_METHODS_NAME =  "close";
+    private final static String CLICK_METHODS_NAME =  "click";
+    private final static String DRAG_METHODS_NAME = "drag";
+
+    @Override
+    public void registerGui(MinetasiaGUI gui)
+    {
+        final Class<? extends MinetasiaGUI> clazz = gui.getClass();
+        for(Method method : clazz.getDeclaredMethods())
+        {
+            if(method.getDeclaredAnnotation(MinetasiaGuiNoCallEvent.class) != null)
+            {
+                final String name = method.getName();
+                switch (name)
+                {
+                    case OPEN_METHODS_NAME:
+                        InventoryOpenListener.blackListClazz.add(clazz);
+                        break;
+                    case CLOSE_METHODS_NAME:
+                        InventoryCloseListener.blackListClazz.add(clazz);
+                        break;
+                    case CLICK_METHODS_NAME:
+                        InventoryClickListener.blackListClazz.add(clazz);
+                        break;
+                    case DRAG_METHODS_NAME:
+                        InventoryDragListener.blackListClazz.add(clazz);
+                        break;
+                }
+            }
+        }
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
         if(startup && serverPhase != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
         try
         {
-            Object playerList = Reflection.getNMSBClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
+            Object playerList = Reflection.getCraftBukkitClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
             Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
             maxPlayers.set(playerList, maxPlayer);
         } catch (Exception e)
