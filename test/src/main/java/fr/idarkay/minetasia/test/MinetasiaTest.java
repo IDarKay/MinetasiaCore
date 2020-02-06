@@ -533,7 +533,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
         //add place for admin
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
         System.out.println("Server Phase set to " + phase.name());
-        //todo: new server system
     }
 
     @Override

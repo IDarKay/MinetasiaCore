@@ -22,20 +22,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class PlayerManager {
 
-    private final Cache<UUID, Player> userCache;
     private final MinetasiaCoreBungee plugin;
 
     public PlayerManager(MinetasiaCoreBungee minetasiaCore)
     {
         this.plugin = minetasiaCore;
-        userCache = CacheBuilder.newBuilder().expireAfterWrite(plugin.getConfig().getLong("cache.user"), TimeUnit.MINUTES).build();
     }
 
-    public @Nullable Player get(UUID uuid)
+    public @Nullable MinePlayer get(UUID uuid)
     {
         if(plugin.getFrsClient().isConnected())
             try {
-                return userCache.get(uuid, () -> new Player(plugin.getFrsClient().getValue("usersData", uuid.toString())));
+                return new MinePlayer(uuid);
             } catch (Exception e) {
                 return null;
             }
@@ -47,17 +45,8 @@ public class PlayerManager {
 
     public void newPlayer(UUID uuid, String name, String lang)
     {
-        Player p = new Player(uuid, name);
-        p.setDaa("lang", lang);
-        userCache.put(uuid, p);
+        MinePlayer p = new MinePlayer(uuid, name);
+        p.putGeneralData("lang", lang);
         plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
-        plugin.getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
-
     }
-
-    public @Nullable Player getOnlyInCache(UUID uuid)
-    {
-        return userCache.getIfPresent(uuid);
-    }
-
 }

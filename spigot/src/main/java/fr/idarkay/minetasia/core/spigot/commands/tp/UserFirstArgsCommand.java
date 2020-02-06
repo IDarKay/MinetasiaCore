@@ -50,7 +50,6 @@ public class UserFirstArgsCommand extends StepCommand implements FlexibleCommand
                 if(p != null)
                 {
                     plugin.movePlayerToServer((Player) sender, p.getServer());
-                    //todo: move ti player
                 }
                 else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
             }
