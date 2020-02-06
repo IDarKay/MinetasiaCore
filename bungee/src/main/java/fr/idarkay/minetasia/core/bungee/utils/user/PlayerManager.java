@@ -6,6 +6,7 @@ import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.exception.FRSDownException;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,7 @@ public class PlayerManager {
     public @Nullable MinePlayer get(UUID uuid)
     {
         if(plugin.getFrsClient().isConnected())
+
             try {
                 return new MinePlayer(uuid);
             } catch (Exception e) {
@@ -43,10 +45,14 @@ public class PlayerManager {
         }
     }
 
+
+
     public void newPlayer(UUID uuid, String name, String lang)
     {
         MinePlayer p = new MinePlayer(uuid, name);
         p.putGeneralData("lang", lang);
-        plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
+        try {
+            plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
+        } catch (Exception ignore) {}
     }
 }

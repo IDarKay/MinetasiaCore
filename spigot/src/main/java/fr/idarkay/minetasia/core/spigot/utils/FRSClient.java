@@ -310,7 +310,7 @@ public class FRSClient
 		try
 		{
 			String result = send("get " + key.replace(' ', '_'), true);
-			if(result == null || result.isEmpty()) return null;
+			if(result == null || result.isEmpty() || result.equals("null")) return null;
 			return result;
 		}
 		catch(Exception e) { return null; }

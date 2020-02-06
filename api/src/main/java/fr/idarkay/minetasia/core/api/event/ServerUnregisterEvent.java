@@ -25,7 +25,7 @@ public class ServerUnregisterEvent extends Event
 
     public ServerUnregisterEvent(@NotNull final Server server)
     {
-        super(false);
+        super(true);
         Validate.notNull(server);
         this.serverConfig = server.getServerConfig();
         this.type = server.getType();

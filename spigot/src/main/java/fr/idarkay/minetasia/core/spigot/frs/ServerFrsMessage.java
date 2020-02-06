@@ -53,11 +53,12 @@ public class    ServerFrsMessage implements CoreFRSMessage
                 try
                 {
                     final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(args[2]);
+                    final int old = server.getPlayerCount();
                     final int count = Integer.parseInt(args[3]);
-                    if(server.getPlayerCount() != count)
+                    if(old != count)
                     {
                         server.setPlayerCount(count);
-                        Bukkit.getPluginManager().callEvent(new ServerPlayerCountUpdateEvent(server, count));
+                        Bukkit.getPluginManager().callEvent(new ServerPlayerCountUpdateEvent(server, count, old));
                     }
 
                 } catch (Exception ignore)
