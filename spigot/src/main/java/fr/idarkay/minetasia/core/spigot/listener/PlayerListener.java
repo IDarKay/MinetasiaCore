@@ -43,16 +43,11 @@ public class PlayerListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
             plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
-            String statue = plugin.getPlayerData(e.getPlayer().getUniqueId(), "statue");
+            int i = plugin.getPlayer(e.getPlayer().getUniqueId()).getStatus();
 
-            try {
-                int i = Integer.parseInt(statue);
 
-                if(plugin.isBollTrue(i, PlayerStatue.SOCIAL_SPY.by)) plugin.socialSpyPlayer.add(e.getPlayer());
+            if(plugin.isBollTrue(i, PlayerStatue.SOCIAL_SPY.by)) plugin.socialSpyPlayer.add(e.getPlayer());
 
-            } catch (Exception ignore) {
-                plugin.setPlayerData(e.getPlayer().getUniqueId(), "statue", String.valueOf(0x0));
-            }
 
             if(plugin.isCommandEnable(Command.PARTY_XP_BOOST))
             {

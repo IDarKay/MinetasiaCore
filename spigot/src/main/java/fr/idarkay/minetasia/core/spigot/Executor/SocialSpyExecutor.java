@@ -1,6 +1,7 @@
 package fr.idarkay.minetasia.core.spigot.Executor;
 
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.PlayerStatue;
 import org.bukkit.command.Command;
@@ -9,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -37,33 +39,25 @@ public class SocialSpyExecutor implements CommandExecutor {
             final String lang = plugin.getPlayerLang(((Player) sender).getUniqueId());
             UUID u = ((Player) sender).getUniqueId();
 
-            String statue = plugin.getPlayerData(u, "statue");
+            final MinePlayer player = Objects.requireNonNull(plugin.getPlayerManager().get(u));
 
-            if(statue != null)
-            {
-                try {
-                    int i = Integer.parseInt(statue);
-                    if(!plugin.isBollTrue(i, PlayerStatue.SOCIAL_SPY.by))
-                    {
-                        plugin.setPlayerData(u, "statue", String.valueOf(plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, true)));
-                        sender.sendMessage(Lang.SOCIAL_SPU_ON.get(lang));
-                        plugin.socialSpyPlayer.add((Player) sender);
-                    } else
-                    {
-                        plugin.setPlayerData(u, "statue", String.valueOf(plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, false)));
-                        sender.sendMessage(Lang.SOCIAL_SPU_OFF.get(lang));
-                        plugin.socialSpyPlayer.remove((Player) sender);
-                    }
-                    return true;
-                } catch (IllegalArgumentException ignore) {}
+            final int i = player.getStatus();
 
-            }
+            try {
+                if(!plugin.isBollTrue(i, PlayerStatue.SOCIAL_SPY.by))
+                {
+                    player.putGeneralData("status", String.valueOf(plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, true)));
+                    sender.sendMessage(Lang.SOCIAL_SPU_ON.get(lang));
+                    plugin.socialSpyPlayer.add((Player) sender);
+                } else
+                {
+                    player.putGeneralData("status", String.valueOf(plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, false)));
+                    sender.sendMessage(Lang.SOCIAL_SPU_OFF.get(lang));
+                    plugin.socialSpyPlayer.remove((Player) sender);
+                }
+                return true;
+            } catch (IllegalArgumentException ignore) {}
 
-            int i = 0x0;
-
-            plugin.setPlayerData(u, "statue", String.valueOf(plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, true)));
-            sender.sendMessage(Lang.SOCIAL_SPU_ON.get(lang));
-            plugin.socialSpyPlayer.add((Player) sender);
         }
         return true;
     }

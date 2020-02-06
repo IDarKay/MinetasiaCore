@@ -397,10 +397,27 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         });
     }
 
+    public void setGeneralPlayerData(@NotNull UUID uuid, @NotNull String key, String value) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
+        {
+            MinePlayer p;
+            if((p = playerManager.get(uuid)) != null)
+            {
+                p.putGeneralData(key, value);
+            }
+        });
+    }
+
     @Override
     public String getPlayerData(@NotNull UUID uuid, @NotNull String key) {
         MinePlayer p;
         if((p = playerManager.get(uuid)) != null) return p.getData(key);
+        else return null;
+    }
+
+    public String getGeneralPlayerData(@NotNull UUID uuid, @NotNull String key) {
+        MinePlayer p;
+        if((p = playerManager.get(uuid)) != null) return p.getGeneralData(key);
         else return null;
     }
 
@@ -561,6 +578,42 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return false;
     }
 
+    public List<UUID> getPlayerOnlineUUID()
+    {
+        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT uuid FROM `online_player`"))
+        {
+            final List<UUID> back = new ArrayList<>();
+            final ResultSet rs = ps.executeQuery();
+            while (rs.next())
+            {
+                back.add(UUID.fromString(rs.getString("uuid")));
+            }
+            return back;
+        }catch ( SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    public List<String> getPlayerOnlineName()
+    {
+        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT username FROM `online_player`"))
+        {
+            final List<String> back = new ArrayList<>();
+            final ResultSet rs = ps.executeQuery();
+            while (rs.next())
+            {
+                back.add(rs.getString("username"));
+            }
+            return back;
+        }catch ( SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
     @Override
     public boolean isPlayerOnline(@NotNull String name) {
         if(Bukkit.getPlayer(name) != null) return true;
@@ -648,7 +701,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public String getPlayerLang(@NotNull UUID uuid) {
-        return getPlayer(uuid).getGeneralData("lang");
+        return getPlayer(uuid).getLang();
     }
 
     @Override

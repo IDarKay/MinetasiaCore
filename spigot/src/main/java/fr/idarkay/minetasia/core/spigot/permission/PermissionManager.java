@@ -144,7 +144,7 @@ public class PermissionManager {
             ja.add(System.currentTimeMillis());
             ja.add(during);
             p.add(group, ja);
-            plugin.setPlayerData(player, type, p.toString());
+            plugin.setGeneralPlayerData(player, type, p.toString());
             sayUpdate(player);
         });
     }
@@ -155,7 +155,7 @@ public class PermissionManager {
             String data = plugin.getPlayerData(player, type);
             JsonArray p = data == null ? new JsonArray() : PARSER.parse(data).getAsJsonArray();
             p.add(args);
-            plugin.setPlayerData(player, type, p.toString());
+            plugin.setGeneralPlayerData(player, type, p.toString());
             sayUpdate(player);
         });
     }
@@ -193,7 +193,7 @@ public class PermissionManager {
             boolean u = (p.remove(args) != null);
             if(u)
             {
-                plugin.setPlayerData(player, type, p.toString());
+                plugin.setGeneralPlayerData(player, type, p.toString());
                 sayUpdate(player);
             }
         });
@@ -210,7 +210,7 @@ public class PermissionManager {
             for(JsonElement j : p) if(!j.getAsString().equals(args)) p2.add(j); else u = true;
             if(u)
             {
-                plugin.setPlayerData(player, type, p2.toString());
+                plugin.setGeneralPlayerData(player, type, p2.toString());
                 sayUpdate(player);
             }
         });
@@ -308,7 +308,7 @@ public class PermissionManager {
         {
             if (isTemp)
             {
-                String data = player.getData(think);
+                String data = player.getGeneralData(think);
                 JsonObject tempPermission = data == null ? null : PARSER.parse(data).getAsJsonObject();
                 if(data != null)
                     for(Map.Entry<String, JsonElement> j : tempPermission.entrySet())
@@ -319,7 +319,7 @@ public class PermissionManager {
             }
             else
             {
-                String data = player.getData(think);
+                String data = player.getGeneralData(think);
                 JsonArray permission = data == null ? null : PARSER.parse(data).getAsJsonArray();
                 if(data != null)
                     for (JsonElement j : permission) back.add(j.getAsString());
@@ -451,7 +451,7 @@ public class PermissionManager {
                 {
                     JsonArray ja = new JsonArray();
                     groupL.forEach(ja::add);
-                    plugin.setPlayerData(uuid, "group", ja.toString());
+                    plugin.setGeneralPlayerData(uuid, "group", ja.toString());
                 }
                 if ((u >> 1 & 0x1) == 1)
                 {
@@ -462,7 +462,7 @@ public class PermissionManager {
                         ja.add(v[1]);
                         jo.add(k, ja);
                     });
-                    plugin.setPlayerData(uuid, "temp_group", jo.toString());
+                    plugin.setGeneralPlayerData(uuid, "temp_group", jo.toString());
                 }
                 if(((u >> 2 & 0x1) == 1))
                 {
@@ -473,7 +473,7 @@ public class PermissionManager {
                         ja.add(v[1]);
                         jo.add(k, ja);
                     });
-                    plugin.setPlayerData(uuid, "temp_permission", jo.toString());
+                    plugin.setGeneralPlayerData(uuid, "temp_permission", jo.toString());
                 }
                 permissionAttachments.put(uuid, map);
                 Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(new PlayerPermissionLoadEndEvent(p)));
