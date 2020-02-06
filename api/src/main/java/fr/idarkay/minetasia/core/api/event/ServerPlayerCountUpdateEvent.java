@@ -23,14 +23,16 @@ public class ServerPlayerCountUpdateEvent extends Event
     @NotNull
     private final Server server;
 
-    private final int count;
+    private final int newCount;
+    private final int oldCount;
 
-    public ServerPlayerCountUpdateEvent(@NotNull final Server server, int count)
+    public ServerPlayerCountUpdateEvent(@NotNull final Server server, int newCount, int oldCount)
     {
-        super(false);
+        super(true);
         Validate.notNull(server);
         this.server = server;
-        this.count = count;
+        this.newCount = newCount;
+        this.oldCount = oldCount;
     }
 
     @NotNull
@@ -39,9 +41,14 @@ public class ServerPlayerCountUpdateEvent extends Event
         return server;
     }
 
-    public int getCount()
+    public int getNewCount()
     {
-        return count;
+        return newCount;
+    }
+
+    public int getOldCount()
+    {
+        return oldCount;
     }
 
     @Override

@@ -25,7 +25,7 @@ public class ServerRegisterEvent extends Event
 
     public ServerRegisterEvent(@NotNull final Server server)
     {
-        super(false);
+        super(true);
         Validate.notNull(server);
         this.server = server;
     }

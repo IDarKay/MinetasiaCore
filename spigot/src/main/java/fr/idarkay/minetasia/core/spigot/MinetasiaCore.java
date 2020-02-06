@@ -365,7 +365,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private void startPlayerCountSchedule()
     {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, ()
-                -> publish(ServerFrsMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.PLAYER_COUNT, getServer().getName(),  Bukkit.getServer().getOnlinePlayers().size())),
+                -> publish(ServerFrsMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.PLAYER_COUNT, getThisServer().getName(),  Bukkit.getServer().getOnlinePlayers().size())),
         20, 20 * 10);
     }
 

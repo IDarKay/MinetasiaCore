@@ -41,7 +41,7 @@ public final class ProxyManager {
 
         proxy = new Proxy(ip, port);
 
-        frsClient.setValue("proxy", proxy.getUuid().toString(), proxy.toJson());
+        frsClient.setValue("proxy/" + proxy.getUuid().toString(), proxy.toJson(), false);
 
         plugin.getProxy().getConfig().getServers().clear();
         plugin.getProxy().getServers().clear();
@@ -50,7 +50,7 @@ public final class ProxyManager {
         {
             try
             {
-                JsonObject server = new JsonParser().parse(frsClient.getValue("server", serverName)).getAsJsonObject();
+                JsonObject server = new JsonParser().parse(frsClient.getValue("server/" + serverName)).getAsJsonObject();
                 String sIp = server.get("ip").getAsString();
                 int sPort = server.get("port").getAsInt();
 
@@ -69,8 +69,8 @@ public final class ProxyManager {
 
     public void disable()
     {
-        frsClient.setValue("proxy-player-count", proxy.getUuid().toString(), null, true);
-        frsClient.setValue("proxy", proxy.getUuid().toString(), null, true);
+        frsClient.setValue("proxy-player-count/" + proxy.getUuid().toString(), null, true);
+        frsClient.setValue("proxy/" + proxy.getUuid().toString(), null, true);
     }
 
     public Proxy getProxy() {

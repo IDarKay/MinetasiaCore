@@ -64,7 +64,8 @@ public final class PlayerListener implements Listener {
                         plugin.getSqlManager().updateAsynchronously("UPDATE `uuid_username` SET `username` = ? WHERE uuid = ?", name, uuid.toString());
                         plugin.setUserName(uuid, name);
                     }
-                } else
+                }
+                else
                 {
                     String c;
                     try

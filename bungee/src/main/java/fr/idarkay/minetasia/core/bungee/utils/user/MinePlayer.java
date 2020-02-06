@@ -42,6 +42,7 @@ public class MinePlayer
         this.uuid = Objects.requireNonNull(uuid);
 
         final String data = Objects.requireNonNull(CORE.getValue(FRSKey.DATA.getKey(uuid)));
+        if(data.equalsIgnoreCase("null")) throw new NullPointerException();
         final JsonObject dataJson = PARSER.parse(data).getAsJsonObject();
 
         this.generalData = JSONUtils.jsonObjectToStringMap(dataJson);
@@ -51,7 +52,6 @@ public class MinePlayer
             this.moneys = new JsonObject();
         else
             this.moneys = dataJson.getAsJsonObject("money");
-        saveGeneralData();
     }
 
     public MinePlayer(@NotNull UUID uuid, @NotNull String name)
@@ -61,6 +61,7 @@ public class MinePlayer
         this.generalData = new HashMap<>();
 
         this.username = name;
+        generalData.put("username", username);
         this.moneys = new JsonObject();
     }
 
@@ -109,6 +110,7 @@ public class MinePlayer
         generalData.putIfAbsent("lang", MinetasiaLang.BASE_LANG);
         final JsonObject object = JSONUtils.mapToJsonObject(generalData);
         object.add("money", moneys);
+        System.out.println(object.toString());
         CORE.setValue(FRSKey.DATA.getKey(uuid), object.toString(), true);
     }
 
