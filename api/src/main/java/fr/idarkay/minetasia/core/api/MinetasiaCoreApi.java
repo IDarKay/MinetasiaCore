@@ -476,8 +476,18 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract void registerGui(MinetasiaGUI gui);
 
-//    public abstract int getKitLevelOfUser(UUID player, String kitName);
-//
-//    public abstract void setKitLvlOfUser(UUID player, String kitName, int lvl);
+    @NotNull
+    public abstract String getPrefix();
+
+    /**
+     *  the config name (32 max char);
+     *  format : {map-name}
+     *  format : {team-mode}_{map-name}
+     *  example :
+     *    mini games skyblockbattle with 6 team and 2 player per team with hill-island  map : 2-x-6_hill-island
+     * @return config name
+     */
+    @NotNull
+    public abstract String getServerConfig();
 
 }
