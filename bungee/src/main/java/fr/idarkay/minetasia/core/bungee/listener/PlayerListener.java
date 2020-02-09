@@ -102,13 +102,13 @@ public final class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onServerConnectedEvent(ServerConnectedEvent e)
     {
-        String proxyName = plugin.getProxyManager().getProxy().getUuid().toString();
-        String serveName = e.getServer().getInfo().getName();
-        UUID uuid = e.getPlayer().getUniqueId();
-        String playerName = e.getPlayer().getName();
+        final String proxyName = plugin.getProxyManager().getProxy().getUuid().toString();
+        final String serveName = e.getServer().getInfo().getName();
+        final UUID uuid = e.getPlayer().getUniqueId();
+        final String playerName = e.getPlayer().getName();
 
         plugin.getSqlManager().updateAsynchronously("INSERT INTO `online_player`(uuid, username, proxy, server) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE username = ?, proxy = ?, server = ?",
-                uuid.toString(),playerName, proxyName, serveName, playerName, proxyName, serveName);
+                uuid.toString(), playerName, proxyName, serveName, playerName, proxyName, serveName);
     }
 
 

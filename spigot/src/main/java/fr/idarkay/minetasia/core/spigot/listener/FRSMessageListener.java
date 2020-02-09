@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.spigot.listener;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
+import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
@@ -55,6 +56,23 @@ public final class FRSMessageListener implements Listener {
                     }
                 }
                 break;
+            }
+            case "core-player-tp":
+            {
+                String[] msg = e.getValue().split(";",2);
+                if(msg.length > 1)
+                {
+                    final UUID playerUUID = UUID.fromString(msg[0]);
+                    final Server server = plugin.getServer(msg[1]);
+                    if(server != null)
+                    {
+                        plugin.movePlayerToServer(playerUUID, server);
+                    }
+                    else
+                    {
+                        //todo:
+                    }
+                }
             }
             case "core-cmd":
             {

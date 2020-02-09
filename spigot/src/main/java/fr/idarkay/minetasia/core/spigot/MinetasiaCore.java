@@ -8,8 +8,12 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
+import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.core.api.*;
+import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
+import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.*;
@@ -42,6 +46,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -50,6 +55,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
@@ -150,6 +156,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private int commands = 0, maxPlayerCountAddAdmin;
 
     private Cache<Integer, Map<UUID, String>> onlinePlayer;
+    private MessageServer messageServer;
 
     @Override
     public void onLoad() {
@@ -175,6 +182,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         frsClient = new FRSClient(this);
         frsClient.startConnection(System.out, getConfig().getString("frs.host"), getConfig().getInt("frs.port"),
                 getConfig().getString("frs.password"), getConfig().getInt("frs.timeout"));
+        messageServer = new MessageServer(getConfig().getInt("publish-port"));
 
         // execute sql file
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Execute SQL");
@@ -244,6 +252,48 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void initClientReceiver()
+    {
+        MessageClient.setReceiver(socket -> Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+        try
+        {
+            final String msg = MessageClient.read(socket);
+
+            if(msg == null)
+            {
+                socket.close();
+                return;
+            }
+
+            final String[] split = msg.split(";", 2);
+            if(split.length == 0)
+            {
+                socket.close();
+                return;
+            }
+
+
+            final SocketPrePossesEvent e = new SocketPrePossesEvent(socket, split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]);
+            Bukkit.getPluginManager().callEvent(e);
+
+            if(e.getAnswer() != null)
+            {
+                MessageClient.send(socket, e.getAnswer());
+            }
+
+            socket.close();
+
+            if(!e.isCancelled())
+            {
+                Bukkit.getPluginManager().callEvent(new MessageReceivedEvent(split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]));
+            }
+            } catch (IOException ex)
+            {
+                ex.printStackTrace();
+            }
+        }));
     }
 
     @Override
@@ -639,6 +689,79 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public void publishGlobal(@NotNull String chanel, String message, boolean proxy, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            final Map<String, Integer> ipPortMap = getServers().values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort));
+
+            if(proxy)
+            {
+                //todo: add proxy
+            }
+
+            ipPortMap.forEach((ip, port) -> MessageClient.send(ip, port, message, false));
+
+        };
+
+        if(sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else Bukkit.getScheduler().runTask(this, run);
+    }
+
+
+    @Override
+    public void publishServerType(@NotNull String chanel, String message, String serverType, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            getServers(serverType).values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort)).forEach((ip, port) -> MessageClient.send(ip, port, message, false));
+
+        };
+
+        if(sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else Bukkit.getScheduler().runTask(this, run);
+    }
+
+    @Override
+    public String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync)
+    {
+        Validate.notNull(chanel);
+        Validate.notNull(target);
+
+        if(rep && !sync) throw new IllegalArgumentException("cant get rep in async");
+
+        final String fullMsg = chanel + ";" + (message == null ? "" : message);
+        if(sync)
+        {
+            return MessageClient.send(target.getIp(), target.getPublishPort(), fullMsg, rep);
+        }
+        else
+        {
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> MessageClient.send(target.getIp(), target.getPublishPort(), fullMsg, false));
+            return null;
+        }
+    }
+
+    @Override
+    public String publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean rep, boolean sync)
+    {
+        return publishTarget(chanel, message, getPlayerStatue(target).getServer(), rep, sync);
+    }
+
+    @Override
+    public String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync)
+    {
+        return publishTarget(chanel, message, target.getServer(), rep, sync);
+    }
+
+
+    @Override
     public String getValue(String key, String field) {
         return getValue(key + "/" + field);
     }
@@ -700,6 +823,17 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public void movePlayerToServer(@NotNull UUID player, Server server)
+    {
+        final Player p = Bukkit.getPlayer(player);
+        if(p != null) movePlayerToServer(p, server);
+        else
+        {
+            publishTargetPlayer("core-player-tp", player.toString() + ";" +  server.getName(), player, false, false);
+        }
+    }
+
+    @Override
     public String getPlayerLang(@NotNull UUID uuid) {
         return getPlayer(uuid).getLang();
     }
@@ -755,7 +889,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             ResultSet rs = ps.executeQuery();
             if(rs.next())
             {
-                return new PlayerStatueFixC(UUID.fromString(rs.getString("uuid")), name, rs.getString("proxy"), getServer(rs.getString("server")));
+                return new PlayerStatueFixC(UUID.fromString(rs.getString("uuid")), name, rs.getString("proxy"), Objects.requireNonNull(getServer(rs.getString("server"))));
             }
             else return null;
         }catch ( SQLException e)
@@ -965,7 +1099,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public Server getServer(String name) {
-        return serverManager.getServers().get(name);
+        return serverManager.getServer(name);
     }
 
     @Override
@@ -1015,19 +1149,26 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void setServerPhase(@NotNull ServerPhase phase)
     {
         Validate.notNull(phase);
-        if(isHub) throw new IllegalArgumentException("cant change phase in hub !");
         //check if max player is not -1
         if(phase != ServerPhase.LOAD && getThisServer().getMaxPlayerCount() < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
-        //add place for admin
-        if(phase == ServerPhase.GAME)
+        getThisServer().setPhase(phase);
+        if(phase == ServerPhase.STARTUP)
         {
-            setMaxPlayerCount( getThisServer().getMaxPlayerCount() + maxPlayerCountAddAdmin, false);
+            serverManager.registerServer();
+            messageServer.open();
         }
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.SERVER_STATUE, getThisServer().getName(), phase.name()));
-            setValue("server", getThisServer().getName(), serverManager.getServer().toJson());
-        });
-
+        else
+        {
+            //add place for admin
+            if(phase == ServerPhase.GAME)
+            {
+                setMaxPlayerCount( getThisServer().getMaxPlayerCount() + maxPlayerCountAddAdmin, false);
+            }
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.SERVER_STATUE, getThisServer().getName(), phase.name()));
+                setValue("server", getThisServer().getName(), serverManager.getServer().toJson());
+            });
+        }
     }
 
     @Override
@@ -1039,7 +1180,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void setMaxPlayerCount(int maxPlayer)
     {
-        if(isHub) throw new IllegalArgumentException("cant set max player in hub with this methods use public void setMaxPlayerCount(int maxPlayer, boolean startup)  !");
+
         setMaxPlayerCount(maxPlayer, true);
         getThisServer().setMaxPlayerCount(maxPlayer);
         Bukkit.getScheduler().runTaskAsynchronously(this, () ->
@@ -1231,5 +1372,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public static MinetasiaCore getCoreInstance()
     {
         return instance;
+    }
+
+    public MessageServer getMessageServer()
+    {
+        return messageServer;
     }
 }

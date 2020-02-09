@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
  * The event call when {@link fr.idarkay.minetasia.core.api.MinetasiaCoreApi#publish(String, String, boolean...)} (String, String, boolean...)} (String, String)} have called
  * please don't call yourself the event , this very boring
  */
+@Deprecated
 public final class FRSMessageEvent extends Event {
 
     private static HandlerList handlerList = new HandlerList();

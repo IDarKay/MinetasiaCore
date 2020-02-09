@@ -49,10 +49,10 @@ public class FRSMessageListener implements Listener {
                     if (msg.length > 1 && msg[0].equals("core-server")) {
                         if(msg[1].equals("create"))
                         {
-                            JsonObject server = new JsonParser().parse(msg[2]).getAsJsonObject();
-                            String sIp = server.get("ip").getAsString();
-                            int sPort = server.get("port").getAsInt();
-                            String serverName = server.get("type").getAsString() + "#" + server.get("uuid").getAsString();
+                            final JsonObject server = new JsonParser().parse(msg[2]).getAsJsonObject();
+                            final String sIp = server.get("ip").getAsString();
+                            final int sPort = server.get("port").getAsInt();
+                            final String serverName = server.get("type").getAsString() + "#" + server.get("uuid").getAsString();
 
                             if(!plugin.getProxy().getServers().containsKey(serverName))
                             {
