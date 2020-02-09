@@ -4,7 +4,8 @@ import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.CountryResponse;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.exception.FRSDownException;
-import fr.idarkay.minetasia.core.bungee.utils.user.Player;
+import fr.idarkay.minetasia.core.bungee.utils.user.MinePlayer;
+import fr.idarkay.minetasia.normes.MinetasiaLang;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
@@ -53,7 +54,7 @@ public final class PlayerListener implements Listener {
             try{
                 PendingConnection proxiedPlayer = e.getConnection();
                 UUID uuid = proxiedPlayer.getUniqueId();
-                Player player = plugin.getPlayerManager().get(uuid);
+                MinePlayer player = plugin.getPlayerManager().get(uuid);
                 if(player != null)
                 {
                     String name;
@@ -62,7 +63,6 @@ public final class PlayerListener implements Listener {
 
                         plugin.getSqlManager().updateAsynchronously("UPDATE `uuid_username` SET `username` = ? WHERE uuid = ?", name, uuid.toString());
                         plugin.setUserName(uuid, name);
-                        plugin.getFrsClient().publish("core-data", "username;" + uuid.toString()  + ";" + name);
                     }
                 } else
                 {
@@ -73,12 +73,11 @@ public final class PlayerListener implements Listener {
                         c = r.getCountry().getIsoCode().toLowerCase();
                     } catch (Exception ignore)
                     {
-                        c = "fr";
+                        c = MinetasiaLang.BASE_LANG;
                     }
 
                     plugin.getPlayerManager().newPlayer(uuid, proxiedPlayer.getName(), c);
                     plugin.getFrsClient().publish("core-msg",  "WELCOME;" + uuid.toString() +";true;PLAYER\\" +proxiedPlayer.getName());
-
                 }
 
             } catch (FRSDownException ignore)

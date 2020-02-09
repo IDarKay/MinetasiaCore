@@ -48,7 +48,7 @@ public final class FriendsExecutor implements TabExecutor {
         if(sender instanceof Player)
         {
             Bukkit.getScheduler().runTaskAsynchronously(minetasiaCore, () -> {
-                Player player = (Player) sender;
+                final Player player = (Player) sender;
                 if(player.hasPermission(CommandPermission.FRIEND.getPermission()))
                 {
                     String lang = minetasiaCore.getPlayerLang(player.getUniqueId());
@@ -88,6 +88,7 @@ public final class FriendsExecutor implements TabExecutor {
                             {
                                 if(minetasiaCore.isFriend(player.getUniqueId(), uuid)) {
                                     minetasiaCore.removeFriend(player.getUniqueId(), uuid);
+                                    minetasiaCore.removeFriend(uuid, player.getUniqueId());
                                     sender.sendMessage(Lang.REMOVE_FRIEND.get(lang, Lang.Argument.PLAYER.match( args[1])));
                                 }
                                 else sender.sendMessage(Lang.NOT_FRIEND.get(lang, Lang.Argument.PLAYER.match( args[1])));
@@ -101,6 +102,7 @@ public final class FriendsExecutor implements TabExecutor {
                             {
                                 friendRequest.invalidate(player.getUniqueId());
                                 minetasiaCore.addFriend(player.getUniqueId(), u);
+                                minetasiaCore.addFriend(u, player.getUniqueId());
                                 sender.sendMessage(Lang.NEW_FRIEND.get(lang, Lang.Argument.PLAYER.match( minetasiaCore.getPlayerName(u))));
                                 minetasiaCore.publish("core-msg",  "NEW_FRIEND;" + u.toString() +";true;" + Lang.Argument.PLAYER.name() + "\\" +  player.getName());
                             }
@@ -111,21 +113,26 @@ public final class FriendsExecutor implements TabExecutor {
                     {
                         StringBuilder onlyPlayer = new StringBuilder(),  offlinePlayer = new StringBuilder();
                         int onlineCount = 0, offlineCount = 0;
-                        for (Map.Entry<UUID, String> p : minetasiaCore.getFriends(player.getUniqueId()).entrySet())
+                        Set<Map.Entry<UUID, String>> entries = minetasiaCore.getFriends(player.getUniqueId()).entrySet();
+                        if(entries.size() > 0)
                         {
-                            if(minetasiaCore.isPlayerOnline(p.getKey()))
+                            final List<String> only = minetasiaCore.getPlayerOnlineName();
+                            for (Map.Entry<UUID, String> p : entries)
                             {
-                                onlyPlayer.append(p.getValue()).append(", ");
-                                onlineCount ++;
+                                if(only.contains(p.getValue()))
+                                {
+                                    onlyPlayer.append(p.getValue()).append(", ");
+                                    onlineCount ++;
+                                }
+                                else
+                                {
+                                    offlinePlayer.append(p.getValue()).append(", ");
+                                    offlineCount ++;
+                                }
                             }
-                            else
-                            {
-                                offlinePlayer.append(p.getValue()).append(", ");
-                                offlineCount ++;
-                            }
+                            if (onlineCount > 0) onlyPlayer.deleteCharAt(onlyPlayer.length() - 1);
+                            if (offlineCount > 0) offlinePlayer.deleteCharAt(offlinePlayer.length() - 1);
                         }
-                        if (onlineCount > 0) onlyPlayer.deleteCharAt(onlyPlayer.length() - 1);
-                        if (offlineCount > 0) offlinePlayer.deleteCharAt(offlinePlayer.length() - 1);
                         player.sendMessage( ChatColor.GREEN + Lang.ONLINE.get(lang) + ChatColor.GRAY + "(" + ChatColor.GREEN
                                 + onlineCount + ChatColor.GRAY + ") "  + ChatColor.GREEN + onlyPlayer.toString());
                         player.sendMessage( ChatColor.RED + Lang.OFFLINE.get(lang) + ChatColor.GRAY + "(" + ChatColor.RED

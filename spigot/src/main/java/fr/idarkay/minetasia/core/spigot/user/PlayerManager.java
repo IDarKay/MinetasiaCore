@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class PlayerManager {
 
-    private final TreeMap<UUID, Player> userCache = new TreeMap<>();
+    private final TreeMap<UUID, MinePlayer> userCache = new TreeMap<>();
     private final MinetasiaCore plugin;
 
     public PlayerManager(MinetasiaCore minetasiaCore)
@@ -35,17 +35,17 @@ public class PlayerManager {
         this.plugin = minetasiaCore;
     }
 
-    public @Nullable Player get(UUID uuid)
+    public @Nullable MinePlayer get(UUID uuid)
     {
-        return userCache.get(uuid);
+        return userCache.getOrDefault(uuid, new MinePlayer(uuid, true));
     }
 
-    public Player load(@NotNull UUID uuid)
+    public MinePlayer load(@NotNull UUID uuid)
     {
         Validate.notNull(uuid);
         if(plugin.getFrsClient().isConnected())
         {
-            final Player player = new Player(plugin.getFrsClient().getValue("usersData", uuid.toString()), plugin.getFrsClient().getValue("userStats", uuid.toString()));
+            final MinePlayer player = new MinePlayer(uuid, false);
             byte p = Byte.MIN_VALUE;
             Group g = null;
 
@@ -53,7 +53,6 @@ public class PlayerManager {
 
             for (String gs : plugin.getPermissionManager().getGroupsOfUser(player))
             {
-                System.out.println(gs);
                 Group group = plugin.getPermissionManager().groups.get(gs);
                 byte i = group.getPriority();
                 if (g == null || i > p)
@@ -66,7 +65,7 @@ public class PlayerManager {
             if (g != null)
             {
                 player.setPartyBoost(g.getPartyBoost());
-                player.setPersonalBoostBoost(g.getPersonalBoost());
+                player.setPersonalBoost(g.getPersonalBoost());
             }
             userCache.put(uuid, player);
             return player;
@@ -83,16 +82,16 @@ public class PlayerManager {
         userCache.remove(uuid);
     }
 
-    public void newPlayer(UUID uuid, String name)
-    {
-        Player p = new Player(uuid, name);
-        userCache.put(uuid, p);
-        plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
-        plugin.getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+//    public void newPlayer(UUID uuid, String name)
+//    {
+//        MinePlayer p = new Player(uuid, name);
+//        userCache.put(uuid, p);
+//        plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
+//        plugin.getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+//
+//    }
 
-    }
-
-    public @Nullable Player getOnlyInCache(UUID uuid)
+    public @Nullable MinePlayer getOnlyInCache(UUID uuid)
     {
         return userCache.get(uuid);
     }

@@ -33,7 +33,7 @@ public final class ServerManager {
         Server server = new Server(ip, port, plugin.getServerType(), plugin.getServerConfig());
         this.server = server;
         String json = server.toJson();
-        plugin.getFrsClient().setValue("server", server.getName(), json);
+        plugin.getFrsClient().setValue("server/" + server.getName(), json, false);
         plugin.publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.CREATE, json));
         plugin.getFrsClient().getValues("server", plugin.getFrsClient().getFields("server")).forEach( (k, v) -> {
             if(v != null && !v.equals("null"))
@@ -43,7 +43,7 @@ public final class ServerManager {
 
     public void disable()
     {
-        plugin.getFrsClient().setValue("server", server.getName(), null, true);
+        plugin.getFrsClient().setValue("server/" + server.getName(), null, true);
         plugin.getFrsClient().publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.REMOVE,  server.getName()), true);
     }
 

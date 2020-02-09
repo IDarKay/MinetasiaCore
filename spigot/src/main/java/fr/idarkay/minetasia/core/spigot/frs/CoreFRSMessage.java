@@ -22,6 +22,7 @@ public interface CoreFRSMessage
 
    Map<String, CoreFRSMessage> MESSAGE = new ImmutableMap.Builder<String, CoreFRSMessage>()
             .put(ServerFrsMessage.getIdentifier(), new ServerFrsMessage())
+            .put(PlayerFrsMessage.getIdentifier(), new PlayerFrsMessage())
             .build();
 
     String CHANNEL = "core-frs-msg";

@@ -3,6 +3,8 @@ package fr.idarkay.minetasia.core.bungee.utils;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.event.FRSMessageEvent;
 import net.md_5.bungee.api.ProxyServer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
@@ -278,16 +280,13 @@ public final class FRSClient
 		if(sync.length == 0 || !sync[0]) main.getProxy().getScheduler().runAsync(main, pub);
 		else pub.run();
 	}
-	
-	public String getValue(String key, Integer field){
-		return getValue(key, String.valueOf(field));
-	}
-	
-	public String getValue(String key, String field)
+
+
+	public String getValue(@NotNull String key)
 	{
 		try
 		{
-			String result = send("get " + (key != null ? key.replace(' ', '_') : "null") + " " + (field != null ? field.replace(' ', '_') : "null"), true);
+			String result = send("get " + key.replace(' ', '_'), true);
 			if (result == null || result.isEmpty()) return null;
 			return result;
 		}
@@ -296,7 +295,7 @@ public final class FRSClient
 			return null;
 		}
 	}
-	
+
 	public Set<String> getFields(String key)
 	{
 		try
@@ -312,7 +311,7 @@ public final class FRSClient
 			return Collections.emptySet();
 		}
 	}
-	
+
 	public Map<String, String> getValues(String key, Set<String> fields)
 	{
 		try
@@ -320,7 +319,7 @@ public final class FRSClient
 			HashMap<String, String> valuesPerFields = new HashMap<>();
 			for (String field : fields)
 			{
-				String value = getValue(key, field);
+				final String value = getValue(key + "/" + field);
 				valuesPerFields.put(field, value);
 			}
 			return valuesPerFields;
@@ -330,25 +329,21 @@ public final class FRSClient
 			return Collections.emptyMap();
 		}
 	}
-	
-	public void setValue(String key, String field, String value, boolean... sync)
+
+	public void setValue(@NotNull String key, @Nullable String value, boolean sync)
 	{
 		Runnable run = () -> {
 			try
 			{
-				send("set " + (key != null ? key.replace(' ', '_') : "null") + " " + (field != null ? field.replace(' ', '_') : "null") + " " + value, false);
+				send("set " +key.replace(' ', '_') + " " +  value, false);
 			}
 			catch (IOException e)
 			{
 				//e.printStackTrace();
 			}
 		};
-		if(sync.length == 0 || !sync[0]) main.getProxy().getScheduler().runAsync(main, run);
+		if(!sync) main.getProxy().getScheduler().runAsync(main, run);
 		else run.run();
 	}
-	
-	public void setValue(String key, int field, String value, boolean... sync)
-	{
-		setValue(key, String.valueOf(field), value, sync);
-	}
+
 }
