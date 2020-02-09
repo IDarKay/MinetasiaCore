@@ -144,7 +144,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      */
     @NotNull
-    public abstract HashMap<UUID, String> getFriends(@NotNull UUID uuid);
+    public abstract Map<UUID, String> getFriends(@NotNull UUID uuid);
 
     /**
      * check if 2 player is friend
@@ -489,5 +489,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     @NotNull
     public abstract String getServerConfig();
+
+    public abstract MinetasiaPlayer getPlayer(UUID uuid);
 
 }

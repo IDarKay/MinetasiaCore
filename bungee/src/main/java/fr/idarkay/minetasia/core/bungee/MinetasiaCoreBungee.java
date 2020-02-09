@@ -5,7 +5,7 @@ import fr.idarkay.minetasia.core.bungee.listener.PlayerListener;
 import fr.idarkay.minetasia.core.bungee.utils.FRSClient;
 import fr.idarkay.minetasia.core.bungee.utils.SQLManager;
 import fr.idarkay.minetasia.core.bungee.utils.proxy.ProxyManager;
-import fr.idarkay.minetasia.core.bungee.utils.user.Player;
+import fr.idarkay.minetasia.core.bungee.utils.user.MinePlayer;
 import fr.idarkay.minetasia.core.bungee.utils.user.PlayerManager;
 import net.md_5.bungee.api.ReconnectHandler;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -43,9 +43,11 @@ public final class MinetasiaCoreBungee extends Plugin {
     private Configuration configuration;
     private ProxyManager proxyManager;
     private PlayerManager playerManager;
+    private static MinetasiaCoreBungee instance;
 
     @Override
     public void onLoad() {
+        this.instance = this;
         File configFile = new File(getDataFolder(), "config.yml");
 
         if(!configFile.getParentFile().exists()) configFile.getParentFile().mkdirs();
@@ -195,8 +197,8 @@ public final class MinetasiaCoreBungee extends Plugin {
         getProxy().getPluginManager().registerListener(this, new PlayerListener(this));
         getProxy().getPluginManager().registerListener(this, new FRSMessageListener(this));
 
-        getProxy().getScheduler().schedule(this, () -> getFrsClient().setValue("proxy-player-count", getProxyManager().getProxy().getUuid().toString()
-                , String.valueOf(getProxy().getOnlineCount())), getConfig().getInt("player_count_update"), TimeUnit.SECONDS);
+        getProxy().getScheduler().schedule(this, () -> getFrsClient().setValue("proxy-player-count/" + getProxyManager().getProxy().getUuid().toString()
+                , String.valueOf(getProxy().getOnlineCount()), false), getConfig().getInt("player_count_update"), TimeUnit.SECONDS);
 
     }
 
@@ -231,18 +233,21 @@ public final class MinetasiaCoreBungee extends Plugin {
     {
         this.getProxy().getScheduler().runAsync(this, () ->
         {
-            Player p;
+            MinePlayer p;
             if((p = playerManager.get(uuid)) != null)
             {
                 p.setUsername(username);
-                frsClient.publish("core-data", "name;" + uuid.toString() + ";" + username);
-                frsClient.setValue("usersData", uuid.toString(), p.getJson());
             }
         });
     }
 
     private Function<String, String> getStatementProcessor() {
         return s -> s.replace("'", "`"); // use backticks for quotes
+    }
+
+    public static MinetasiaCoreBungee getInstance()
+    {
+        return instance;
     }
 
 }

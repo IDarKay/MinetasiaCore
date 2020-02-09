@@ -144,7 +144,6 @@ public class SecondArgsCommand extends SubCommand implements FlexibleCommand {
                     if(p != null && p1 != null)
                     {
                         plugin.movePlayerToServer(p1, p.getServer());
-                        //todo: move ti player
                     }
                     else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(getLangOfSender(sender)));
                 }

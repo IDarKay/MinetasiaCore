@@ -27,7 +27,7 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
-import fr.idarkay.minetasia.core.spigot.user.Player;
+import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
 import fr.idarkay.minetasia.core.spigot.utils.FRSClient;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
@@ -81,6 +81,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public final static String HUB_NAME = "hub";
 
     private final static String LOG_PREFIX = "[Minetasia-Core] ";
+
+    private static MinetasiaCore instance;
 
     public final List<org.bukkit.entity.Player> socialSpyPlayer = new ArrayList<>();
 
@@ -152,6 +154,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void onLoad() {
         saveDefaultConfig();
+        instance = this;
         // init lang file
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load lang file");
         getMinetasiaLang().init();
@@ -386,20 +389,35 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void setPlayerData(@NotNull UUID uuid, @NotNull String key, String value) {
         Bukkit.getScheduler().runTaskAsynchronously(this, () ->
         {
-            Player p;
+            MinePlayer p;
             if((p = playerManager.get(uuid)) != null)
             {
-                p.setData(key, value);
-                publish("core-data", "data;" + uuid.toString() + ";" + key + ";" + value);
-                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+                p.putData(key, value);
+            }
+        });
+    }
+
+    public void setGeneralPlayerData(@NotNull UUID uuid, @NotNull String key, String value) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
+        {
+            MinePlayer p;
+            if((p = playerManager.get(uuid)) != null)
+            {
+                p.putGeneralData(key, value);
             }
         });
     }
 
     @Override
     public String getPlayerData(@NotNull UUID uuid, @NotNull String key) {
-        Player p;
+        MinePlayer p;
         if((p = playerManager.get(uuid)) != null) return p.getData(key);
+        else return null;
+    }
+
+    public String getGeneralPlayerData(@NotNull UUID uuid, @NotNull String key) {
+        MinePlayer p;
+        if((p = playerManager.get(uuid)) != null) return p.getGeneralData(key);
         else return null;
     }
 
@@ -428,7 +446,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public float getPlayerMoney(UUID uuid, Economy economy) {
-        Player p = playerManager.get(uuid);
+        MinePlayer p = playerManager.get(uuid);
         if(p != null) return p.getMoney(economy);
         else return -1.0F;
     }
@@ -436,14 +454,14 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void addPlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
 
-        Consumer<BukkitTask> c = bukkitTask -> {
+        final Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
-            Player p = playerManager.get(uuid);
-            if(p != null){
+            MinePlayer p = playerManager.get(uuid);
+            if(p != null)
+            {
                 p.addMoney(economy, amount);
-                publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + p.getMoney(economy));
-                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
-            } else throw new PlayerNotFoundException("can't add money to not found user");
+            }
+            else throw new PlayerNotFoundException("can't add money to not found user");
         };
 
         if(async)
@@ -454,17 +472,16 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     public void addPlayerMoneys(UUID uuid, Map<Economy, Float> m, boolean async)
     {
-        Consumer<BukkitTask> c = bukkitTask -> {
-            Player p = playerManager.get(uuid);
+        final Consumer<BukkitTask> c = bukkitTask -> {
+            MinePlayer p = playerManager.get(uuid);
             if(p != null)
             {
                 m.forEach((k, v )-> {
                     if(v < 0) throw new IllegalArgumentException("negative money amount");
 
-                    p.addMoney(k, v);
-                    publish("core-data", "money;" + uuid.toString() + ";" + k.name() + ";" + p.getMoney(k));
+                    p.addMoneyWithoutSave(k, v);
                 });
-                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+                p.saveGeneralData();
             }
             else throw new PlayerNotFoundException("can't add money to not found user");
         };
@@ -478,13 +495,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void removePlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
 
-        Consumer<BukkitTask> c = bukkitTask -> {
+        final Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
-            Player p = playerManager.get(uuid);
+            MinePlayer p = playerManager.get(uuid);
             if(p != null){
-                p.removeMooney(economy, amount);
-                publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + p.getMoney(economy));
-                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
+                p.removeMoney(economy, amount);
             } else throw new PlayerNotFoundException("can't remove money to not found user");
         };
 
@@ -497,13 +512,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void setPlayerMoney(UUID uuid, Economy economy, float amount, boolean async) {
 
-        Consumer<BukkitTask> c = bukkitTask -> {
+        final Consumer<BukkitTask> c = bukkitTask -> {
             if(amount < 0) throw new IllegalArgumentException("negative money amount");
-            Player p = playerManager.get(uuid);
+            final MinePlayer p = playerManager.get(uuid);
             if(p != null){
                 p.setMoney(economy, amount);
-                publish("core-data", "money;" + uuid.toString() + ";" + economy.name() + ";" + amount);
-                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
             } else throw new PlayerNotFoundException("can't set money to not found user");
         };
         if(async)
@@ -513,58 +526,41 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public @NotNull HashMap<UUID, String> getFriends(@NotNull UUID uuid) {
-        Player p = playerManager.get(uuid);
+    public @NotNull Map<UUID, String> getFriends(@NotNull UUID uuid) {
+        MinePlayer p = playerManager.get(uuid);
         if (p != null) return p.getFriends();
         return new HashMap<>();
     }
 
     @Override
     public boolean isFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
-        Player p = playerManager.get(uuid);
+        MinePlayer p = playerManager.get(uuid);
         if(p != null) return p.isFriend(uuid2);
         return false;
     }
 
     @Override
     public void removeFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
-        removeFriend(uuid, uuid2, true);
-    }
-
-    private void removeFriend(@NotNull UUID uuid, @NotNull UUID uuid2, boolean r) {
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            Player p = playerManager.get(uuid);
+            final MinePlayer p = playerManager.get(uuid);
             if(p != null)
             {
-                if(p.removeFriends(uuid2))
-                {
-                    if(r) removeFriend(uuid2, uuid, false);
-                    publish("core-data", "fremove;" + uuid.toString() + ";" + uuid2.toString());
-                    getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
-                }
+                p.removeFriends(uuid);
             }
         });
     }
 
     @Override
     public void addFriend(@NotNull UUID uuid, @NotNull UUID uuid2) {
-        addFriend(uuid, uuid2, true);
-    }
-
-    private void addFriend(@NotNull UUID uuid, @NotNull UUID uuid2, boolean r) {
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            Player p = playerManager.get(uuid);
+            MinePlayer p = playerManager.get(uuid);
             if(p != null)
             {
-                if(p.addFriends(uuid2))
-                {
-                    if(r) addFriend(uuid2, uuid, false);
-                    publish("core-data", "fadd;" + uuid.toString() + ";" + uuid2.toString());
-                    getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
-                }
+                p.addFriends(uuid2);
             }
         });
     }
+
 
     @Override
     public boolean isPlayerOnline(@NotNull UUID uuid) {
@@ -573,13 +569,49 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE uuid = ?"))
         {
             ps.setString(1, uuid.toString());
-            ResultSet rs = ps.executeQuery();
+            final ResultSet rs = ps.executeQuery();
             return rs.next();
         }catch ( SQLException e)
         {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public List<UUID> getPlayerOnlineUUID()
+    {
+        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT uuid FROM `online_player`"))
+        {
+            final List<UUID> back = new ArrayList<>();
+            final ResultSet rs = ps.executeQuery();
+            while (rs.next())
+            {
+                back.add(UUID.fromString(rs.getString("uuid")));
+            }
+            return back;
+        }catch ( SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    public List<String> getPlayerOnlineName()
+    {
+        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT username FROM `online_player`"))
+        {
+            final List<String> back = new ArrayList<>();
+            final ResultSet rs = ps.executeQuery();
+            while (rs.next())
+            {
+                back.add(rs.getString("username"));
+            }
+            return back;
+        }catch ( SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -589,7 +621,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE username = ?"))
         {
             ps.setString(1, name);
-            ResultSet rs = ps.executeQuery();
+            final ResultSet rs = ps.executeQuery();
             return rs.next();
         }catch ( SQLException e)
         {
@@ -608,7 +640,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public String getValue(String key, String field) {
-        return frsClient.getValue(key, field);
+        return getValue(key + "/" + field);
+    }
+
+    public String getValue(String key ) {
+        return frsClient.getValue(key);
     }
 
     @Override
@@ -622,12 +658,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public void setValue(String key, String field, String value, boolean... sync) {
-        frsClient.setValue(key, field, value, sync);
+    public void setValue(String key, String field, String value, boolean... sync)
+    {
+        setValue(key + "/" + field, value, sync.length == 0 || sync[0]);
+    }
+
+    public void setValue(String key, String value, boolean sync)
+    {
+        frsClient.setValue(key, value, sync);
     }
 
     @Override
-    public void movePlayerToHub(@NotNull org.bukkit.entity.Player player) {
+    public void movePlayerToHub(@NotNull org.bukkit.entity.Player player)
+    {
 
         Bukkit.getScheduler().runTaskAsynchronously(this, () ->
         {
@@ -658,18 +701,30 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public String getPlayerLang(@NotNull UUID uuid) {
-        return getPlayerData(uuid, "lang");
+        return getPlayer(uuid).getLang();
     }
 
     @Override
     public @Nullable String getPlayerName(UUID uuid) {
-        org.bukkit.entity.Player pl = Bukkit.getPlayer(uuid);
-        if(pl == null)
+        org.bukkit.entity.Player p;
+        if((p = Bukkit.getPlayer(uuid)) != null) return p.getName();
+        else
         {
-            Player p = playerManager.get(uuid);
-            if(p != null) return p.getName();
-        } else return pl.getName();
-        return null;
+            sqlManager.getSQL();
+            try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT username FROM `uuid_username` WHERE uuid = ?"))
+            {
+                ps.setString(1, uuid.toString());
+                ResultSet rs = ps.executeQuery();
+                if(rs.next())
+                {
+                    return rs.getString("username");
+                }
+            }catch ( SQLException e)
+            {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     @Override
@@ -768,7 +823,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public PlayerStats getPlayerStats(@NotNull UUID uuid)
     {
-        Player p = playerManager.get(uuid);
+        MinePlayer p = playerManager.get(uuid);
         if(p != null) return p.getStats();
         return null;
     }
@@ -779,13 +834,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Validate.notNull(uuid, "uuid can't be null");
         Validate.notNull(statsUpdater, "statsUpdater can't be null");
 
-        Consumer<BukkitTask> c = bukkitTask -> {
+        final Consumer<BukkitTask> c = bukkitTask -> {
             try
             {
-                Player p = Objects.requireNonNull(playerManager.get(uuid));
-                p.upDateStats(statsUpdater);
-                publish("core-data", "stats;" + uuid.toString() + ";" + p.getJsonStats().toString());
-                getFrsClient().setValue("userStats", uuid.toString(), p.getJsonStats().toString());
+                final MinePlayer p = Objects.requireNonNull(playerManager.get(uuid));
+                p.updatePlayerStats(statsUpdater);
             }
             catch (NullPointerException e)
             {
@@ -1055,6 +1108,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return serverConfig;
     }
 
+    @Override
+    public MinetasiaPlayer getPlayer(UUID uuid)
+    {
+        return playerManager.get(uuid);
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         if(startup && getThisServer().getServerPhase() != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
@@ -1118,12 +1177,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         Bukkit.getScheduler().runTaskAsynchronously(this, () ->
         {
-            Player p;
+            MinePlayer p;
             if((p = playerManager.get(uuid)) != null)
             {
                 p.setUsername(username);
-                publish("core-data", "name;" + uuid.toString() + ";" + username);
-                getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
             }
         });
     }
@@ -1165,10 +1222,14 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return partyServerBoost;
     }
 
-    public static Player validateNotNullPlayer(@Nullable Player player)
+    public static MinePlayer validateNotNullPlayer(@Nullable MinePlayer player)
     {
         if(player == null) throw new PlayerNotFoundException();
         return player;
     }
 
+    public static MinetasiaCore getCoreInstance()
+    {
+        return instance;
+    }
 }

@@ -533,7 +533,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
         //add place for admin
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
         System.out.println("Server Phase set to " + phase.name());
-        //todo: new server system
     }
 
     @Override
@@ -605,6 +604,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return serverConfig;
     }
 
+    @Override
+    public MinetasiaPlayer getPlayer(UUID uuid)
+    {
+        return null;
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
@@ -617,6 +622,131 @@ public class MinetasiaTest extends MinetasiaCoreApi
         } catch (Exception e)
         {
             e.printStackTrace();
+        }
+    }
+
+    public class MinePlayer implements MinetasiaPlayer
+    {
+
+        private final UUID uuid;
+
+        public MinePlayer(UUID uuid)
+        {
+            this.uuid = uuid;
+        }
+
+        @Override
+        public boolean isCache()
+        {
+            return false;
+        }
+
+        @Override
+        public float getMoney(@NotNull Economy economy)
+        {
+            return getPlayerMoney(uuid, economy);
+        }
+
+        @Override
+        public void addMoney(@NotNull Economy economy, float amount)
+        {
+            addPlayerMoney(uuid, economy, amount, false);
+        }
+
+        @Override
+        public void removeMoney(@NotNull Economy economy, float amount)
+        {
+            removePlayerMoney(uuid, economy , amount, false);
+        }
+
+        @Override
+        public void setMoney(@NotNull Economy economy, float amount)
+        {
+            setPlayerMoney(uuid, economy, amount, false);
+        }
+
+        @Override
+        public @NotNull UUID getUUID()
+        {
+            return uuid;
+        }
+
+        @Override
+        public @NotNull String getName()
+        {
+            return getPlayerName(uuid);
+        }
+
+        @Override
+        public @NotNull Map<UUID, String> getFriends()
+        {
+            return new HashMap<>();
+        }
+
+        @Override
+        public @NotNull String getLang()
+        {
+            return MinetasiaLang.BASE_LANG;
+        }
+
+        @Override
+        public boolean isFriend(@NotNull UUID uuid)
+        {
+            return true;
+        }
+
+        @Override
+        public void addFriends(@NotNull UUID uuid)
+        {
+
+        }
+
+        @Override
+        public void removeFriends(@NotNull UUID uuid)
+        {
+
+        }
+
+        @Override
+        public @Nullable String getGeneralData(@NotNull String key)
+        {
+            return "no in test plugin";
+        }
+
+        @Override
+        public void putGeneralData(@NotNull String key, @Nullable String value)
+        {
+
+        }
+
+        @Override
+        public @Nullable String getData(@NotNull String key)
+        {
+            return getPlayerData(uuid, key);
+        }
+
+        @Override
+        public void putData(@NotNull String key, @Nullable String value)
+        {
+            setPlayerData(uuid, key, value);
+        }
+
+        @Override
+        public @NotNull PlayerStats getStats()
+        {
+            return getPlayerStats(uuid);
+        }
+
+        @Override
+        public void updatePlayerStats(@NotNull StatsUpdater updater)
+        {
+
+        }
+
+        @Override
+        public int getStatus()
+        {
+            return 0;
         }
     }
 
