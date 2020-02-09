@@ -67,6 +67,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
+        public int getPublishPort()
+        {
+            return getPort();
+        }
+
+        @Override
         public @NotNull UUID getUuid()
         {
             return uuid;
@@ -270,7 +276,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
-    public void publishGlobal(@NotNull String chanel, String message, boolean sync)
+    public void publishGlobal(@NotNull String chanel, String message, boolean proxy, boolean sync)
     {
 
     }
@@ -282,22 +288,23 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
-    public void publishTarget(@NotNull String chanel, String message, Server target, boolean sync)
+    public String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync)
     {
-
+        return null;
     }
 
     @Override
-    public void publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean sync)
+    public String publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean rep, boolean sync)
     {
-
+        return null;
     }
 
     @Override
-    public void publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean sync)
+    public String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync)
     {
-
+        return null;
     }
+
 
     HashMap<String, HashMap<String, String>> values = new HashMap<>();
 
