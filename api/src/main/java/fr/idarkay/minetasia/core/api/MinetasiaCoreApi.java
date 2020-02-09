@@ -193,13 +193,33 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * publish a message to the redis system
      * the message will be get by all only server with the {@link fr.idarkay.minetasia.core.api.event.FRSMessageEvent}
      *
-     * @param chanel  {@link NotNull} chanel of the message
+     * @param chanel  chanel of the message
      * @param message  message
      * @param sync if need be sync or not
      * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
      * @since 1.0
+     * @deprecated
      */
     public abstract void publish(@NotNull String chanel, String message, boolean... sync);
+
+    /**
+     *
+     * @param chanel  chanel of the message
+     * @param message  message
+     * @param proxy only when for server create msg
+     * @param sync if need be sync or not
+     */
+    public abstract void publishGlobal(@NotNull String chanel, String message, boolean proxy, boolean sync);
+
+//    public abstract void publishProxy(@NotNull String chanel, String message, boolean sync);
+
+    public abstract void publishServerType(@NotNull String chanel, String message, String serverType , boolean sync);
+
+    public abstract String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync);
+
+    public abstract String publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean rep, boolean sync);
+
+    public abstract String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync);
 
     /**
      * get value of field
@@ -248,6 +268,14 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param server where move player
      */
     public abstract void movePlayerToServer(@NotNull Player player, Server server);
+
+    /**
+     *  move a player to server the player not need to be connect on this server
+     *  use {@link MinetasiaCoreApi#movePlayerToHub(Player)} to move ot hub !
+     * @param player to move
+     * @param server where move player
+     */
+    public abstract void movePlayerToServer(@NotNull UUID player, Server server);
 
     /**
      * get the lang of player in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>

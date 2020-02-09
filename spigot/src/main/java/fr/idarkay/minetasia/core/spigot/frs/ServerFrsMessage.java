@@ -5,7 +5,7 @@ import fr.idarkay.minetasia.core.api.event.ServerPlayerCountUpdateEvent;
 import fr.idarkay.minetasia.core.api.event.ServerRegisterEvent;
 import fr.idarkay.minetasia.core.api.event.ServerUnregisterEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.server.Server;
+import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +35,7 @@ public class    ServerFrsMessage implements CoreFRSMessage
         {
             if (args[1].equals(CREATE))
             {
-                final Server server = Server.getServerFromJson(CoreFRSMessage.concat(args, ";", 2));
+                final MineServer server = MineServer.getServerFromJson(CoreFRSMessage.concat(args, ";", 2));
                 plugin.getServerManager().addServer(server);
                 Bukkit.getPluginManager().callEvent(new ServerRegisterEvent(server));
             }

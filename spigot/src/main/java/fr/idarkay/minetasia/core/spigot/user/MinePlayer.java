@@ -4,10 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.utils.Boost;
-import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
-import fr.idarkay.minetasia.core.api.utils.PlayerStats;
-import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
+import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.frs.PlayerFrsMessage;
 import fr.idarkay.minetasia.core.spigot.utils.FRSKey;
@@ -51,6 +48,7 @@ public class MinePlayer implements MinetasiaPlayer
     private boolean friendsLoad = false, dataLoad = false, statsLoad = false;
 
     private Boost personalBoost = HashMap::new, partyBoost = HashMap::new;
+    private Party party;
 
     public MinePlayer(@NotNull UUID uuid, boolean isCache)
     {
@@ -68,6 +66,30 @@ public class MinePlayer implements MinetasiaPlayer
             this.moneys = new HashMap<>();
         else
             this.moneys = JSONUtils.jsonObjectToMap(dataJson.getAsJsonObject("money"), Economy::valueOf, JsonElement::getAsFloat);
+
+        //todo: party
+        //temp value
+        party = new Party()
+        {
+            @Override
+            public UUID getOwner()
+            {
+                return uuid;
+            }
+
+            @Override
+            public List<UUID> getPlayers()
+            {
+                return Collections.singletonList(uuid);
+            }
+
+            @Override
+            public int limitSize()
+            {
+                return 10;
+            }
+        };
+
     }
 
     public void setUsername(@NotNull String username)
@@ -266,6 +288,12 @@ public class MinePlayer implements MinetasiaPlayer
         return Integer.parseInt(generalData.getOrDefault("status", "0"));
     }
 
+    @Override
+    public Party getParty()
+    {
+        return party;
+    }
+
     public Boost getPersonalBoost()
     {
         return personalBoost;
@@ -350,7 +378,7 @@ public class MinePlayer implements MinetasiaPlayer
     public synchronized void saveStats()
     {
         if(statsLoad)
-            CORE.setValue(FRSKey.STATS.getKey(uuid), stats.toJsonObject().getAsString(), true);
+            CORE.setValue(FRSKey.STATS.getKey(uuid), stats.toJsonObject().toString(), true);
     }
 
     public synchronized void saveFriends()

@@ -269,6 +269,36 @@ public class MinetasiaTest extends MinetasiaCoreApi
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> Bukkit.getPluginManager().callEvent(new FRSMessageEvent(s, s1)));
     }
 
+    @Override
+    public void publishGlobal(@NotNull String chanel, String message, boolean sync)
+    {
+
+    }
+
+    @Override
+    public void publishServerType(@NotNull String chanel, String message, String serverType, boolean sync)
+    {
+
+    }
+
+    @Override
+    public void publishTarget(@NotNull String chanel, String message, Server target, boolean sync)
+    {
+
+    }
+
+    @Override
+    public void publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean sync)
+    {
+
+    }
+
+    @Override
+    public void publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean sync)
+    {
+
+    }
+
     HashMap<String, HashMap<String, String>> values = new HashMap<>();
 
     @Override
@@ -308,6 +338,14 @@ public class MinetasiaTest extends MinetasiaCoreApi
     public void movePlayerToServer(@NotNull Player player, Server server)
     {
         player.kickPlayer("Disconnect move function not set (test core version)");
+    }
+
+    @Override
+    public void movePlayerToServer(@NotNull UUID player, Server server)
+    {
+        final Player player1 = Bukkit.getPlayer(player);
+        if(player1 != null)
+            movePlayerToServer(player1, server);
     }
 
     @Override
@@ -747,6 +785,31 @@ public class MinetasiaTest extends MinetasiaCoreApi
         public int getStatus()
         {
             return 0;
+        }
+
+        @Override
+        public Party getParty()
+        {
+            return new Party()
+            {
+                @Override
+                public UUID getOwner()
+                {
+                    return uuid;
+                }
+
+                @Override
+                public List<UUID> getPlayers()
+                {
+                    return Collections.singletonList(uuid);
+                }
+
+                @Override
+                public int limitSize()
+                {
+                    return 10;
+                }
+            };
         }
     }
 
