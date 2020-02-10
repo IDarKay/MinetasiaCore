@@ -1,9 +1,9 @@
 package fr.idarkay.minetasia.core.spigot.server;
 
+import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
-import fr.idarkay.minetasia.core.spigot.frs.ServerFrsMessage;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,10 +35,12 @@ public final class ServerManager {
 
         this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(), plugin.getServerConfig());
 
-        plugin.getFrsClient().getValues("server", plugin.getFrsClient().getFields("server")).forEach( (k, v) -> {
-            if(v != null && !v.equals("null"))
-            servers.put(k, MineServer.getServerFromJson(v));
-        });
+        plugin.getMongoDbManager().getAll(MongoCollections.SERVERS).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
+
+//        plugin.getFrsClient().getValues("server", plugin.getFrsClient().getFields("server")).forEach( (k, v) -> {
+//            if(v != null && !v.equals("null"))
+//            servers.put(k, MineServer.getServerFromJson(v));
+//        });
     }
 
     private boolean register = false;
@@ -47,17 +49,16 @@ public final class ServerManager {
     {
         if(!register)
         {
-            String json = server.toJson();
-            plugin.getFrsClient().setValue("server/" + server.getName(), json, false);
-            plugin.publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.CREATE, json));
+            plugin.getMongoDbManager().insert(MongoCollections.SERVERS, server.toDocument());
+            //todo:
             register = true;
         }
     }
 
     public void disable()
     {
-        plugin.getFrsClient().setValue("server/" + server.getName(), null, true);
-        plugin.getFrsClient().publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.REMOVE,  server.getName()), true);
+        plugin.getMongoDbManager().delete(MongoCollections.SERVERS, server.getName());
+        //todo: publish
     }
 
     public MineServer getServer()
@@ -78,10 +79,10 @@ public final class ServerManager {
         }
         else
         {
-            final String data = plugin.getValue("server/" + name);
-            if(data != null && !data.isEmpty() && !data.equals("null"))
+            final Document data = plugin.getMongoDbManager().getByKey(MongoCollections.SERVERS, name);
+            if(data != null)
             {
-                return MineServer.getServerFromJson(data);
+                return MineServer.getServerFromDocument(data);
             }
         }
         return null;

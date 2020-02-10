@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.api;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +64,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @return complete {@link SQLManager} instance
      * @since 1.0
      */
-    public abstract SQLManager getSqlManager();
+//    @Deprecated
+//    public abstract SQLManager getSqlManager();
 
     /**
      * set a data to a specific player if key already exist this will be replaced by the new values
@@ -73,7 +75,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @throws IllegalStateException if one or more parameter are null
      * @since 1.0
      */
-    public abstract void setPlayerData(@NotNull UUID uuid, @NotNull String key, String value);
+    public abstract void setPlayerData(@NotNull UUID uuid, @NotNull String key, Object value);
 
     /**
      * get a data of a specific player and key
@@ -83,7 +85,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @throws IllegalStateException if one or more parameter are null
      * @since 1.0
      */
-    public abstract String getPlayerData(@NotNull UUID uuid, @NotNull String key);
+    public abstract Object getPlayerData(@NotNull UUID uuid, @NotNull String key);
 
     /**
      * get the uuid of a player from user name
@@ -102,7 +104,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @return float amount or -1 if player not found
      * @since 1.0
      */
-    public abstract float getPlayerMoney(UUID uuid, Economy economy);
+    public abstract double getPlayerMoney(UUID uuid, Economy economy);
 
     /**
      * async task
@@ -200,7 +202,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      * @deprecated
      */
-    public abstract void publish(@NotNull String chanel, String message, boolean... sync);
+//    public abstract void publish(@NotNull String chanel, String message, boolean... sync);
 
     /**
      *
@@ -221,37 +223,6 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync);
 
-    /**
-     * get value of field
-     * @param key - key
-     * @param field - field
-     * @return String data or null
-     */
-    public abstract String getValue(String key, String field);
-
-    /**
-     * get all field of a key
-     * @param key - key
-     * @return list of fields or empty list
-     */
-    public abstract Set<String> getFields(String key);
-
-    /**
-     * get all values for key and Set of field
-     * @param key - key
-     * @param fields - fields
-     * @return map of fields - value or empty map
-     */
-    public abstract Map<String, String> getValues(String key, Set<String> fields);
-
-    /**
-     * set data value
-     * @param key - key
-     * @param field - field
-     * @param value - data
-     * @param sync to do in sync or async
-     */
-    public abstract void setValue(String key, String field, String value, boolean... sync);
 
     /**
      * move a player to random lobby
@@ -519,5 +490,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract String getServerConfig();
 
     public abstract MinetasiaPlayer getPlayer(UUID uuid);
+
+    public abstract MongoDbManager getMongoDbManager();
 
 }

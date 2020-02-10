@@ -4,9 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.event.PlayerPermissionLoadEndEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.PermissionAttachment;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +25,7 @@ import java.util.*;
  * @author Alois. B. (IDarKay),
  * Created the 28/11/2019 at 20:22
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class PermissionManager {
 
     private final static JsonParser PARSER = new JsonParser();
@@ -35,15 +37,10 @@ public class PermissionManager {
     public PermissionManager(MinetasiaCore plugin)
     {
         this.plugin = plugin;
-        for(String f : plugin.getFields("group"))
+        for(Document d : plugin.getMongoDbManager().getAll(MongoCollections.GROUPS))
         {
-            System.out.println(f);
-            try
-            {
-                Group g = new Group(plugin.getValue("group", f), this);
-                groups.put(g.getName(), g);
-            } catch (Exception ignore) { ignore.printStackTrace();}
-
+            Group g = new Group(d, this);
+            groups.put(g.getName(), g);
         }
     }
 
@@ -51,6 +48,7 @@ public class PermissionManager {
     {
         Group g = new Group(this, name);
         groups.put(name, g);
+        plugin.getMongoDbManager().insert(MongoCollections.GROUPS, g.toDocument());
         return g;
     }
 
@@ -64,8 +62,7 @@ public class PermissionManager {
             if(pa != null) pa.remove(); v.remove("temp_group_" + group);
         });
         groups.remove(group);
-        plugin.setValue("group", group, null);
-        plugin.publish("core-group", "group;" + group + ";null");
+        plugin.getMongoDbManager().delete(MongoCollections.GROUPS, group);
     }
 
     public void updateGroupToFRS(String group)
@@ -79,9 +76,7 @@ public class PermissionManager {
 
     public void updateGroupToFRS(@NotNull Group group)
     {
-        String j = group.toJson();
-        plugin.setValue("group", group.getName(), j);
-        plugin.publish("core-group", "group;" + group.getName() + ";" + j);
+        plugin.getMongoDbManager().replace(MongoCollections.GROUPS, group.getName(), group.toDocument());
     }
 
     public void updateGroupToPlayer(String group)
@@ -138,13 +133,13 @@ public class PermissionManager {
     private void addTemp(@NotNull UUID player, @NotNull String group, @NotNull String type, long during)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type);
+            String data = plugin.getPlayerData(player, type).toString();
             JsonObject p = data == null ? new JsonObject() : PARSER.parse(data).getAsJsonObject();
             JsonArray ja = new JsonArray();
             ja.add(System.currentTimeMillis());
             ja.add(during);
             p.add(group, ja);
-            plugin.setGeneralPlayerData(player, type, p.toString());
+            plugin.setPlayerData(player, type, p.toString());
             sayUpdate(player);
         });
     }
@@ -152,10 +147,10 @@ public class PermissionManager {
     private void add(@NotNull UUID player, @NotNull String args, @NotNull String type)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type);
+            String data = plugin.getPlayerData(player, type).toString();
             JsonArray p = data == null ? new JsonArray() : PARSER.parse(data).getAsJsonArray();
             p.add(args);
-            plugin.setGeneralPlayerData(player, type, p.toString());
+            plugin.setPlayerData(player, type, p.toString());
             sayUpdate(player);
         });
     }
@@ -187,13 +182,13 @@ public class PermissionManager {
     private void removeTemp(@NotNull UUID player, @NotNull String args, @NotNull String type)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type);
+            String data = plugin.getPlayerData(player, type).toString();
             JsonObject p = data == null ? null : PARSER.parse(data).getAsJsonObject();
             if(p == null) return;
             boolean u = (p.remove(args) != null);
             if(u)
             {
-                plugin.setGeneralPlayerData(player, type, p.toString());
+                plugin.setPlayerData(player, type, p.toString());
                 sayUpdate(player);
             }
         });
@@ -202,7 +197,7 @@ public class PermissionManager {
     private void remove(@NotNull UUID player, @NotNull String args, @NotNull String type)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type);
+            String data = plugin.getPlayerData(player, type).toString();
             JsonArray p = data == null ? null : PARSER.parse(data).getAsJsonArray();
             if(p == null) return;
             JsonArray p2 = new JsonArray();
@@ -210,7 +205,7 @@ public class PermissionManager {
             for(JsonElement j : p) if(!j.getAsString().equals(args)) p2.add(j); else u = true;
             if(u)
             {
-                plugin.setGeneralPlayerData(player, type, p2.toString());
+                plugin.setPlayerData(player, type, p2.toString());
                 sayUpdate(player);
             }
         });
@@ -219,7 +214,7 @@ public class PermissionManager {
     private void sayUpdate(@NotNull UUID player)
     {
         if(Bukkit.getPlayer(player) != null) loadUser(player, true);
-        else Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> plugin.publish("core-cmd", "permission;" + player.toString()), 40);
+        else Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> plugin.publishTargetPlayer("core-cmd", "permission;" + player.toString(), player, false, false), 40);
     }
 
     private List<String> getThinkOfUSer(@NotNull UUID uuid, String think, boolean isTemp, boolean isPerm)
@@ -243,7 +238,7 @@ public class PermissionManager {
         {
             if (isTemp)
             {
-                String data = plugin.getPlayerData(uuid, think);
+                String data = plugin.getPlayerData(uuid, think).toString();
                 JsonObject tempPermission = data == null ? null : PARSER.parse(data).getAsJsonObject();
                 if(data != null)
                     for(Map.Entry<String, JsonElement> j : tempPermission.entrySet())
@@ -254,7 +249,7 @@ public class PermissionManager {
             }
             else
             {
-                String data = plugin.getPlayerData(uuid, think);
+                String data = plugin.getPlayerData(uuid, think).toString();
                 JsonArray permission = data == null ? null : PARSER.parse(data).getAsJsonArray();
                 if(data != null)
                     for (JsonElement j : permission) back.add(j.getAsString());
@@ -308,8 +303,8 @@ public class PermissionManager {
         {
             if (isTemp)
             {
-                String data = player.getGeneralData(think);
-                JsonObject tempPermission = data == null ? null : PARSER.parse(data).getAsJsonObject();
+                Object data = player.getData(think);
+                JsonObject tempPermission = data == null ? null : PARSER.parse(data.toString()).getAsJsonObject();
                 if(data != null)
                     for(Map.Entry<String, JsonElement> j : tempPermission.entrySet())
                     {
@@ -319,8 +314,8 @@ public class PermissionManager {
             }
             else
             {
-                String data = player.getGeneralData(think);
-                JsonArray permission = data == null ? null : PARSER.parse(data).getAsJsonArray();
+                Object data = player.getData(think);
+                JsonArray permission = data == null ? null : PARSER.parse(data.toString()).getAsJsonArray();
                 if(data != null)
                     for (JsonElement j : permission) back.add(j.getAsString());
             }
@@ -361,14 +356,14 @@ public class PermissionManager {
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
         {
-            String data =  plugin.getPlayerData(uuid, "group");
-            JsonArray group = data == null ? null : PARSER.parse(data).getAsJsonArray();
+            Object data =  plugin.getPlayerData(uuid, "group");
+            JsonArray group = data == null ? null : PARSER.parse(data.toString()).getAsJsonArray();
             data = plugin.getPlayerData(uuid, "permission");
-            JsonArray permission = data == null ? null : PARSER.parse(data).getAsJsonArray();
+            JsonArray permission = data == null ? null : PARSER.parse(data.toString()).getAsJsonArray();
             data = plugin.getPlayerData(uuid, "temp_group");
-            JsonObject tempgroup = data == null ? null : PARSER.parse(data).getAsJsonObject();
+            JsonObject tempgroup = data == null ? null : PARSER.parse(data.toString()).getAsJsonObject();
             data = plugin.getPlayerData(uuid, "temp_permission");
-            JsonObject tempPermission = data == null ? null : PARSER.parse(data).getAsJsonObject();
+            JsonObject tempPermission = data == null ? null : PARSER.parse(data.toString()).getAsJsonObject();
 
             org.bukkit.entity.Player p = plugin.getServer().getPlayer(uuid);
             if(p != null)
@@ -451,7 +446,7 @@ public class PermissionManager {
                 {
                     JsonArray ja = new JsonArray();
                     groupL.forEach(ja::add);
-                    plugin.setGeneralPlayerData(uuid, "group", ja.toString());
+                    plugin.setPlayerData(uuid, "group", ja.toString());
                 }
                 if ((u >> 1 & 0x1) == 1)
                 {
@@ -462,7 +457,7 @@ public class PermissionManager {
                         ja.add(v[1]);
                         jo.add(k, ja);
                     });
-                    plugin.setGeneralPlayerData(uuid, "temp_group", jo.toString());
+                    plugin.setPlayerData(uuid, "temp_group", jo.toString());
                 }
                 if(((u >> 2 & 0x1) == 1))
                 {
@@ -473,7 +468,7 @@ public class PermissionManager {
                         ja.add(v[1]);
                         jo.add(k, ja);
                     });
-                    plugin.setGeneralPlayerData(uuid, "temp_permission", jo.toString());
+                    plugin.setPlayerData(uuid, "temp_permission", jo.toString());
                 }
                 permissionAttachments.put(uuid, map);
                 Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(new PlayerPermissionLoadEndEvent(p)));

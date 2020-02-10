@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 public class MinetasiaTest extends MinetasiaCoreApi
 {
 
-    HashMap<UUID, HashMap<String, String>> data = new HashMap<>();
+    HashMap<UUID, HashMap<String, Object>> data = new HashMap<>();
 
     private Server server = new Server()
     {
@@ -183,21 +183,17 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return "pong";
     }
 
-    @Override
-    public SQLManager getSqlManager() {
-        return null;
-    }
 
     @Override
-    public void setPlayerData(@NotNull UUID uuid, @NotNull String s, @NotNull String s1) {
-        HashMap<String, String> t = data.getOrDefault(uuid, new HashMap<>());
+    public void setPlayerData(@NotNull UUID uuid, @NotNull String s, @NotNull Object s1) {
+        HashMap<String, Object> t = data.getOrDefault(uuid, new HashMap<>());
         t.put(s, s1);
         data.put(uuid, t);
     }
 
     @Override
-    public String getPlayerData(@NotNull UUID uuid, @NotNull String s) {
-        HashMap<String, String> d = data.get(uuid);
+    public Object getPlayerData(@NotNull UUID uuid, @NotNull String s) {
+        HashMap<String, Object> d = data.get(uuid);
         if(d != null) return  d.get(s);
         else return null;
     }
@@ -210,9 +206,9 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
-    public float getPlayerMoney(UUID uuid, Economy economy)
+    public double getPlayerMoney(UUID uuid, Economy economy)
     {
-        return 100;
+        return 100.0D;
     }
 
     @Override
@@ -270,12 +266,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
-    public void publish(@NotNull String s, String s1, boolean... booleans)
-    {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> Bukkit.getPluginManager().callEvent(new FRSMessageEvent(s, s1)));
-    }
-
-    @Override
     public void publishGlobal(@NotNull String chanel, String message, boolean proxy, boolean sync)
     {
 
@@ -308,32 +298,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
 
     HashMap<String, HashMap<String, String>> values = new HashMap<>();
 
-    @Override
-    public String getValue(String s, String s1)
-    {
-        return values.getOrDefault(s, new HashMap<>()).getOrDefault(s1, null);
-    }
-
-    @Override
-    public Set<String> getFields(String s)
-    {
-        return values.getOrDefault(s, new HashMap<>()).keySet();
-    }
-
-    @Override
-    public Map<String, String> getValues(String s, Set<String> set)
-    {
-        return values.getOrDefault(s, new HashMap<>());
-    }
-
-    @Override
-    public void setValue(String s, String s1, String s2, boolean... booleans)
-    {
-        HashMap<String, String> v = values.getOrDefault(s, new HashMap<>());
-        v.put(s1, s2);
-        values.put(s, v);
-
-    }
 
 
     @Override
@@ -655,6 +619,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return null;
     }
 
+    @Override
+    public MongoDbManager getMongoDbManager()
+    {
+        return null;
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
@@ -687,7 +657,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
-        public float getMoney(@NotNull Economy economy)
+        public double getMoney(@NotNull Economy economy)
         {
             return getPlayerMoney(uuid, economy);
         }
@@ -759,27 +729,29 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
-        public void putGeneralData(@NotNull String key, @Nullable String value)
+        public void putGeneralData(@NotNull String key, @Nullable Object value)
         {
 
         }
 
+
         @Override
-        public @Nullable String getData(@NotNull String key)
+        public @Nullable Object getData(@NotNull String key)
         {
             return getPlayerData(uuid, key);
         }
 
         @Override
-        public void putData(@NotNull String key, @Nullable String value)
+        public void putData(@NotNull String key, @Nullable Object value)
         {
             setPlayerData(uuid, key, value);
         }
 
+
         @Override
         public @NotNull PlayerStats getStats()
         {
-            return getPlayerStats(uuid);
+            return Objects.requireNonNull(getPlayerStats(uuid));
         }
 
         @Override

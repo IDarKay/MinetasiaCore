@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.spigot.Executor;
 
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
@@ -46,12 +47,13 @@ public class RExecutor implements TabExecutor {
                 Bukkit.getScheduler().runTaskAsynchronously(minetasiaCore, () -> {
                     try
                     {
-                        UUID u = UUID.fromString(minetasiaCore.getPlayerData(((Player) sender).getUniqueId(), "last_talker"));
-                            if(minetasiaCore.isPlayerOnline(u))
+                        UUID u = UUID.fromString(minetasiaCore.getPlayerData(((Player) sender).getUniqueId(), "last_talker").toString());
+                            final PlayerStatueFix playerStatueFix = minetasiaCore.getPlayerStatue(u);
+                            if(playerStatueFix != null)
                             {
                                 String msg = concat(args, " ", 1);
                                 sender.sendMessage(Lang.MSG_FORMAT.getWithoutPrefix(lang, Lang.Argument.PLAYER_SENDER.match(sender.getName()), Lang.Argument.PLAYER_RECEIVER.match(args[0]), Lang.Argument.MESSAGE.match(msg)));
-                                minetasiaCore.publish("core-msg","MSG_FORMAT;" + u.toString() + ";false;" + Lang.Argument.PLAYER_SENDER.name() + "\\" + sender.getName() + ";" + Lang.Argument.PLAYER_RECEIVER.name() + "\\" + args[0] + ";" + Lang.Argument.MESSAGE + "\\" + msg.replace(';', ':').replace('\\', '/'));
+                                minetasiaCore.publishTargetPlayer("core-msg","MSG_FORMAT;" + u.toString() + ";false;" + Lang.Argument.PLAYER_SENDER.name() + "\\" + sender.getName() + ";" + Lang.Argument.PLAYER_RECEIVER.name() + "\\" + args[0] + ";" + Lang.Argument.MESSAGE + "\\" + msg.replace(';', ':').replace('\\', '/'), playerStatueFix, false, true);
                             }
                             else sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(lang));
                     }

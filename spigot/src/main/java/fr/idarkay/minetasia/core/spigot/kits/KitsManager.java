@@ -24,18 +24,18 @@ public class KitsManager {
         final List<String> filter = plugin.getConfig().getStringList("kits_load");
 
 
-        Collection<String> fields = plugin.getFields("kits");
-        if(filter.size() > 0 && !filter.get(0).equals("*"))
-        {
-            fields = filterList(fields, filter);
-        }
-
-        for(String f : fields)
-        {
-            Kit k = new Kit(MinetasiaCore.JSON_PARSER.parse(plugin.getValue("kits", f)).getAsJsonObject());
-            kits.put(k.getName() + "_" + k.getIsoLang(), k);
-            if(!kitsName.contains(k.getName())) kitsName.add(k.getName());
-        }
+//        Collection<String> fields = plugin.getFields("kits");
+//        if(filter.size() > 0 && !filter.get(0).equals("*"))
+//        {
+//            fields = filterList(fields, filter);
+//        }
+//
+//        for(String f : fields)
+//        {
+//            Kit k = new Kit(MinetasiaCore.JSON_PARSER.parse(plugin.getValue("kits", f)).getAsJsonObject());
+//            kits.put(k.getName() + "_" + k.getIsoLang(), k);
+//            if(!kitsName.contains(k.getName())) kitsName.add(k.getName());
+//        }
     }
 
     public Map<String, fr.idarkay.minetasia.core.api.utils.Kit> getKits() {

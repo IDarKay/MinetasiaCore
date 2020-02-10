@@ -31,6 +31,12 @@ db: # NO value here !
   system: 'mysql'
   connexion_args: '?allowMultiQueries=true&useSSL=false'
 
+dbm:
+  host: 'mongodb://localhost:27017'
+  dbname: 'minetasia'
+  login: ''
+  password: ''
+
 # =========================================================================================================== #
 # host: url of the frs (set 127.0.0.1 for local db)                                                            #
 # password: password for log          (def 4514)                                                              #

@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
  * make by RedHeadEmile
  * @since 1.0
  */
+@Deprecated
 public class FRSClient
 {
 	private JavaPlugin plugin;
@@ -48,13 +49,15 @@ public class FRSClient
 	private List<String> waiting;
 	
 	private Map<String, String> responses;
-	
+
+	@Deprecated
 	public FRSClient(JavaPlugin plugin)
 	{
 		this.plugin = plugin;
 		waiting = new ArrayList<>();
 	}
-	
+
+	@Deprecated
 	private void breakThread()
 	{
 		try
@@ -71,6 +74,7 @@ public class FRSClient
 	 * @param password Password of the server (if needed)
 	 * @throws IOException 
 	 */
+	@Deprecated
 	public boolean startConnection(OutputStream out, String ip, int port, String password, int timeout)
 	{
 		breakThread();
@@ -196,14 +200,14 @@ public class FRSClient
 		t1.start();
 		return true;
 	}
-	
+	@Deprecated
 	private void restart()
 	{
 		shutdown(false);
 		out.println("Retrying...");
 		startConnection(null, ip, port, password, timeout);
 	}
-	
+	@Deprecated
 	public void shutdown(boolean onDisable)
 	{
 		try
@@ -218,7 +222,7 @@ public class FRSClient
 		}
 		catch(Exception e) { e.printStackTrace(); }
 	}
-	
+	@Deprecated
 	private synchronized String send(String message, boolean needRep) throws IOException
 	{
 		if(needRep)
@@ -255,7 +259,7 @@ public class FRSClient
 			return null;
 		}
 	}
-	
+	@Deprecated
 	private void onMessageReceived(String message)
 	{
 		if(message.equals("imhere")) connected = true;
@@ -279,17 +283,17 @@ public class FRSClient
 			}
 		}
 	}
-	
+	@Deprecated
 	private void onPublish(String channel, String message)
 	{
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> Bukkit.getPluginManager().callEvent(new FRSMessageEvent(channel, message)));
 	}
-
+	@Deprecated
 	public boolean isConnected()
 	{
 		return fixEnable;
 	}
-	
+	@Deprecated
 	public void publish(String channel, String message, boolean... sync)
 	{
 		Consumer<BukkitTask> cons = task ->
@@ -303,7 +307,7 @@ public class FRSClient
 		if(sync.length == 0 || !sync[0]) Bukkit.getScheduler().runTaskAsynchronously(plugin, cons);
 		else cons.accept(null);
 	}
-
+	@Deprecated
 	public String getValue(@NotNull String key)
 	{
 		Validate.notNull(key);
@@ -315,7 +319,7 @@ public class FRSClient
 		}
 		catch(Exception e) { return null; }
 	}
-
+	@Deprecated
 	public Set<String> getFields(String key)
 	{
 		try
@@ -328,7 +332,7 @@ public class FRSClient
 		}
 		catch(Exception e) { return Collections.emptySet(); }
 	}
-	
+	@Deprecated
 	public Map<String, String> getValues(String key, Set<String> fields)
 	{
 		try
@@ -343,7 +347,7 @@ public class FRSClient
 		}
 		catch(Exception e) { return Collections.emptyMap(); }
 	}
-
+	@Deprecated
 	public void setValue(@NotNull String key, @Nullable String value, boolean sync)
 	{
 		Validate.notNull(key);

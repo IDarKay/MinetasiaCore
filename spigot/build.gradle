@@ -1,7 +1,7 @@
 
 dependencies {
 //    compileOnly 'org.spigotmc:spigot-api:1.15-R0.1-SNAPSHOT'
-    compile 'org.mongodb:mongodb-driver-sync:4.0.0-beta1'
+
     compileOnly (group: 'spigot', name: 'spigot', version: '1.15.1')
     compile project(":api")
     compile project(":common")

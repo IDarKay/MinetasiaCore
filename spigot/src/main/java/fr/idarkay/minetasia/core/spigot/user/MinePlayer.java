@@ -3,14 +3,17 @@ package fr.idarkay.minetasia.core.spigot.user;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.frs.PlayerFrsMessage;
-import fr.idarkay.minetasia.core.spigot.utils.FRSKey;
 import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.apache.commons.lang.Validate;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,19 +36,17 @@ public class MinePlayer implements MinetasiaPlayer
     private static final MinetasiaCore CORE = MinetasiaCore.getCoreInstance();
     private static final JsonParser PARSER = new JsonParser();
 
-
     @NotNull private final UUID uuid;
     private final boolean isCache;
 
-    private Map<String, String> data = null;
-    private Map<UUID, String> friends = null;
-    @NotNull private final Map<Economy, Float> moneys;
+    private final Map<String, Object> data;
+    private final Map<UUID, String> friends;
+    @NotNull private final Map<Economy, Long> moneys;
 
     @NotNull private Map<String, String> generalData;
     @NotNull private String username;
 
     private Stats stats;
-    private boolean friendsLoad = false, dataLoad = false, statsLoad = false;
 
     private Boost personalBoost = HashMap::new, partyBoost = HashMap::new;
     private Party party;
@@ -56,16 +57,26 @@ public class MinePlayer implements MinetasiaPlayer
         this.uuid = uuid;
         this.isCache = isCache;
 
-        final String data = Objects.requireNonNull(CORE.getValue(FRSKey.DATA.getKey(uuid)));
-        final JsonObject dataJson = PARSER.parse(data).getAsJsonObject();
+        final Document doc = CORE.getMongoDbManager().getByKey(MongoCollections.USERS, uuid.toString());
+        username = doc.getString("username");
 
-        this.generalData = JSONUtils.jsonObjectToStringMap(dataJson);
+        this.moneys = new HashMap<>();
+        if(doc.containsKey("money"))
+            doc.get("money", Document.class).forEach((k, v) -> moneys.put(Economy.valueOf(k), (Long) v));
 
-        this.username = Objects.requireNonNull(generalData.get("username"));
-        if(!generalData.containsKey("money"))
-            this.moneys = new HashMap<>();
+
+        this.friends = new HashMap<>();
+        if(doc.containsKey("friends"))
+            doc.get("friends", Document.class).forEach((k, v) -> friends.put(UUID.fromString(k), v.toString()));
+
+        this.data = new HashMap<>();
+        if(doc.containsKey("data"))
+            doc.get("data", Document.class).forEach(data::put);
+
+        if(doc.containsKey("stats"))
+            this.stats = new Stats(doc.get("stats", Document.class));
         else
-            this.moneys = JSONUtils.jsonObjectToMap(dataJson.getAsJsonObject("money"), Economy::valueOf, JsonElement::getAsFloat);
+            this.stats = new Stats();
 
         //todo: party
         //temp value
@@ -97,7 +108,7 @@ public class MinePlayer implements MinetasiaPlayer
         Validate.notNull(username);
         this.username = username;
         generalData.put("username", username);
-        saveGeneralData();
+        set("username", username);
     }
 
     @Override
@@ -107,17 +118,17 @@ public class MinePlayer implements MinetasiaPlayer
     }
 
     @Override
-    public float getMoney(@NotNull Economy economy)
+    public double getMoney(@NotNull Economy economy)
     {
-        return moneys.getOrDefault(economy, 0.0F);
+        return moneys.getOrDefault(economy, 0L) / 100d;
     }
 
     public synchronized void addMoneyWithoutSave(@NotNull Economy economy, float amount)
     {
         if(amount < 0) throw new IllegalArgumentException("negative amount");
-        if(validateNotCache(PlayerFrsMessage.ActionType.ADD_MONEY, economy, amount))
+        if(validateNotCache(PlayerFrsMessage.ActionType.ADD_MONEY, economy, amount * 100))
         {
-            moneys.merge(economy, amount, Float::sum);
+            moneys.merge(economy, (long) (amount * 100), Long::sum);
         }
     }
 
@@ -125,25 +136,24 @@ public class MinePlayer implements MinetasiaPlayer
     public synchronized void addMoney(@NotNull Economy economy, float amount)
     {
         if(amount < 0) throw new IllegalArgumentException("negative amount");
-        if(validateNotCache(PlayerFrsMessage.ActionType.ADD_MONEY, economy, amount))
+        if(validateNotCache(PlayerFrsMessage.ActionType.ADD_MONEY, economy, amount * 100))
         {
-            moneys.merge(economy, amount, Float::sum);
-            saveGeneralData();
+            moneys.merge(economy, (long) (amount * 100), Long::sum);
+            increment("money." + economy.name, (long) (amount * 100));
         }
-
     }
 
     @Override
     public synchronized void removeMoney(@NotNull Economy economy, float amount)
     {
         if(amount < 0) throw new IllegalArgumentException("negative amount");
-        if(validateNotCache(PlayerFrsMessage.ActionType.REMOVE_MONEY, economy, amount))
+        if(validateNotCache(PlayerFrsMessage.ActionType.REMOVE_MONEY, economy, amount * 100))
         {
-            moneys.merge(economy, amount, (oldV, newV) -> {
+            moneys.merge(economy, (long) (amount * 100), (oldV, newV) -> {
                 if(oldV < newV) throw new IllegalArgumentException("cant remove "+ amount + " " + economy.displayName + " to " + username);
                 return oldV - newV;
             });
-            saveGeneralData();
+            increment("money." + economy.name, (long) (amount * -100));
         }
     }
 
@@ -151,10 +161,10 @@ public class MinePlayer implements MinetasiaPlayer
     public void setMoney(@NotNull Economy economy, float amount)
     {
         if(amount < 0) throw new IllegalArgumentException("negative amount");
-        if(validateNotCache(PlayerFrsMessage.ActionType.SET_MONEY, economy, amount))
+        if(validateNotCache(PlayerFrsMessage.ActionType.SET_MONEY, economy, amount * 100))
         {
-            moneys.put(economy, amount);
-            saveGeneralData();
+            moneys.put(economy, (long) (amount * 100));
+            set("money." + economy.name, (long) (amount * 100));
         }
     }
 
@@ -173,7 +183,6 @@ public class MinePlayer implements MinetasiaPlayer
     @Override
     public @NotNull Map<UUID, String> getFriends()
     {
-        checkAndLoadFriends();
         return friends;
     }
 
@@ -187,14 +196,12 @@ public class MinePlayer implements MinetasiaPlayer
     public boolean isFriend(@NotNull UUID uuid)
     {
         Validate.notNull(uuid);
-        checkAndLoadFriends();
         return friends.containsKey(uuid);
     }
 
     @Override
     public synchronized void addFriends(@NotNull UUID uuid)
     {
-        checkAndLoadFriends();
         Validate.notNull(uuid);
         if(validateNotCache(PlayerFrsMessage.ActionType.ADD_FRIENDS, uuid))
         {
@@ -208,7 +215,6 @@ public class MinePlayer implements MinetasiaPlayer
     @Override
     public synchronized void removeFriends(@NotNull UUID uuid)
     {
-        checkAndLoadFriends();
         Validate.notNull(uuid);
         if(validateNotCache(PlayerFrsMessage.ActionType.REMOVE_FRIENDS, uuid))
         {
@@ -221,65 +227,64 @@ public class MinePlayer implements MinetasiaPlayer
     }
 
     @Override
-    public @Nullable String getGeneralData(@NotNull String key)
+    @Deprecated
+    public @Nullable Object getGeneralData(@NotNull String key)
     {
-        Validate.notNull(key);
-        return generalData.get(key);
+        return getData(key);
     }
 
     @Override
-    public synchronized void putGeneralData(@NotNull String key, @Nullable String value)
+    @Deprecated
+    public synchronized void putGeneralData(@NotNull String key, @Nullable Object value)
     {
-        Validate.notNull(key);
-        if(validateNotCache(PlayerFrsMessage.ActionType.PUT_GENERAL_DATA, key, value))
-        {
-            if(value == null)
-            {
-                if(generalData.remove(key) == null) return;
-            }
-            else generalData.put(key, value);
-            saveGeneralData();
-        }
+        putData(key, value);
     }
 
     @Override
-    public @Nullable String getData(@NotNull String key)
+    public @Nullable Object getData(@NotNull String key)
     {
         Validate.notNull(key);
-        checkAndLoadCustomData();
         return data.get(key);
     }
 
     @Override
-    public synchronized void putData(@NotNull String key, @Nullable String value)
+    public synchronized void putData(@NotNull String key, @Nullable Object value)
     {
         Validate.notNull(key);
-        checkAndLoadCustomData();
         if(validateNotCache(PlayerFrsMessage.ActionType.PUT_CUSTOM_DATA, key, value))
         {
             if(value == null)
             {
                 if(data.remove(key) == null) return;
+                unset("data." + key);
             }
             else
+            {
                 data.put(key, value);
-            saveCustomData();
+                set("data." + key, value);
+            }
+
         }
     }
 
     @Override
     public @NotNull PlayerStats getStats()
     {
-        checkAndLoadStats();
         return stats;
     }
 
     @Override
     public void updatePlayerStats(@NotNull StatsUpdater updater)
     {
-        checkAndLoadStats();
         stats.update(updater);
-        if(validateNotCache(PlayerFrsMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString())) saveStats();
+        if(validateNotCache(PlayerFrsMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString()))
+        {
+
+            final Document doc =  new Document();
+            updater.getUpdate().forEach(doc::append);
+
+            CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), new Document("$inc", doc));
+        }
     }
 
     @Override
@@ -331,67 +336,28 @@ public class MinePlayer implements MinetasiaPlayer
         else return true;
     }
 
-    private synchronized void checkAndLoadStats()
+    private synchronized void set(String key, Object value)
     {
-        if(!statsLoad)
-        {
-            final String data = CORE.getValue(FRSKey.STATS.getKey(uuid));
-            stats = data == null ? new Stats() : new Stats(PARSER.parse(data).getAsJsonObject());
-            statsLoad = true;
-        }
+        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.addToSet(key, value));
     }
 
-    public synchronized void reloadStats(String data)
+    private synchronized void increment(String key, Number increment)
     {
-        stats = data == null ? new Stats() : new Stats(PARSER.parse(data).getAsJsonObject());
+        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.inc(key, increment));
     }
 
-    private synchronized void checkAndLoadFriends()
+    private synchronized void unset(String key)
     {
-        if(!friendsLoad)
-        {
-            final String data = CORE.getValue(FRSKey.FIENDS.getKey(uuid));
-            friends = data == null ? new HashMap<>()
-                    : JSONUtils.jsonObjectToMap(PARSER.parse(data).getAsJsonObject(), UUID::fromString, JsonElement::getAsString, new TreeMap<>());
-            friendsLoad = true;
-        }
+        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.unset(key));
     }
 
-    private synchronized void checkAndLoadCustomData()
+    private void saveFriends()
     {
-        if(!dataLoad)
-        {
-            final String data = CORE.getValue(FRSKey.CUSTOM_DATA.getKey(uuid));
-            this.data = data == null ? new TreeMap<>() : JSONUtils.jsonObjectToStringMap(PARSER.parse(data).getAsJsonObject(), new TreeMap<>());
-            dataLoad = true;
-        }
+        final List<Document> all = new ArrayList<>();
+        friends.forEach((k, v) -> all.add(new Document("uuid", k.toString()).append("name", v)));
+        set("friends", all);
     }
 
-    public synchronized void saveGeneralData()
-    {
-        generalData.putIfAbsent("lang", MinetasiaLang.BASE_LANG);
-        final JsonObject object = JSONUtils.mapToJsonObject(generalData);
-        object.add("money", JSONUtils.floatMapToJsonObject(moneys));
-        CORE.setValue(FRSKey.DATA.getKey(uuid), object.toString(), true);
-    }
-
-    public synchronized void saveStats()
-    {
-        if(statsLoad)
-            CORE.setValue(FRSKey.STATS.getKey(uuid), stats.toJsonObject().toString(), true);
-    }
-
-    public synchronized void saveFriends()
-    {
-        if(friendsLoad)
-            CORE.setValue(FRSKey.FIENDS.getKey(uuid), JSONUtils.mapToJsonObject(friends).toString(), true);
-    }
-
-    public synchronized void saveCustomData()
-    {
-        if(dataLoad)
-            CORE.setValue(FRSKey.CUSTOM_DATA.getKey(uuid), JSONUtils.mapToJsonObject(data).toString(), true);
-    }
 
     private static class Stats implements PlayerStats {
 
@@ -406,6 +372,12 @@ public class MinePlayer implements MinetasiaPlayer
         {
             if(data != null)
                 JSONUtils.jsonObjectToMap(data, s -> s, JsonElement::getAsLong, stats);
+        }
+
+        Stats(@Nullable Document document)
+        {
+            if(document != null)
+                document.forEach((k, v) -> stats.put(k, (Long) v));
         }
 
         @Override

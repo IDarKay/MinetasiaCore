@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.spigot.server;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.ServerPhase;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -54,8 +55,15 @@ public final class MineServer implements fr.idarkay.minetasia.core.api.utils.Ser
     {
         JsonObject server = new JsonParser().parse(json).getAsJsonObject();
         return new MineServer(server.get("ip").getAsString(), server.get("port").getAsInt(), server.get("publish_port").getAsInt(), server.get("type").getAsString()
-                ,server.get("server_config").getAsString() , UUID.fromString(server.get("uuid").getAsString()), server.get("create_time").getAsLong(),
+                ,server.get("server_config").getAsString() , UUID.fromString(server.get("_id").getAsString().split("#", 2)[1]), server.get("create_time").getAsLong(),
                 server.get("phase").getAsInt(), server.get("max_player_count").getAsInt());
+    }
+
+    public static MineServer getServerFromDocument(Document d)
+    {
+        return new MineServer(d.getString("ip"), d.getInteger("port", -1), d.getInteger("publish_port", -1),
+                d.getString("type"), d.getString("server_config"), UUID.fromString(d.getString("_id").split("#", 2)[1]),
+                d.getLong("create_time"),  d.getInteger("phase", 0), d.getInteger("max_player_count", 0));
     }
 
     @Override
@@ -149,7 +157,7 @@ public final class MineServer implements fr.idarkay.minetasia.core.api.utils.Ser
     {
         JsonObject server = new JsonObject();
         server.addProperty("create_time", creatTime);
-        server.addProperty("uuid", uuid.toString());
+        server.addProperty("_id", getName());
         server.addProperty("ip", ip);
         server.addProperty("port", port);
         server.addProperty("publish_port", publishPort);
@@ -159,6 +167,20 @@ public final class MineServer implements fr.idarkay.minetasia.core.api.utils.Ser
         server.addProperty("max_player_count", maxPlayerCount);
         //todo: player count
         return server.toString();
+    }
+
+    @NotNull
+    public Document toDocument()
+    {
+        return  new Document("_id", getName())
+                .append("create_time", creatTime)
+                .append("max_player_count", maxPlayerCount)
+                .append("phase", serverPhase.ordinal())
+                .append("type", type)
+                .append("server_config", serverConfig)
+                .append("publish_port", publishPort)
+                .append("port", port)
+                .append("ip", ip);
     }
 
     @Override
