@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.spigot.Executor;
 
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
@@ -45,16 +46,17 @@ public class MSGExecutor implements TabExecutor {
                     UUID u = plugin.getPlayerUUID(args[0]);
                     if(u != null)
                     {
-                        if(plugin.isPlayerOnline(u))
+                        final PlayerStatueFix playerStatueFix = plugin.getPlayerStatue(u);
+                        if(playerStatueFix != null)
                         {
                             String msg = concat(args, " ", 1);
                             sender.sendMessage(Lang.MSG_FORMAT.getWithoutPrefix(lang, Lang.Argument.PLAYER_SENDER.match(sender instanceof Player ? sender.getName() : "console")
                                     , Lang.Argument.PLAYER_RECEIVER.match(args[0]), Lang.Argument.MESSAGE.match(msg)));
-                            plugin.publish( "core-msg","MSG_FORMAT;" + u.toString() + ";false;" +  (sender instanceof Player ? sender.getName() : "console") + ";" + args[0] +";" + msg.replace(';', ':'));
+                            plugin.publishTargetPlayer( "core-msg","MSG_FORMAT;" + u.toString() + ";false;" +  (sender instanceof Player ? sender.getName() : "console") + ";" + args[0] +";" + msg.replace(';', ':'), playerStatueFix, false, true);
                             if(sender instanceof Player)
                             {
                                 String uu = u.toString();
-                                String data = plugin.getPlayerData(((Player) sender).getUniqueId(), "last_talker");
+                                String data = plugin.getPlayerData(((Player) sender).getUniqueId(), "last_talker").toString();
                                 if(data == null || !data.equals(uu))
                                     plugin.setPlayerData(((Player) sender).getUniqueId(), "last_talker", uu);
                             }

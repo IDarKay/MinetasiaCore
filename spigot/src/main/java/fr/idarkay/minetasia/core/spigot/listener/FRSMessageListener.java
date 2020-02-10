@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.spigot.listener;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
+import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
@@ -38,7 +39,7 @@ public final class FRSMessageListener implements Listener {
     }
 
     @EventHandler
-    public void onFRSMessageEvent(FRSMessageEvent e)
+    public void onFRSMessageEvent(MessageReceivedEvent e)
     {
         switch (e.getChanel())
         {
@@ -67,10 +68,6 @@ public final class FRSMessageListener implements Listener {
                     if(server != null)
                     {
                         plugin.movePlayerToServer(playerUUID, server);
-                    }
-                    else
-                    {
-                        //todo:
                     }
                 }
             }
@@ -134,8 +131,8 @@ public final class FRSMessageListener implements Listener {
                                 UUID uu = plugin.getPlayerUUID(msg[3]);
                                 if(uu != null)
                                 {
-                                    String uus = uu.toString();
-                                    String data = plugin.getPlayerData(u, "last_talker");
+                                    final String uus = uu.toString();
+                                    final String data = plugin.getPlayerData(u, "last_talker").toString();
                                     if(data == null || !data.equals(uus))
                                         plugin.setPlayerData(u, "last_talker", uus);
                                 }

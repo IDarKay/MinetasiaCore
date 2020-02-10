@@ -66,8 +66,8 @@ public class PlayerFrsMessage implements CoreFRSMessage
         PUT_GENERAL_DATA((plugin, args) -> plugin.getPlayer(UUID.fromString(args[1])).putGeneralData(args[3], args[4])),
         PUT_CUSTOM_DATA((plugin, args) -> plugin.getPlayer(UUID.fromString(args[1])).putData(args[3], args[4])),
 
-        UPDATE_STATS((plugin, args) -> Objects.requireNonNull(plugin.getPlayerManager().get(UUID.fromString(args[1]))).reloadStats(CoreFRSMessage.concat(args, ";", 3))),
-
+//        UPDATE_STATS((plugin, args) -> Objects.requireNonNull(plugin.getPlayerManager().get(UUID.fromString(args[1]))).reloadStats(CoreFRSMessage.concat(args, ";", 3))),
+        UPDATE_STATS((plugin, args) -> {})
         ;
 
         private final BiConsumer<MinetasiaCore, String[]> action;

@@ -43,37 +43,31 @@ public class PlayerManager {
     public MinePlayer load(@NotNull UUID uuid)
     {
         Validate.notNull(uuid);
-        if(plugin.getFrsClient().isConnected())
+
+        final MinePlayer player = new MinePlayer(uuid, false);
+        byte p = Byte.MIN_VALUE;
+        Group g = null;
+
+        plugin.getPermissionManager().groups.forEach((k, v) -> System.out.println(k));
+
+        for (String gs : plugin.getPermissionManager().getGroupsOfUser(player))
         {
-            final MinePlayer player = new MinePlayer(uuid, false);
-            byte p = Byte.MIN_VALUE;
-            Group g = null;
-
-            plugin.getPermissionManager().groups.forEach((k, v) -> System.out.println(k));
-
-            for (String gs : plugin.getPermissionManager().getGroupsOfUser(player))
+            Group group = plugin.getPermissionManager().groups.get(gs);
+            byte i = group.getPriority();
+            if (g == null || i > p)
             {
-                Group group = plugin.getPermissionManager().groups.get(gs);
-                byte i = group.getPriority();
-                if (g == null || i > p)
-                {
-                    p = i;
-                    g = group;
-                }
+                p = i;
+                g = group;
             }
-
-            if (g != null)
-            {
-                player.setPartyBoost(g.getPartyBoost());
-                player.setPersonalBoost(g.getPersonalBoost());
-            }
-            userCache.put(uuid, player);
-            return player;
         }
-        else
+
+        if (g != null)
         {
-            throw new FRSDownException("can't get the player frs down ");
+            player.setPartyBoost(g.getPartyBoost());
+            player.setPersonalBoost(g.getPersonalBoost());
         }
+        userCache.put(uuid, player);
+        return player;
     }
 
     public void removePlayer(@NotNull UUID uuid)

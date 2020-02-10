@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -29,7 +30,7 @@ public interface MinetasiaPlayer
      * @param economy type of money
      * @return amount of money
      */
-    float getMoney(@NotNull Economy economy);
+    double getMoney(@NotNull Economy economy);
 
     /**
      * add amount of specific money to player
@@ -106,8 +107,7 @@ public interface MinetasiaPlayer
      * @param key of the data
      * @return value or null if not found
      */
-    @Nullable
-    String getGeneralData(@NotNull String key);
+    @Nullable Object getGeneralData(@NotNull String key);
 
     /**
      * general data is common data load anywhere : uuid username lang etc...
@@ -115,7 +115,7 @@ public interface MinetasiaPlayer
      * @param key of the data
      * @param value value of the data set {@code null} for remove
      */
-    void putGeneralData(@NotNull String key, @Nullable String value);
+    void putGeneralData(@NotNull String key, @Nullable Object value);
 
     /**
      * get a data of teh user
@@ -123,14 +123,14 @@ public interface MinetasiaPlayer
      * @return value or null if not found
      */
     @Nullable
-    String getData(@NotNull String key);
+    Object getData(@NotNull String key);
 
     /**
      * put a data of the player
      * @param key of the data
      * @param value value of the data set {@code null} for remove
      */
-    void putData(@NotNull String key, @Nullable String value);
+    void putData(@NotNull String key, @Nullable Object value);
 
     /**=
      * @return the {@link PlayerStats} of the player

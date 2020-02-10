@@ -19,13 +19,13 @@ import java.sql.SQLException;
  * @author alice. B. (IDarKay),
  * Created the 13/11/2019 at 18:02
  */
+@Deprecated
 public class SQLManager implements fr.idarkay.minetasia.core.api.utils.SQLManager {
 
     private final Plugin plugin;
     private final String host, dbname, user, pass, connexionArgs; // connection information
-
     private Connection connection; // connection of the database
-
+    @Deprecated
     public SQLManager(Plugin plugin)
     {
         this.plugin = plugin;
@@ -35,7 +35,7 @@ public class SQLManager implements fr.idarkay.minetasia.core.api.utils.SQLManage
         pass = plugin.getConfig().getString("db.password");
         connexionArgs = plugin.getConfig().getString("db.connexion_args");
     }
-
+    @Deprecated
     @Override
     public Connection getSQL()
     {
@@ -50,7 +50,7 @@ public class SQLManager implements fr.idarkay.minetasia.core.api.utils.SQLManage
         }
         return connection;
     }
-
+    @Deprecated
     @Override
     public void update(String query, Object... args)
     {
@@ -71,13 +71,13 @@ public class SQLManager implements fr.idarkay.minetasia.core.api.utils.SQLManage
             e.printStackTrace();
         }
     }
-
+    @Deprecated
     @Override
     public void updateAsynchronously(String query, Object... args)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> update(query, args));
     }
-
+    @Deprecated
     @Override
     public boolean connectionIsOk() {
         try {

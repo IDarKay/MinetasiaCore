@@ -2,9 +2,11 @@ package fr.idarkay.minetasia.core.spigot.Executor;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
+import fr.idarkay.minetasia.core.spigot.utils.PlayerStatue;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -63,7 +65,8 @@ public final class FriendsExecutor implements TabExecutor {
                                 {
                                     if(!minetasiaCore.isFriend(player.getUniqueId(), uuid))
                                     {
-                                        if(minetasiaCore.isPlayerOnline(uuid))
+                                        final PlayerStatueFix playerStatueFix = minetasiaCore.getPlayerStatue(uuid);
+                                        if(playerStatueFix != null)
                                         {
                                             sender.sendMessage(Lang.REQUEST_SEND_FRIENDS.get(lang, Lang.Argument.PLAYER.match( args[1])));
                                             org.bukkit.entity.Player p = minetasiaCore.getServer().getPlayer(uuid);
@@ -71,7 +74,7 @@ public final class FriendsExecutor implements TabExecutor {
                                             {
                                                 newRequest(uuid, player.getUniqueId(), p);
                                             }
-                                            else minetasiaCore.publish("core-cmd", "friends;" + player.getUniqueId().toString() +";" + uuid.toString());
+                                            else minetasiaCore.publishTargetPlayer("core-cmd", "friends;" + player.getUniqueId().toString() +";" + uuid.toString(), playerStatueFix, false, true);
                                         }
                                         else sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(lang));
                                     }
@@ -103,8 +106,16 @@ public final class FriendsExecutor implements TabExecutor {
                                 friendRequest.invalidate(player.getUniqueId());
                                 minetasiaCore.addFriend(player.getUniqueId(), u);
                                 minetasiaCore.addFriend(u, player.getUniqueId());
+
                                 sender.sendMessage(Lang.NEW_FRIEND.get(lang, Lang.Argument.PLAYER.match( minetasiaCore.getPlayerName(u))));
-                                minetasiaCore.publish("core-msg",  "NEW_FRIEND;" + u.toString() +";true;" + Lang.Argument.PLAYER.name() + "\\" +  player.getName());
+                                final Player player1 = Bukkit.getPlayer(u);
+                                if(player1 != null) player1.sendMessage(Lang.NEW_FRIEND.get(lang, Lang.Argument.PLAYER.match(player.getName())));
+                                else
+                                {
+                                    final PlayerStatueFix playerStatue = minetasiaCore.getPlayerStatue(u);
+                                    if(playerStatue != null)
+                                        minetasiaCore.publishTargetPlayer("core-msg",  "NEW_FRIEND;" + u.toString() +";true;" + Lang.Argument.PLAYER.name() + "\\" +  player.getName(), playerStatue, false, true);
+                                }
                             }
                         }
                         else sendHelpMsg(player, lang);
