@@ -20,6 +20,7 @@ import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.Executor.*;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
+import fr.idarkay.minetasia.core.spigot.kits.KitMain;
 import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
 import fr.idarkay.minetasia.core.spigot.listener.*;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryClickListener;
@@ -34,13 +35,13 @@ import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
 import fr.idarkay.minetasia.core.spigot.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
-import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.anontation.MinetasiaGuiNoCallEvent;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -378,6 +379,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         else return null;
     }
 
+    @Override
+    public <T> T getPlayerData(@NotNull UUID uuid, @NotNull String key, Class<T> cast)
+    {
+        return cast.cast(getPlayerData(uuid, key));
+    }
+
     @Deprecated
     public Object getGeneralPlayerData(@NotNull UUID uuid, @NotNull String key) {
         MinePlayer p;
@@ -693,58 +700,59 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         );
     }
 
+    public Document getPlayerKitDocument(UUID uuid)
+    {
+        return getPlayerData(uuid, "kits", Document.class);
+    }
+
     @Override
     public Map<String, Integer> getPlayerKitsLvl(UUID uuid) {
-        String data = getPlayerData(uuid, "kits").toString();
-        Map<String, Integer> back = new HashMap<>();
-        if(data != null)
-        {
-
-            JsonObject jsonObject = JSON_PARSER.parse(data).getAsJsonObject();
-            for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet())
-            {
-                back.put(entry.getKey(), entry.getValue().getAsInt());
-            }
-        }
-        return back;
+        return getPlayerKitDocument(uuid).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> ((Integer) e.getValue())));
     }
 
     @Override
     public Map<String, Integer> getPlayerKitsLvl(UUID uuid, String gameFilter) {
-        String data = getPlayerData(uuid, "kits").toString();
-        Map<String, Integer> back = new HashMap<>();
-        if(data != null)
-        {
-            JsonObject jsonObject = JSON_PARSER.parse(data).getAsJsonObject();
-            for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet())
-            {
-                if(entry.getKey().startsWith(gameFilter))
-                    back.put(entry.getKey(), entry.getValue().getAsInt());
-            }
-        }
-        return back;
+        return getPlayerKitDocument(uuid).entrySet().stream().filter(e -> e.getKey().startsWith(gameFilter)).collect(Collectors.toMap(Map.Entry::getKey, e -> ((Integer) e.getValue())));
     }
 
     @Override
     public int getPlayerKitLvl(UUID uuid, String kitName) {
-
-        return getPlayerKitsLvl(uuid).getOrDefault(kitName, 0);
+        return getPlayerKitDocument(uuid).getInteger(kitName, 0);
     }
 
     @Override
     public Kit getKitKit(String name, String lang) {
-        Kit k = kitsManager.getKits().get(name + "_" + lang);
-        if(k == null && !lang.equals(MinetasiaLang.BASE_LANG)) k = kitsManager.getKits().get(name + "_" + MinetasiaLang.BASE_LANG);
-        return k;
+        return getKitLang(name, lang);
     }
 
     @Override
-    public void saveDefaultKit(Kit kit) {
-        if(!kitsManager.getKits().containsKey(kit.getName() + "_" + kit.getIsoLang()))
+    public MainKit getMainKit(String name)
+    {
+        return kitsManager.getKits().get(name);
+    }
+
+    @Override
+    public Kit getKitLang(String kitName, String lang)
+    {
+        return getMainKit(kitName).getLang(lang);
+    }
+
+    @Override
+    public void saveDefaultKit(MainKit kit)
+    {
+        if(!kitsManager.getKits().containsKey(kit.getName()))
         {
-            //todo:
+            kitsManager.getKits().put(kit.getName(), kit);
+            mongoDBManager.insert(MongoCollections.KITS, kit.toDocument());
         }
     }
+
+    @Override
+    public MainKit createKit(String isoLang, String name, String displayName, int maxLvl, int[] price, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
+    }
+
 
     @Override
     public PlayerStats getPlayerStats(@NotNull UUID uuid)

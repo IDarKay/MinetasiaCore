@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Updates;
 import org.bson.Document;
 
 import java.util.*;
@@ -61,33 +62,18 @@ public class Main
 //            database.createCollection(s);
 //        }
 
-        final MongoCollection<Document> online_player = database.getCollection("online_users");
-
-        List<String> serverId = Arrays.asList("hub#04769135-3238-455e-a3a2-8512dbe0e7bf", "hub#3ff661d2-d9f6-42d4-93ee-2228d52e53ae", "hub#3df49c070-2d98-4f25-a1e2-842c5124518e");
-
-        final Long time2 = System.currentTimeMillis();
-
-        Map<UUID, Document> onlinePlayer = new HashMap<>();
-
-        for(int i = 0 ; i < 300_000; i++)
-        {
-            UUID uuid = UUID.randomUUID();
-            onlinePlayer.put(uuid, new Document("_id", uuid.toString()).append("servers_id", serverId.get((int) (Math.random() * serverId.size()))));
-        }
-
-        System.out.println("Total time pus : " + (System.currentTimeMillis() - time2));
-
-        online_player.insertMany(new ArrayList<>(onlinePlayer.values()));
-
-        for(int i = 0; i < 15; i++)
-        {
-            final Long time = System.currentTimeMillis();
-
-            System.out.println(online_player.countDocuments(eq("servers_id", "hub#3ff661d2-d9f6-42d4-93ee-2228d52e53ae")));
-
-            System.out.println("Total time (" + i + ") : " + (System.currentTimeMillis() - time));
-        }
-
+//        Document k = database.getCollection("kits").find(eq("skyblockbattle_more_life")).first();
+//        k.getList("price", Integer.class);
+//
+//        Document d = database.getCollection("users").find(eq("3ff661d2-d9f6-42d4-93ee-2228d52e53ae")).first();
+//
+//        Document doc = d.get("data", Document.class);
+//        doc.forEach((k, v) -> System.out.println(k + " " + v));
+//
+//        Map<String, Long> moneys = new HashMap<>();
+//        if(d.containsKey("money"))
+//            d.get("money", Document.class).forEach((k, v) -> moneys.put(k, (long) v));
+//        moneys.forEach((k, v) -> System.out.println(k + " " + v));
 
 
 //        final MongoCollection<Document> server = database.getCollection("servers");
