@@ -5,6 +5,7 @@ import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,21 +52,10 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     /**
      * test function connexion between core and api
-     * @deprecated
      * @return "pong" if connexion work
      * @since 1.0
      */
     public abstract String ping();
-
-    /**
-     * return complete {@link SQLManager} instance  to be use for get The connexion to SQL
-     * don't create self connexion.
-     * @see SQLManager
-     * @return complete {@link SQLManager} instance
-     * @since 1.0
-     */
-//    @Deprecated
-//    public abstract SQLManager getSqlManager();
 
     /**
      * set a data to a specific player if key already exist this will be replaced by the new values
@@ -86,6 +76,18 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      */
     public abstract Object getPlayerData(@NotNull UUID uuid, @NotNull String key);
+
+    /**
+     * get a data of a specific player and key
+     * @param uuid {@link NotNull} uuid of the player
+     * @param key  {@link NotNull} String key of the data
+     * @param cast cast type
+     * @param <T> type of return object given in cast
+     * @return String value or {@code null} if player not found or data not found
+     * @throws IllegalStateException if one or more parameter are null
+     * @since 1.0
+     */
+    public abstract <T> T getPlayerData(@NotNull UUID uuid, @NotNull String key, Class<T> cast);
 
     /**
      * get the uuid of a player from user name
@@ -190,19 +192,6 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      */
     public abstract boolean isPlayerOnline(@NotNull String name);
-
-    /**
-     * publish a message to the redis system
-     * the message will be get by all only server with the {@link fr.idarkay.minetasia.core.api.event.FRSMessageEvent}
-     *
-     * @param chanel  chanel of the message
-     * @param message  message
-     * @param sync if need be sync or not
-     * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
-     * @since 1.0
-     * @deprecated
-     */
-//    public abstract void publish(@NotNull String chanel, String message, boolean... sync);
 
     /**
      *
@@ -316,11 +305,41 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract Kit getKitKit(String name, String lang);
 
     /**
+     * get a kit from name no lang her
+     * @param name name of the kit
+     * @return void
+     */
+    public abstract MainKit getMainKit(String name);
+
+    /**
+     * get a kit with a lang in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a> <br>
+     * if not found will be retail with default lang
+     * @param kitName name of the kit
+     * @param lang lang of the kit in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
+     * @return Kit or null
+     */
+    public abstract Kit getKitLang(String kitName, String lang);
+
+    /**
      * save a kit in frs if not exist  <br>
      *  in {@link Kit} please not set color char just {@code '&'}
      * @param kit to save
      */
-    public abstract void saveDefaultKit(Kit kit);
+    public abstract void saveDefaultKit(MainKit kit);
+
+    /**
+     *
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param maxLvl the max lvl of the kit
+     * @param price the price for each lvl 0 not count ; price.length = maxLvl
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for each lvl in lan iso lang ; lvlDesc.length = maxLvl
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public abstract MainKit createKit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, Material displayMat, final String[] lvlDesc, final String... desc);
 
     /**
      * get Stats of a user

@@ -1,7 +1,6 @@
 package fr.idarkay.minetasia.test;
 
 import fr.idarkay.minetasia.core.api.*;
-import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
@@ -14,6 +13,7 @@ import fr.idarkay.minetasia.test.listener.inventory.InventoryOpenListener;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -196,6 +196,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         HashMap<String, Object> d = data.get(uuid);
         if(d != null) return  d.get(s);
         else return null;
+    }
+
+    @Override
+    public <T> T getPlayerData(@NotNull UUID uuid, @NotNull String key, Class<T> cast)
+    {
+        return cast.cast(getPlayerData(uuid, key));
     }
 
     @Override
@@ -392,21 +398,37 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return 1;
     }
 
-    private HashMap<String, Kit> kits = new HashMap<>();
+    private HashMap<String, MainKit> kits = new HashMap<>();
 
     @Override
     public Kit getKitKit(String s, String s1)
     {
-        return kits.get(s + "_" + s1);
+        return getMainKit(s).getLang(s1);
     }
 
     @Override
-    public void saveDefaultKit(Kit kit)
+    public MainKit getMainKit(String name)
     {
-        kits.put(kit.getName() + "_" + kit.getIsoLang(), kit);
+        return kits.get(name);
     }
 
+    @Override
+    public Kit getKitLang(String kitName, String lang)
+    {
+        return getMainKit(kitName).getLang(lang);
+    }
 
+    @Override
+    public void saveDefaultKit(MainKit kit)
+    {
+        kits.put(kit.getName(), kit);
+    }
+
+    @Override
+    public MainKit createKit(String isoLang, String name, String displayName, int maxLvl, int[] price, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
+    }
 
     public class Stats implements PlayerStats
     {

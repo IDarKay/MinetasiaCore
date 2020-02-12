@@ -18,6 +18,7 @@ public enum MongoCollections
     ONLINE_USERS("online_users"),
     SERVERS("servers"),
     GROUPS("groups"),
+    KITS("kits"),
 
     ;
     public final String name;
