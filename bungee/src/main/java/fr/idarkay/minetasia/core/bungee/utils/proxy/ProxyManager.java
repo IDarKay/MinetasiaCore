@@ -1,10 +1,7 @@
 package fr.idarkay.minetasia.core.bungee.utils.proxy;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.MongoCollections;
-import fr.idarkay.minetasia.core.bungee.utils.FRSClient;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
