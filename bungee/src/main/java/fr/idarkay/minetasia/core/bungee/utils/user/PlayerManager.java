@@ -30,7 +30,7 @@ public class PlayerManager {
         {
             return new MinePlayer(uuid);
         }
-        catch (IllegalArgumentException ignore)
+        catch (IllegalArgumentException | NullPointerException ignore)
         {
             return null;
         }

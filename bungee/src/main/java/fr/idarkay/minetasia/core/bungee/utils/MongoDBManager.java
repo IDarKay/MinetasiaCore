@@ -5,6 +5,7 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import fr.idarkay.minetasia.core.bungee.MongoCollections;
 import org.bson.Document;
@@ -130,7 +131,7 @@ public class MongoDBManager
 
     public void insertOrReplaceIfExist(MongoCollections collections, String key, Document document)
     {
-        getCollection(collections).updateOne(Filters.eq(key), document, new UpdateOptions().upsert(true));
+        getCollection(collections).replaceOne(Filters.eq(key), document, new ReplaceOptions().upsert(true));
     }
 
     @NotNull

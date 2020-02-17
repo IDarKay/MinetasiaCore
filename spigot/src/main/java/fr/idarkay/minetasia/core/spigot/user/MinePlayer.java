@@ -9,7 +9,7 @@ import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.frs.PlayerFrsMessage;
+import fr.idarkay.minetasia.core.spigot.frs.PlayerMessage;
 import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.apache.commons.lang.Validate;
@@ -121,20 +121,11 @@ public class MinePlayer implements MinetasiaPlayer
         return moneys.getOrDefault(economy, 0L) / 100d;
     }
 
-    public synchronized void addMoneyWithoutSave(@NotNull Economy economy, float amount)
-    {
-        if(amount < 0) throw new IllegalArgumentException("negative amount");
-        if(validateNotCache(PlayerFrsMessage.ActionType.ADD_MONEY, economy, amount * 100))
-        {
-            moneys.merge(economy, (long) (amount * 100), Long::sum);
-        }
-    }
-
     @Override
     public synchronized void addMoney(@NotNull Economy economy, float amount)
     {
         if(amount < 0) throw new IllegalArgumentException("negative amount");
-        if(validateNotCache(PlayerFrsMessage.ActionType.ADD_MONEY, economy, amount * 100))
+        if(validateNotCache(PlayerMessage.ActionType.ADD_MONEY, economy, amount))
         {
             moneys.merge(economy, (long) (amount * 100), Long::sum);
             increment("money." + economy.name, (long) (amount * 100));
@@ -145,7 +136,7 @@ public class MinePlayer implements MinetasiaPlayer
     public synchronized void removeMoney(@NotNull Economy economy, float amount)
     {
         if(amount < 0) throw new IllegalArgumentException("negative amount");
-        if(validateNotCache(PlayerFrsMessage.ActionType.REMOVE_MONEY, economy, amount * 100))
+        if(validateNotCache(PlayerMessage.ActionType.REMOVE_MONEY, economy, amount))
         {
             moneys.merge(economy, (long) (amount * 100), (oldV, newV) -> {
                 if(oldV < newV) throw new IllegalArgumentException("cant remove "+ amount + " " + economy.displayName + " to " + username);
@@ -159,7 +150,7 @@ public class MinePlayer implements MinetasiaPlayer
     public void setMoney(@NotNull Economy economy, float amount)
     {
         if(amount < 0) throw new IllegalArgumentException("negative amount");
-        if(validateNotCache(PlayerFrsMessage.ActionType.SET_MONEY, economy, amount * 100))
+        if(validateNotCache(PlayerMessage.ActionType.SET_MONEY, economy, amount))
         {
             moneys.put(economy, (long) (amount * 100));
             set("money." + economy.name, (long) (amount * 100));
@@ -201,7 +192,7 @@ public class MinePlayer implements MinetasiaPlayer
     public synchronized void addFriends(@NotNull UUID uuid)
     {
         Validate.notNull(uuid);
-        if(validateNotCache(PlayerFrsMessage.ActionType.ADD_FRIENDS, uuid))
+        if(validateNotCache(PlayerMessage.ActionType.ADD_FRIENDS, uuid))
         {
             if(friends.put(uuid, CORE.getPlayerName(uuid)) == null)
             {
@@ -214,7 +205,7 @@ public class MinePlayer implements MinetasiaPlayer
     public synchronized void removeFriends(@NotNull UUID uuid)
     {
         Validate.notNull(uuid);
-        if(validateNotCache(PlayerFrsMessage.ActionType.REMOVE_FRIENDS, uuid))
+        if(validateNotCache(PlayerMessage.ActionType.REMOVE_FRIENDS, uuid))
         {
             if(friends.remove(uuid) != null)
             {
@@ -249,7 +240,7 @@ public class MinePlayer implements MinetasiaPlayer
     public synchronized void putData(@NotNull String key, @Nullable Object value)
     {
         Validate.notNull(key);
-        if(validateNotCache(PlayerFrsMessage.ActionType.PUT_CUSTOM_DATA, key, value))
+        if(validateNotCache(PlayerMessage.ActionType.PUT_CUSTOM_DATA, key, value))
         {
             if(value == null)
             {
@@ -275,7 +266,7 @@ public class MinePlayer implements MinetasiaPlayer
     public void updatePlayerStats(@NotNull StatsUpdater updater)
     {
         stats.update(updater);
-        if(validateNotCache(PlayerFrsMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString()))
+        if(validateNotCache(PlayerMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString()))
         {
 
             final Document doc =  new Document();
@@ -317,13 +308,13 @@ public class MinePlayer implements MinetasiaPlayer
         return partyBoost;
     }
 
-    private boolean validateNotCache(PlayerFrsMessage.ActionType actionType, Object... args)
+    private boolean validateNotCache(PlayerMessage.ActionType actionType, Object... args)
     {
         if(isCache)
         {
             if(CORE.isPlayerOnline(uuid))
             {
-                PlayerFrsMessage.getMessage(uuid, actionType, args);
+                PlayerMessage.getMessage(uuid, actionType, args);
                 return false;
             }
             else
@@ -337,6 +328,37 @@ public class MinePlayer implements MinetasiaPlayer
     private synchronized void set(String key, Object value)
     {
         CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.addToSet(key, value));
+    }
+
+
+    public synchronized void incrementMoney(JsonObject json)
+    {
+        for (Map.Entry<String, JsonElement> e : json.entrySet())
+        {
+            moneys.merge(Economy.valueOf(e.getKey()), e.getValue().getAsLong(), Long::sum);
+        }
+    }
+
+    public synchronized void incrementMoney(String json)
+    {
+        incrementMoney(PARSER.parse(json).getAsJsonObject());
+    }
+
+    public synchronized void incrementMoney(Map<Economy, Float> m)
+    {
+        final Document money = new Document();
+
+        m.forEach((k,v ) -> money.append("money." + k.name, (long) (v * 100)));
+
+        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()),  new Document("$inc", money));
+        final JsonObject json = new JsonObject();
+        m.forEach((k,v ) -> json.addProperty(k.name, (long) (v * 100)));
+        if(validateNotCache(PlayerMessage.ActionType.ADD_MONEYS, json.toString()))
+        {
+            incrementMoney(json);
+        }
+
+
     }
 
     private synchronized void increment(String key, Number increment)

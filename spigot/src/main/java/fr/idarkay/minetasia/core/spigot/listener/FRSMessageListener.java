@@ -1,12 +1,10 @@
 package fr.idarkay.minetasia.core.spigot.listener;
 
 import fr.idarkay.minetasia.core.api.Command;
-import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
 import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
+import fr.idarkay.minetasia.core.spigot.frs.CoreMessage;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.Args;
@@ -144,10 +142,10 @@ public final class FRSMessageListener implements Listener {
                 }
                 break;
             }
-            case CoreFRSMessage.CHANNEL:
+            case CoreMessage.CHANNEL:
             {
                 String[] split = e.getValue().split(";");
-                CoreFRSMessage msg = CoreFRSMessage.MESSAGE.get(split[0]);
+                CoreMessage msg = CoreMessage.MESSAGE.get(split[0]);
                 if(msg != null) msg.actionOnGet(plugin, split);
             }
         }

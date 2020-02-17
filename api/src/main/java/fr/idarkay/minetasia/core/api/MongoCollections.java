@@ -19,6 +19,7 @@ public enum MongoCollections
     SERVERS("servers"),
     GROUPS("groups"),
     KITS("kits"),
+    PROXY("proxy"),
 
     ;
     public final String name;

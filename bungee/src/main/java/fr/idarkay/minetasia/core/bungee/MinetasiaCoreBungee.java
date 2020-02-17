@@ -2,8 +2,9 @@ package fr.idarkay.minetasia.core.bungee;
 
 import com.mongodb.client.model.Filters;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
+import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.core.bungee.event.MessageEvent;
-import fr.idarkay.minetasia.core.bungee.listener.FRSMessageListener;
+import fr.idarkay.minetasia.core.bungee.listener.MessageListener;
 import fr.idarkay.minetasia.core.bungee.listener.PlayerListener;
 import fr.idarkay.minetasia.core.bungee.utils.MongoDBManager;
 import fr.idarkay.minetasia.core.bungee.utils.proxy.ProxyManager;
@@ -40,6 +41,7 @@ public final class MinetasiaCoreBungee extends Plugin {
     private Configuration configuration;
     private ProxyManager proxyManager;
     private PlayerManager playerManager;
+    private MessageServer messageServer;
     private static MinetasiaCoreBungee instance;
 
     @Override
@@ -64,6 +66,9 @@ public final class MinetasiaCoreBungee extends Plugin {
             e.printStackTrace();
         }
 
+        final int publishPort = getConfig().getInt("publish-port");
+        messageServer = new MessageServer(publishPort);
+
         mongoDBManager = new MongoDBManager(Objects.requireNonNull(configuration.getString("dbm.host")),
                 Objects.requireNonNull(configuration.getString("dbm.dbname")),
                 Objects.requireNonNull(configuration.getString("dbm.login")),
@@ -83,7 +88,7 @@ public final class MinetasiaCoreBungee extends Plugin {
             try
             {
                 final String msg = MessageClient.read(socket);
-
+                System.out.println(msg);
                 if(msg == null)
                 {
                     socket.close();
@@ -98,6 +103,7 @@ public final class MinetasiaCoreBungee extends Plugin {
                 }
 
                 socket.close();
+                System.out.println("good");
                 getProxy().getPluginManager().callEvent(new MessageEvent(split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]));
             } catch (IOException ex)
             {
@@ -158,9 +164,10 @@ public final class MinetasiaCoreBungee extends Plugin {
         playerManager = new PlayerManager(this);
 
         getProxy().getPluginManager().registerListener(this, new PlayerListener(this));
-        getProxy().getPluginManager().registerListener(this, new FRSMessageListener(this));
+        getProxy().getPluginManager().registerListener(this, new MessageListener(this));
 
         initClientReceiver();
+        messageServer.open();
 
     }
 

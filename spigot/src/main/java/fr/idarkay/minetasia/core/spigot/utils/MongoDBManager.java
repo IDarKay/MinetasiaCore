@@ -5,6 +5,7 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
@@ -121,13 +122,13 @@ public class MongoDBManager implements MongoDbManager
 
     public void replace(MongoCollections collections, String key, Document document)
     {
-        getCollection(collections).updateOne(Filters.eq(key), document);
+        getCollection(collections).replaceOne(Filters.eq(key), document);
     }
 
     @Override
     public void insertOrReplaceIfExist(MongoCollections collections, String key, Document document)
     {
-        getCollection(collections).updateOne(Filters.eq(key), document, new UpdateOptions().upsert(true));
+        getCollection(collections).replaceOne(Filters.eq(key), document, new ReplaceOptions().upsert(true));
     }
 
     public void delete(MongoCollections collections, String key)

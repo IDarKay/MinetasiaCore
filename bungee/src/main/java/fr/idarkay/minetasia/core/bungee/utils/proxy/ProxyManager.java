@@ -36,10 +36,12 @@ public final class ProxyManager {
 
     public void init()
     {
-        String ip =  plugin.getProxy().getConfig().getListeners().iterator().next().getHost().getHostName();
-        int port = plugin.getProxy().getConfig().getListeners().iterator().next().getHost().getPort();
+        final String ip =  plugin.getProxy().getConfig().getListeners().iterator().next().getHost().getHostName();
+        final int port = plugin.getProxy().getConfig().getListeners().iterator().next().getHost().getPort();
+        final int publishPort = plugin.getConfig().getInt("publish-port");
 
-        proxy = new Proxy(ip, port);
+
+        proxy = new Proxy(ip, port, publishPort);
 
         plugin.getMongoDBManager().insert(MongoCollections.PROXY, proxy.toDocument());
 

@@ -14,8 +14,9 @@ server_type: "hub"
 #   for hub set hub
 config_name: "hub"
 
-publish-port": 32000
+publish-port: 32000
 
+default-register: false
 # =========================================================================================================== #                                                                 #
 # host: url of the db (set localhost for local db)                                                            #
 # login: login for connect need have permission to create and edit table                                      #

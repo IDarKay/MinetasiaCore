@@ -386,7 +386,10 @@ public class PermissionManager {
                         if(g != null)
                         {
                             PermissionAttachment pa = p.addAttachment(plugin);
-                            for(String perm : g.getPermissions()) pa.setPermission(perm, true);
+                            for(String perm : g.getPermissions()) {
+                                if(perm.equals("*")) p.setOp(true);
+                                pa.setPermission(perm, true);
+                            }
                             map.put("group_" + g.getName(), pa);
                             groupL.add(g.getName());
 
@@ -398,7 +401,11 @@ public class PermissionManager {
                 if(permission != null)
                 {
                     PermissionAttachment pa = p.addAttachment(plugin);
-                    for(JsonElement j : permission) pa.setPermission(j.getAsString(), true);
+                    for(JsonElement j : permission) {
+                        final String perm = j.getAsString();
+                        if(perm.equals("*")) p.setOp(true);
+                        pa.setPermission(perm, true);
+                    }
                     map.put("permission", pa);
                 }
                 if(tempgroup != null)
@@ -415,7 +422,10 @@ public class PermissionManager {
                             if(tLeft > 0)
                             {
                                 PermissionAttachment pa = p.addAttachment(plugin, ((int) (tLeft / 50)));
-                                for(String perm : g.getPermissions()) Objects.requireNonNull(pa).setPermission(perm, true);
+                                for(String perm : g.getPermissions()) {
+                                    if(perm.equals("*")) p.setOp(true);
+                                    Objects.requireNonNull(pa).setPermission(perm, true);
+                                }
                                 map.put("temp_group_" + g.getName(), pa);
                                 tempgroupH.put(g.getName(), new Long[] {t1, t2});
                             }
@@ -436,6 +446,7 @@ public class PermissionManager {
                         {
                             PermissionAttachment pa = p.addAttachment(plugin, ((int) (tLeft / 50)));
                             Objects.requireNonNull(pa).setPermission(entry.getKey(), true);
+                            if(entry.getKey().equals("*")) p.setOp(true);
                             map.put("temp_permission_" + entry.getKey(), pa);
                             tempPermH.put(entry.getKey(), new Long[] {t1, t2});
                         }
