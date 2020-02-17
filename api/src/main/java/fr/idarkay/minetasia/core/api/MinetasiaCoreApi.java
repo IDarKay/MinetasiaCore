@@ -202,7 +202,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract void publishGlobal(@NotNull String chanel, String message, boolean proxy, boolean sync);
 
-//    public abstract void publishProxy(@NotNull String chanel, String message, boolean sync);
+    public abstract void publishProxy(@NotNull String chanel, String message, boolean sync);
 
     public abstract void publishServerType(@NotNull String chanel, String message, String serverType , boolean sync);
 

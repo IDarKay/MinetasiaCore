@@ -19,6 +19,7 @@ import java.sql.SQLException;
  * @author Alois. B. (IDarKay),
  * Created the 13/11/2019 at 18:02
  */
+@Deprecated
 public final class SQLManager {
 
     private final MinetasiaCoreBungee plugin;

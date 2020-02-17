@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.bungee.listener;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.CountryResponse;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
+import fr.idarkay.minetasia.core.bungee.MongoCollections;
 import fr.idarkay.minetasia.core.bungee.exception.FRSDownException;
 import fr.idarkay.minetasia.core.bungee.utils.user.MinePlayer;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
@@ -14,6 +15,7 @@ import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
+import org.bson.Document;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +53,13 @@ public final class PlayerListener implements Listener {
     {
         e.registerIntent(plugin);
         plugin.getProxy().getScheduler().runAsync(plugin, () -> {
+            if(plugin.getProxy().getServers().size() == 0)
+            {
+                e.setCancelled(true);
+                e.setCancelReason(TextComponent.fromLegacyText("No online server retry later !"));
+                e.completeIntent(plugin);
+                return;
+            }
             try{
                 PendingConnection proxiedPlayer = e.getConnection();
                 UUID uuid = proxiedPlayer.getUniqueId();
@@ -61,8 +70,7 @@ public final class PlayerListener implements Listener {
                     if (!player.getName().equals(name = proxiedPlayer.getName()))
                     {
 
-                        plugin.getSqlManager().updateAsynchronously("UPDATE `uuid_username` SET `username` = ? WHERE uuid = ?", name, uuid.toString());
-                        plugin.setUserName(uuid, name);
+                        player.setUsername(name);
                     }
                 }
                 else
@@ -78,7 +86,6 @@ public final class PlayerListener implements Listener {
                     }
 
                     plugin.getPlayerManager().newPlayer(uuid, proxiedPlayer.getName(), c);
-                    plugin.getFrsClient().publish("core-msg",  "WELCOME;" + uuid.toString() +";true;PLAYER\\" +proxiedPlayer.getName());
                 }
 
             } catch (FRSDownException ignore)
@@ -107,15 +114,15 @@ public final class PlayerListener implements Listener {
         final UUID uuid = e.getPlayer().getUniqueId();
         final String playerName = e.getPlayer().getName();
 
-        plugin.getSqlManager().updateAsynchronously("INSERT INTO `online_player`(uuid, username, proxy, server) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE username = ?, proxy = ?, server = ?",
-                uuid.toString(), playerName, proxyName, serveName, playerName, proxyName, serveName);
+        plugin.getMongoDBManager().insertOrReplaceIfExist(MongoCollections.ONLINE_USERS, uuid.toString(), new Document("_id", uuid.toString()).append("proxy_id", proxyName).append("server_id", serveName).append("username", playerName));
+
     }
 
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDisconnectEvent(PlayerDisconnectEvent e)
     {
-        plugin.getSqlManager().updateAsynchronously("DELETE FROM `online_player` WHERE uuid = ?", e.getPlayer().getUniqueId().toString());
+       plugin.getMongoDBManager().delete(MongoCollections.ONLINE_USERS, e.getPlayer().getUniqueId().toString());
     }
 
 }

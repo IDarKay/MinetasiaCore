@@ -1,7 +1,7 @@
 package fr.idarkay.minetasia.core.bungee.utils;
 
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
-import fr.idarkay.minetasia.core.bungee.event.FRSMessageEvent;
+import fr.idarkay.minetasia.core.bungee.event.MessageEvent;
 import net.md_5.bungee.api.ProxyServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.*;
 
+@Deprecated
 public final class FRSClient
 {
 	private boolean enable, connected, fixEnable = false;
@@ -261,7 +262,7 @@ public final class FRSClient
 		    .getScheduler()
 		    .runAsync(main, () -> main.getProxy()
 		                              .getPluginManager()
-		                              .callEvent(new FRSMessageEvent(channel, message)));
+		                              .callEvent(new MessageEvent(channel, message)));
 	}
 	
 	public void publish(String channel, String message, boolean... sync)

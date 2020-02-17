@@ -278,6 +278,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public void publishProxy(@NotNull String chanel, String message, boolean sync)
+    {
+
+    }
+
+    @Override
     public void publishServerType(@NotNull String chanel, String message, String serverType, boolean sync)
     {
 
