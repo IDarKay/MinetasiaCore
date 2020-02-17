@@ -70,14 +70,6 @@ public class PlayerManager {
         userCache.remove(uuid);
     }
 
-//    public void newPlayer(UUID uuid, String name)
-//    {
-//        MinePlayer p = new Player(uuid, name);
-//        userCache.put(uuid, p);
-//        plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
-//        plugin.getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
-//
-//    }
 
     public @Nullable MinePlayer getOnlyInCache(UUID uuid)
     {

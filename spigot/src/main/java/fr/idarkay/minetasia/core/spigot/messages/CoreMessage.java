@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.frs;
+package fr.idarkay.minetasia.core.spigot.messages;
 
 import com.google.common.collect.ImmutableMap;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 /**
- * File <b>FRSMessage</b> located on fr.idarkay.minetasia.core.spigot.utils
- * CoreFRSMessage is a part of MinetasiaCore.
+ * File <b>CoreMessage</b> located on fr.idarkay.minetasia.core.spigot.messages
+ * CoreMessage is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
  * <p>
@@ -25,7 +25,7 @@ public interface CoreMessage
             .put(PlayerMessage.getIdentifier(), new PlayerMessage())
             .build();
 
-    String CHANNEL = "core-frs-msg";
+    String CHANNEL = "core-messaging";
 
     void actionOnGet(MinetasiaCore plugin, String... args);
 

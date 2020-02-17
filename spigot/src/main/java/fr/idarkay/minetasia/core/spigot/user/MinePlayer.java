@@ -9,7 +9,7 @@ import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.frs.PlayerMessage;
+import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
 import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.apache.commons.lang.Validate;

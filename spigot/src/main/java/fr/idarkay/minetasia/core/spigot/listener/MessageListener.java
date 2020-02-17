@@ -4,7 +4,7 @@ import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.frs.CoreMessage;
+import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.Args;
@@ -16,8 +16,8 @@ import org.bukkit.event.Listener;
 import java.util.UUID;
 
 /**
- * File <b>FRSMessageListener</b> located on fr.idarkay.minetasia.core.common.listener
- * FRSMessageListener is a part of MinetasiaCore.
+ * File <b>MessageListener</b> located on fr.idarkay.minetasia.core.common.listener
+ * MessageListener is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2019 MinetasiaCore.
  * <p>
@@ -25,19 +25,19 @@ import java.util.UUID;
  * @author Alois. B. (IDarKay),
  * Created the 20/11/2019 at 13:46
  */
-public final class FRSMessageListener implements Listener {
+public final class MessageListener implements Listener {
 
 
 
     private final MinetasiaCore plugin;
 
-    public FRSMessageListener(MinetasiaCore plugin)
+    public MessageListener(MinetasiaCore plugin)
     {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void onFRSMessageEvent(MessageReceivedEvent e)
+    public void onMessageEvent(MessageReceivedEvent e)
     {
         switch (e.getChanel())
         {

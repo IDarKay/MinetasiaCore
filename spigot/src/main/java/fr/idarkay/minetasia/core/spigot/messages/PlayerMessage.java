@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.frs;
+package fr.idarkay.minetasia.core.spigot.messages;
 
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
@@ -9,8 +9,8 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 
 /**
- * File <b>PlayerFrsMessage</b> located on fr.idarkay.minetasia.core.spigot.frs
- * PlayerFrsMessage is a part of MinetasiaCore.
+ * File <b>PlayerMessage</b> located on fr.idarkay.minetasia.core.spigot.messages
+ * PlayerMessage is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
  * <p>
@@ -65,7 +65,7 @@ public class PlayerMessage implements CoreMessage
         PUT_GENERAL_DATA((plugin, args) -> plugin.getPlayer(UUID.fromString(args[1])).putGeneralData(args[3], args[4])),
         PUT_CUSTOM_DATA((plugin, args) -> plugin.getPlayer(UUID.fromString(args[1])).putData(args[3], args[4])),
 
-//        UPDATE_STATS((plugin, args) -> Objects.requireNonNull(plugin.getPlayerManager().get(UUID.fromString(args[1]))).reloadStats(CoreFRSMessage.concat(args, ";", 3))),
+//        UPDATE_STATS((plugin, args) -> Objects.requireNonNull(plugin.getPlayerManager().get(UUID.fromString(args[1]))).reloadStats(CoreMessage.concat(args, ";", 3))),
         UPDATE_STATS((plugin, args) -> {})
         ;
 

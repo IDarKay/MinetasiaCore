@@ -65,16 +65,16 @@ public class PermissionManager {
         plugin.getMongoDbManager().delete(MongoCollections.GROUPS, group);
     }
 
-    public void updateGroupToFRS(String group)
+    public void updateGroupToDB(String group)
     {
         Group g = groups.get(group);
         if(g != null)
         {
-            updateGroupToFRS(g);
+            updateGroupToDB(g);
         }
     }
 
-    public void updateGroupToFRS(@NotNull Group group)
+    public void updateGroupToDB(@NotNull Group group)
     {
         plugin.getMongoDbManager().replace(MongoCollections.GROUPS, group.getName(), group.toDocument());
     }

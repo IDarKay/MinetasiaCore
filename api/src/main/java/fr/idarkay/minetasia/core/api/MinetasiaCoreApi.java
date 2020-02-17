@@ -216,7 +216,6 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     /**
      * move a player to random lobby
      * @param player {@link NotNull}  to return to the lobby
-     * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
      * @since 1.0
      */
     public abstract void movePlayerToHub(@NotNull Player player);
@@ -321,7 +320,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract Kit getKitLang(String kitName, String lang);
 
     /**
-     * save a kit in frs if not exist  <br>
+     * save a kit in database if not exist  <br>
      *  in {@link Kit} please not set color char just {@code '&'}
      * @param kit to save
      */

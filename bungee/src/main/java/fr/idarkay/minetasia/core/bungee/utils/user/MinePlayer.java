@@ -92,53 +92,11 @@ public class MinePlayer
         return username;
     }
 
-    
-//    public @NotNull Map<UUID, String> getFriends()
-//    {
-//        return friends;
-//    }
-
-    
     public @NotNull String getLang()
     {
         return data.getOrDefault("lang", MinetasiaLang.BASE_LANG).toString();
     }
 
-    
-//    public boolean isFriend(@NotNull UUID uuid)
-//    {
-//        Validate.notNull(uuid);
-//        return friends.containsKey(uuid);
-//    }
-
-    
-//    public synchronized void addFriends(@NotNull UUID uuid)
-//    {
-//        Validate.notNull(uuid);
-//        if(validateNotCache(PlayerFrsMessage.ActionType.ADD_FRIENDS, uuid))
-//        {
-//            if(friends.put(uuid, CORE.getPlayerName(uuid)) == null)
-//            {
-//                saveFriends();
-//            }
-//        }
-//    }
-//
-//
-//    public synchronized void removeFriends(@NotNull UUID uuid)
-//    {
-//        Validate.notNull(uuid);
-//        if(validateNotCache(PlayerFrsMessage.ActionType.REMOVE_FRIENDS, uuid))
-//        {
-//            if(friends.remove(uuid) != null)
-//            {
-//                saveFriends();
-//            }
-//        }
-//
-//    }
-
-    
     @Deprecated
     public @Nullable Object getGeneralData(@NotNull String key)
     {
@@ -179,7 +137,7 @@ public class MinePlayer
 //    public void updatePlayerStats(@NotNull StatsUpdater updater)
 //    {
 //        stats.update(updater);
-//        if(validateNotCache(PlayerFrsMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString()))
+//        if(validateNotCache(PlayerMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString()))
 //        {
 //
 //            final Document doc =  new Document();
