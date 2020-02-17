@@ -55,11 +55,11 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         parents = d.getList("parents", String.class);
 
         final Map<BoostType, Float> personalBoosts = new HashMap<>();
-        d.get("personal_boosts", Document.class).forEach((k, v) -> personalBoosts.put(BoostType.valueOf(k), (float) v));
+        d.get("personal_boosts", Document.class).forEach((k, v) -> personalBoosts.put(BoostType.valueOf(k), ((Double) v).floatValue()));
         this.personalBoost = () -> personalBoosts;
 
         final Map<BoostType, Float> partyBoost = new HashMap<>();
-        d.get("party_boosts", Document.class).forEach((k, v) -> partyBoost.put(BoostType.valueOf(k), (float) v));
+        d.get("party_boosts", Document.class).forEach((k, v) -> partyBoost.put(BoostType.valueOf(k),  ((Double) v).floatValue()));
         this.partyBoost = () -> partyBoost;
     }
 

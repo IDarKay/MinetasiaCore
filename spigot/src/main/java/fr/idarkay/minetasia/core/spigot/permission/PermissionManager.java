@@ -133,7 +133,7 @@ public class PermissionManager {
     private void addTemp(@NotNull UUID player, @NotNull String group, @NotNull String type, long during)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type).toString();
+            String data = plugin.getPlayerData(player, type, String.class);
             JsonObject p = data == null ? new JsonObject() : PARSER.parse(data).getAsJsonObject();
             JsonArray ja = new JsonArray();
             ja.add(System.currentTimeMillis());
@@ -147,7 +147,7 @@ public class PermissionManager {
     private void add(@NotNull UUID player, @NotNull String args, @NotNull String type)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type).toString();
+            String data = plugin.getPlayerData(player, type, String.class);
             JsonArray p = data == null ? new JsonArray() : PARSER.parse(data).getAsJsonArray();
             p.add(args);
             plugin.setPlayerData(player, type, p.toString());
@@ -182,7 +182,7 @@ public class PermissionManager {
     private void removeTemp(@NotNull UUID player, @NotNull String args, @NotNull String type)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type).toString();
+            String data = plugin.getPlayerData(player, type, String.class);
             JsonObject p = data == null ? null : PARSER.parse(data).getAsJsonObject();
             if(p == null) return;
             boolean u = (p.remove(args) != null);
@@ -197,7 +197,7 @@ public class PermissionManager {
     private void remove(@NotNull UUID player, @NotNull String args, @NotNull String type)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type).toString();
+            String data = plugin.getPlayerData(player, type, String.class);
             JsonArray p = data == null ? null : PARSER.parse(data).getAsJsonArray();
             if(p == null) return;
             JsonArray p2 = new JsonArray();
