@@ -166,10 +166,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         maxPlayerCountAddAdmin = getConfig().getInt("max-player-count-add-admin");
 
         // init db system
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load SQL");
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load FRS");
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load messaging system");
+
         messageServer = new MessageServer(getConfig().getInt("publish-port"));
 
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load mongo");
         mongoDBManager = new MongoDBManager(Objects.requireNonNull(this.getConfig().getString("dbm.host")),
                                             Objects.requireNonNull(this.getConfig().getString("dbm.dbname")),
                                             Objects.requireNonNull(this.getConfig().getString("dbm.login")),
@@ -337,7 +338,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     private void registerListener()
     {
-        getServer().getPluginManager().registerEvents(new FRSMessageListener(this), this);
+        getServer().getPluginManager().registerEvents(new MessageListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);

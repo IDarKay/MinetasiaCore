@@ -35,8 +35,6 @@ import java.util.stream.Collectors;
  */
 public final class MinetasiaCoreBungee extends Plugin {
 
-//    private FRSClient frsClient;
-//    private SQLManager sqlManager;
     private MongoDBManager mongoDBManager;
     private Configuration configuration;
     private ProxyManager proxyManager;
@@ -74,12 +72,6 @@ public final class MinetasiaCoreBungee extends Plugin {
                 Objects.requireNonNull(configuration.getString("dbm.login")),
                 Objects.requireNonNull(configuration.getString("dbm.password")));
 
-//        frsClient  = new FRSClient(this);
-//
-//        frsClient.startConnection(System.out, configuration.getString("frs.host"), configuration.getInt("frs.port"),
-//                configuration.getString("frs.password"));
-//
-//        sqlManager = new SQLManager(this);
     }
 
     public void initClientReceiver()

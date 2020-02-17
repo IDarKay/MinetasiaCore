@@ -3,8 +3,8 @@ package fr.idarkay.minetasia.core.spigot.server;
 import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.frs.CoreMessage;
-import fr.idarkay.minetasia.core.spigot.frs.ServerMessage;
+import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
+import fr.idarkay.minetasia.core.spigot.messages.ServerMessage;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
@@ -39,10 +39,6 @@ public final class ServerManager {
 
         plugin.getMongoDbManager().getAll(MongoCollections.SERVERS).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
 
-//        plugin.getFrsClient().getValues("server", plugin.getFrsClient().getFields("server")).forEach( (k, v) -> {
-//            if(v != null && !v.equals("null"))
-//            servers.put(k, MineServer.getServerFromJson(v));
-//        });
     }
 
     private boolean register = false;

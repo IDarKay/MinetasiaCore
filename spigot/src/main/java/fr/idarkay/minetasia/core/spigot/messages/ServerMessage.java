@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.frs;
+package fr.idarkay.minetasia.core.spigot.messages;
 
 import fr.idarkay.minetasia.core.api.ServerPhase;
 import fr.idarkay.minetasia.core.api.event.ServerPlayerCountUpdateEvent;
@@ -10,8 +10,8 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * File <b>ServerFrsMessage</b> located on fr.idarkay.minetasia.core.spigot.frs
- * ServerFrsMessage is a part of MinetasiaCore.
+ * File <b>ServerMessage</b> located on fr.idarkay.minetasia.core.spigot.messages
+ * ServerMessage is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
  * <p>

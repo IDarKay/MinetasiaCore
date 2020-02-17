@@ -14,8 +14,8 @@ import net.md_5.bungee.event.EventHandler;
 import java.net.InetSocketAddress;
 
 /**
- * File <b>FRSMessageListener</b> located on fr.idarkay.minetasia.core.bungee.listener
- * FRSMessageListener is a part of MinetasiaCore.
+ * File <b>MessageListener</b> located on fr.idarkay.minetasia.core.bungee.listener
+ * MessageListener is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2019 MinetasiaCore.
  * <p>
@@ -40,7 +40,7 @@ public class MessageListener implements Listener {
             try
             {
                 System.out.println(e.getChanel());
-                if(e.getChanel().equals("core-frs-msg"))
+                if(e.getChanel().equals("core-messaging"))
                 {
                     System.out.println(e.getValue());
                     String[] msg = e.getValue().split(";", 3);

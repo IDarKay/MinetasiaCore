@@ -4,8 +4,8 @@ import net.md_5.bungee.api.event.AsyncEvent;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * File <b>FRSMessageEvent</b> located on fr.idarkay.minetasia.core.bungee.utils
- * FRSMessageEvent is a part of MinetasiaCore.
+ * File <b>MessageEvent</b> located on fr.idarkay.minetasia.core.bungee.utils
+ * MessageEvent is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2019 MinetasiaCore.
  * <p>
