@@ -1,19 +1,13 @@
 package fr.idarkay.minetasia.core.spigot.user;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import fr.idarkay.minetasia.core.api.utils.Group;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * File <b>PlayerManagement</b> located on fr.idarkay.minetasia.core.common.user
