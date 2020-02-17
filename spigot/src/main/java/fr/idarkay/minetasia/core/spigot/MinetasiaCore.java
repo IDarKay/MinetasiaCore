@@ -5,8 +5,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mongodb.client.model.Filters;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
@@ -171,49 +169,58 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load SQL");
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load FRS");
         messageServer = new MessageServer(getConfig().getInt("publish-port"));
-        mongoDBManager = new MongoDBManager(this);
+
+        mongoDBManager = new MongoDBManager(Objects.requireNonNull(this.getConfig().getString("dbm.host")),
+                                            Objects.requireNonNull(this.getConfig().getString("dbm.dbname")),
+                                            Objects.requireNonNull(this.getConfig().getString("dbm.login")),
+                                            Objects.requireNonNull(this.getConfig().getString("dbm.password")));
     }
 
     public void initClientReceiver()
     {
-        MessageClient.setReceiver(socket -> Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-        try
-        {
-            final String msg = MessageClient.read(socket);
-
-            if(msg == null)
+        MessageClient.setReceiver(socket -> {
+            if(this.isEnabled())
             {
-                socket.close();
-                return;
+                Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                    try
+                    {
+                        final String msg = MessageClient.read(socket);
+
+                        if(msg == null)
+                        {
+                            socket.close();
+                            return;
+                        }
+
+                        final String[] split = msg.split(";", 2);
+                        if(split.length == 0)
+                        {
+                            socket.close();
+                            return;
+                        }
+
+
+                        final SocketPrePossesEvent e = new SocketPrePossesEvent(socket, split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]);
+                        Bukkit.getPluginManager().callEvent(e);
+
+                        if(e.getAnswer() != null)
+                        {
+                            MessageClient.send(socket, e.getAnswer());
+                        }
+
+                        socket.close();
+
+                        if(!e.isCancelled())
+                        {
+                            Bukkit.getPluginManager().callEvent(new MessageReceivedEvent(split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]));
+                        }
+                    } catch (IOException ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                });
             }
-
-            final String[] split = msg.split(";", 2);
-            if(split.length == 0)
-            {
-                socket.close();
-                return;
-            }
-
-
-            final SocketPrePossesEvent e = new SocketPrePossesEvent(socket, split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]);
-            Bukkit.getPluginManager().callEvent(e);
-
-            if(e.getAnswer() != null)
-            {
-                MessageClient.send(socket, e.getAnswer());
-            }
-
-            socket.close();
-
-            if(!e.isCancelled())
-            {
-                Bukkit.getPluginManager().callEvent(new MessageReceivedEvent(split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]));
-            }
-            } catch (IOException ex)
-            {
-                ex.printStackTrace();
-            }
-        }));
+        });
     }
 
     @Override
@@ -317,8 +324,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         registerListener();
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "start player count schedule");
+        initClientReceiver();
         startPlayerCountSchedule();
-
     }
 
     private void registerListener()
@@ -564,6 +571,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         if(sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
         else Bukkit.getScheduler().runTask(this, run);
+    }
+
+    @Override
+    public void publishProxy(@NotNull String chanel, String message, boolean sync)
+    {
+
     }
 
 

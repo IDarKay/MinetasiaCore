@@ -2,6 +2,7 @@ package fr.idarkay.minetasia.core.bungee.utils.proxy;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -39,6 +40,11 @@ public final class Proxy {
         this.port = port;
     }
 
+    public static Proxy getProxyFromDocument(Document d)
+    {
+        return new Proxy(d.getString("ip"), d.getInteger("port", -1), UUID.fromString(d.getString("_id")), d.getLong("create_time"));
+    }
+
     public static Proxy getProxyFromJson(String json)
     {
         JsonObject proxy = new JsonParser().parse(json).getAsJsonObject();
@@ -66,6 +72,14 @@ public final class Proxy {
     public UUID getUuid()
     {
         return uuid;
+    }
+
+    public Document toDocument()
+    {
+        return new Document("_id", uuid.toString())
+                .append("ip", ip)
+                .append("port", port)
+                .append("create_time", creatTime);
     }
 
     @NotNull

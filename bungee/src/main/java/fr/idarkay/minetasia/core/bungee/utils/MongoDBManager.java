@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.utils;
+package fr.idarkay.minetasia.core.bungee.utils;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -6,8 +6,7 @@ import com.mongodb.MongoCredential;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
-import fr.idarkay.minetasia.core.api.MongoCollections;
-import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
+import fr.idarkay.minetasia.core.bungee.MongoCollections;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
  * @author alice. B. (IDarKay),
  * Created the 09/02/2020 at 15:32
  */
-public class MongoDBManager implements MongoDbManager
+public class MongoDBManager
 {
 
     private final MongoClient mongoClient; // connection of the database
@@ -121,18 +120,17 @@ public class MongoDBManager implements MongoDbManager
 
     public void replace(MongoCollections collections, String key, Document document)
     {
-        getCollection(collections).updateOne(Filters.eq(key), document);
-    }
-
-    @Override
-    public void insertOrReplaceIfExist(MongoCollections collections, String key, Document document)
-    {
-        getCollection(collections).updateOne(Filters.eq(key), document, new UpdateOptions().upsert(true));
+        getCollection(collections).replaceOne(Filters.eq(key), document);
     }
 
     public void delete(MongoCollections collections, String key)
     {
         getCollection(collections).deleteOne(Filters.eq(key));
+    }
+
+    public void insertOrReplaceIfExist(MongoCollections collections, String key, Document document)
+    {
+        getCollection(collections).updateOne(Filters.eq(key), document, new UpdateOptions().upsert(true));
     }
 
     @NotNull

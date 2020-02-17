@@ -43,7 +43,6 @@ public class MinePlayer implements MinetasiaPlayer
     private final Map<UUID, String> friends;
     @NotNull private final Map<Economy, Long> moneys;
 
-    @NotNull private Map<String, String> generalData;
     @NotNull private String username;
 
     private Stats stats;
@@ -107,7 +106,6 @@ public class MinePlayer implements MinetasiaPlayer
     {
         Validate.notNull(username);
         this.username = username;
-        generalData.put("username", username);
         set("username", username);
     }
 
@@ -189,7 +187,7 @@ public class MinePlayer implements MinetasiaPlayer
     @Override
     public @NotNull String getLang()
     {
-        return generalData.getOrDefault("lang", MinetasiaLang.BASE_LANG);
+        return data.getOrDefault("lang", MinetasiaLang.BASE_LANG).toString();
     }
 
     @Override
@@ -290,7 +288,7 @@ public class MinePlayer implements MinetasiaPlayer
     @Override
     public int getStatus()
     {
-        return Integer.parseInt(generalData.getOrDefault("status", "0"));
+        return (int) data.getOrDefault("statue", 0);
     }
 
     @Override

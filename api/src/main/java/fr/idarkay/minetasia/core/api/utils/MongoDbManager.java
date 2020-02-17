@@ -57,6 +57,8 @@ public interface MongoDbManager
 
     void replace(MongoCollections collections, String key, Document document);
 
+    void insertOrReplaceIfExist(MongoCollections collections, String key, Document document);
+
     MongoCollection<Document> getCollection(MongoCollections collections);
 
     MongoDatabase getDatabase();

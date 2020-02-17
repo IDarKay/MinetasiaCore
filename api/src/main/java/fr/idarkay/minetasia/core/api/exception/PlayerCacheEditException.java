@@ -10,6 +10,7 @@ package fr.idarkay.minetasia.core.api.exception;
  * @author alice. B. (IDarKay),
  * Created the 05/02/2020 at 17:09
  */
+@Deprecated
 public class PlayerCacheEditException extends RuntimeException
 {
     public PlayerCacheEditException()

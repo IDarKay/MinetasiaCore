@@ -10,6 +10,7 @@ package fr.idarkay.minetasia.core.bungee.utils;
  * @author alice. B. (IDarKay),
  * Created the 05/02/2020 at 16:31
  */
+@Deprecated
 public enum FRSKey
 {
 
