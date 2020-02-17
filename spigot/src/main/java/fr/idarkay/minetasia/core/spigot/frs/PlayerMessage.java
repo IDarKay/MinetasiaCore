@@ -5,10 +5,8 @@ import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * File <b>PlayerFrsMessage</b> located on fr.idarkay.minetasia.core.spigot.frs
@@ -20,7 +18,7 @@ import java.util.function.Consumer;
  * @author alice. B. (IDarKay),
  * Created the 05/02/2020 at 21:25
  */
-public class PlayerFrsMessage implements CoreFRSMessage
+public class PlayerMessage implements CoreMessage
 {
 
 
@@ -40,7 +38,7 @@ public class PlayerFrsMessage implements CoreFRSMessage
     {
         if(!goodObject(args)) throw new IllegalArgumentException();
         if(uuid == null || actionType == null) throw new NullPointerException();
-        return CoreFRSMessage.getMessage(getIdentifier(), uuid, actionType, args);
+        return CoreMessage.getMessage(getIdentifier(), uuid, actionType, args);
     }
 
     public static boolean goodObject(Object... args)
@@ -56,6 +54,7 @@ public class PlayerFrsMessage implements CoreFRSMessage
 
     public enum ActionType
     {
+        ADD_MONEYS((plugin, args) -> plugin.getPlayerManager().get(UUID.fromString(args[1])).incrementMoney(args[3])),
         ADD_MONEY((plugin, args) -> plugin.addPlayerMoney(UUID.fromString(args[1]), Economy.valueOf(args[3]), Float.parseFloat(args[4]), true)),
         SET_MONEY((plugin, args) -> plugin.setPlayerMoney(UUID.fromString(args[1]), Economy.valueOf(args[3]), Float.parseFloat(args[4]), true)),
         REMOVE_MONEY((plugin, args) -> plugin.removePlayerMoney(UUID.fromString(args[1]), Economy.valueOf(args[3]), Float.parseFloat(args[4]), true)),

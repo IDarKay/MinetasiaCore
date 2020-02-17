@@ -3,6 +3,8 @@ package fr.idarkay.minetasia.core.spigot.server;
 import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.frs.CoreMessage;
+import fr.idarkay.minetasia.core.spigot.frs.ServerMessage;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +52,8 @@ public final class ServerManager {
         if(!register)
         {
             plugin.getMongoDbManager().insert(MongoCollections.SERVERS, server.toDocument());
-            //todo:
+            plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
+            plugin.publishServerType(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()),"hub", true);
             register = true;
         }
     }
@@ -58,7 +61,8 @@ public final class ServerManager {
     public void disable()
     {
         plugin.getMongoDbManager().delete(MongoCollections.SERVERS, server.getName());
-        //todo: publish
+        plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
+        plugin.publishServerType(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()),"hub", true);
     }
 
     public MineServer getServer()

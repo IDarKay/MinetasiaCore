@@ -4,7 +4,6 @@ import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.CountryResponse;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.MongoCollections;
-import fr.idarkay.minetasia.core.bungee.exception.FRSDownException;
 import fr.idarkay.minetasia.core.bungee.utils.user.MinePlayer;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -87,12 +86,6 @@ public final class PlayerListener implements Listener {
 
                     plugin.getPlayerManager().newPlayer(uuid, proxiedPlayer.getName(), c);
                 }
-
-            } catch (FRSDownException ignore)
-            {
-                plugin.getLogger().warning("FRS DISCONNECT CAN4 LOAD PLAYER ! THE PLAYER WAS KICK !");
-                e.setCancelled(true);
-                e.setCancelReason(TextComponent.fromLegacyText("Fatal error can't load your profile retry later"));
 
             } catch (Exception e1)
             {

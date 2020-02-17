@@ -17,12 +17,12 @@ import java.util.Map;
  * @author alice. B. (IDarKay),
  * Created the 01/02/2020 at 13:41
  */
-public interface CoreFRSMessage
+public interface CoreMessage
 {
 
-   Map<String, CoreFRSMessage> MESSAGE = new ImmutableMap.Builder<String, CoreFRSMessage>()
-            .put(ServerFrsMessage.getIdentifier(), new ServerFrsMessage())
-            .put(PlayerFrsMessage.getIdentifier(), new PlayerFrsMessage())
+   Map<String, CoreMessage> MESSAGE = new ImmutableMap.Builder<String, CoreMessage>()
+            .put(ServerMessage.getIdentifier(), new ServerMessage())
+            .put(PlayerMessage.getIdentifier(), new PlayerMessage())
             .build();
 
     String CHANNEL = "core-frs-msg";

@@ -326,6 +326,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "start player count schedule");
         initClientReceiver();
         startPlayerCountSchedule();
+
+        if(getConfig().getBoolean("default-register"))
+        {
+            this.setMaxPlayerCount(60);
+            this.setServerPhase(ServerPhase.STARTUP);
+        }
+
     }
 
     private void registerListener()
@@ -440,13 +447,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             MinePlayer p = playerManager.get(uuid);
             if(p != null)
             {
-                m.forEach((k, v )-> {
-                    if(v < 0) throw new IllegalArgumentException("negative money amount");
-
-                    p.addMoneyWithoutSave(k, v);
-                });
-//                p.saveGeneralData();
-                //todo:
+                p.incrementMoney(m);
             }
             else throw new PlayerNotFoundException("can't add money to not found user");
         };
@@ -557,26 +558,36 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         final Runnable run = () -> {
 
             final String fullMsg = chanel + ";" + (message == null ? "" : message);
+            if(proxy)
+            {
+                mongoDBManager.getAll(MongoCollections.PROXY).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("port"), fullMsg, false));
+            }
+
+
 
             final Map<String, Integer> ipPortMap = getServers().values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort));
 
-            if(proxy)
-            {
-                //todo: add proxy
-            }
-
-            ipPortMap.forEach((ip, port) -> MessageClient.send(ip, port, message, false));
+            ipPortMap.forEach((ip, port) -> MessageClient.send(ip, port, fullMsg, false));
 
         };
 
-        if(sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
-        else Bukkit.getScheduler().runTask(this, run);
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
     }
 
     @Override
     public void publishProxy(@NotNull String chanel, String message, boolean sync)
     {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
 
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            mongoDBManager.getAll(MongoCollections.PROXY).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
+        };
+
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
     }
 
 
@@ -588,12 +599,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
             final String fullMsg = chanel + ";" + (message == null ? "" : message);
 
-            getServers(serverType).values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort)).forEach((ip, port) -> MessageClient.send(ip, port, message, false));
+            getServers(serverType).values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort)).forEach((ip, port) -> MessageClient.send(ip, port, fullMsg, false));
 
         };
 
-        if(sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
-        else Bukkit.getScheduler().runTask(this, run);
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
     }
 
     @Override

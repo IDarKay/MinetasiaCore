@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  * @author alice. B. (IDarKay),
  * Created the 01/02/2020 at 13:45
  */
-public class    ServerFrsMessage implements CoreFRSMessage
+public class ServerMessage implements CoreMessage
 {
 
     public static final String CREATE = "create";
@@ -35,13 +35,13 @@ public class    ServerFrsMessage implements CoreFRSMessage
         {
             if (args[1].equals(CREATE))
             {
-                final MineServer server = MineServer.getServerFromJson(CoreFRSMessage.concat(args, ";", 2));
+                final MineServer server = MineServer.getServerFromJson(CoreMessage.concat(args, ";", 2));
                 plugin.getServerManager().addServer(server);
                 Bukkit.getPluginManager().callEvent(new ServerRegisterEvent(server));
             }
             else if (args[1].equals(REMOVE))
             {
-                final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(CoreFRSMessage.concat(args, ";", 2));
+                final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(CoreMessage.concat(args, ";", 2));
                 if(server != null)
                 {
                     Bukkit.getPluginManager().callEvent(new ServerUnregisterEvent(server));
@@ -87,7 +87,7 @@ public class    ServerFrsMessage implements CoreFRSMessage
     public static @NotNull String getMessage(Object... args)
     {
         if(!goodObject(args)) throw new IllegalArgumentException();
-        return CoreFRSMessage.getMessage(getIdentifier(), args);
+        return CoreMessage.getMessage(getIdentifier(), args);
     }
 
     public static boolean goodObject(Object... args)

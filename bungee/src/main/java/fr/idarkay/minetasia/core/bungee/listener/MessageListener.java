@@ -23,24 +23,26 @@ import java.net.InetSocketAddress;
  * @author alice. B. (IDarKay),
  * Created the 27/11/2019 at 12:57
  */
-public class FRSMessageListener implements Listener {
+public class MessageListener implements Listener {
 
     private MinetasiaCoreBungee plugin;
 
-    public FRSMessageListener(MinetasiaCoreBungee plugin)
+    public MessageListener(MinetasiaCoreBungee plugin)
     {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void onFRSMessageEvent(MessageEvent e)
+    public void onMessageEvent(MessageEvent e)
     {
         e.registerIntent(plugin);
         plugin.getProxy().getScheduler().runAsync(plugin, () -> {
             try
             {
+                System.out.println(e.getChanel());
                 if(e.getChanel().equals("core-frs-msg"))
                 {
+                    System.out.println(e.getValue());
                     String[] msg = e.getValue().split(";", 3);
                     if (msg.length > 1 && msg[0].equals("core-server")) {
                         if(msg[1].equals("create"))
@@ -48,7 +50,7 @@ public class FRSMessageListener implements Listener {
                             final JsonObject server = new JsonParser().parse(msg[2]).getAsJsonObject();
                             final String sIp = server.get("ip").getAsString();
                             final int sPort = server.get("port").getAsInt();
-                            final String serverName = server.get("type").getAsString() + "#" + server.get("uuid").getAsString();
+                            final String serverName = server.get("_id").getAsString();
 
                             if(!plugin.getProxy().getServers().containsKey(serverName))
                             {
@@ -67,7 +69,7 @@ public class FRSMessageListener implements Listener {
                     }
                 }
             } catch (Exception ignore)
-            {} finally {
+            {ignore.printStackTrace();} finally {
                 e.completeIntent(plugin);
             }
 
