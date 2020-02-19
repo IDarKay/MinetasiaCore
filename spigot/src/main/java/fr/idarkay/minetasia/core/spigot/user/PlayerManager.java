@@ -6,6 +6,7 @@ import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -42,9 +43,21 @@ public class PlayerManager {
         byte p = Byte.MIN_VALUE;
         Group g = null;
 
-        plugin.getPermissionManager().groups.forEach((k, v) -> System.out.println(k));
+        final List<String> groupsOfUser = plugin.getPermissionManager().getGroupsOfUser(player);
 
-        for (String gs : plugin.getPermissionManager().getGroupsOfUser(player))
+        //default group
+        for (fr.idarkay.minetasia.core.spigot.permission.Group defaultGroup : plugin.getPermissionManager().getDefaultGroups())
+        {
+            System.out.println(defaultGroup.getName());
+            if(!groupsOfUser.contains(defaultGroup.getName()))
+            {
+                System.out.println(true);
+                plugin.getPermissionManager().addGroupWithoutUpdate(player, defaultGroup.getName());
+                groupsOfUser.add(defaultGroup.getName());
+            }
+        }
+
+        for (String gs : groupsOfUser)
         {
             Group group = plugin.getPermissionManager().groups.get(gs);
             byte i = group.getPriority();

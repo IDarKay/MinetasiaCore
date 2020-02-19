@@ -108,6 +108,7 @@ public enum Lang implements IMinetasiaLang {
     DESC_PERMISSION_GROUP_PRIORITY              ("<priority> / for change the priority of the group"),
     DESC_PERMISSION_GROUP_PRIORITY_VALUE        ("for change the priority of the group"),
     DESC_PERMISSION_GROUP_SAVE                  ("Save and update the group for all server use when you finish all modification"),
+    DESC_PERMISSION_GROUP_DEFAULT               ("change if the group is a default group or not"),
     DESC_PERMISSION_GROUP_INFO                  ("get all information of a group"),
     DESC_PERMISSION_GROUP_PERMISSION            ("edit permissions of the group"),
     DESC_PERMISSION_GROUP_PERMISSION_ADD        ("<permission> / add permission of the group"),
