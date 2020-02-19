@@ -172,9 +172,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load mongo");
         mongoDBManager = new MongoDBManager(Objects.requireNonNull(this.getConfig().getString("dbm.host")),
-                                            Objects.requireNonNull(this.getConfig().getString("dbm.dbname")),
-                                            Objects.requireNonNull(this.getConfig().getString("dbm.login")),
-                                            Objects.requireNonNull(this.getConfig().getString("dbm.password")));
+                                            Objects.requireNonNull(this.getConfig().getString("dbm.dbname")));
     }
 
     public void initClientReceiver()
@@ -591,6 +589,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         else run.run();
     }
 
+    public void publishHub(@NotNull String chanel, String message, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            mongoDBManager.getSimpleFilter(MongoCollections.SERVERS, "type", "hub").forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
+        };
+
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
+    }
 
     @Override
     public void publishServerType(@NotNull String chanel, String message, String serverType, boolean sync)
@@ -755,6 +766,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public Kit getKitKit(String name, String lang) {
         return getKitLang(name, lang);
+    }
+
+    @Override
+    public List<MainKit> getMainKits(String prefix)
+    {
+        return kitsManager.getKits().values().stream().filter(k -> k.getName().startsWith(prefix)).collect(Collectors.toList());
     }
 
     @Override

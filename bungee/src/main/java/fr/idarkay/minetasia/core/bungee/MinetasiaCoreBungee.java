@@ -68,9 +68,7 @@ public final class MinetasiaCoreBungee extends Plugin {
         messageServer = new MessageServer(publishPort);
 
         mongoDBManager = new MongoDBManager(Objects.requireNonNull(configuration.getString("dbm.host")),
-                Objects.requireNonNull(configuration.getString("dbm.dbname")),
-                Objects.requireNonNull(configuration.getString("dbm.login")),
-                Objects.requireNonNull(configuration.getString("dbm.password")));
+                Objects.requireNonNull(configuration.getString("dbm.dbname")));
 
     }
 

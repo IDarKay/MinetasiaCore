@@ -35,12 +35,13 @@ public class KitMain implements MainKit
         this.name = d.getString("_id");
         this.maxLvl = d.getInteger("max_lvl");
         this.mat = Material.valueOf(d.getString("material"));
-        priceList = d.getList("price", int.class);
+        priceList = d.getList("price", Integer.class);
         price = new int[priceList.size()];
-        int i = -1;
+        int i = 0;
         for(int in : priceList)
         {
-            price[i++] = in;
+            price[i] = in;
+            i++;
         }
 
         d.get("lang", Document.class).forEach((k, v) -> kits.put(k, new KitLang(this, k, (Document) v)));
@@ -109,7 +110,7 @@ public class KitMain implements MainKit
 
         return new Document("_id", name)
                 .append("max_lvl", maxLvl)
-                .append("material", mat)
+                .append("material", mat.name())
                 .append("price", priceList)
                 .append("lang", l);
 
