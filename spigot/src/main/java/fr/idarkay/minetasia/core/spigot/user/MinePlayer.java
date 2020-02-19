@@ -327,7 +327,7 @@ public class MinePlayer implements MinetasiaPlayer
 
     private synchronized void set(String key, Object value)
     {
-        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.addToSet(key, value));
+        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.set(key, value));
     }
 
 

@@ -600,8 +600,15 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
             final String fullMsg = chanel + ";" + (message == null ? "" : message);
 
-            getServers(serverType).values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort)).forEach((ip, port) -> MessageClient.send(ip, port, fullMsg, false));
+            List<String> pas = new ArrayList<>();
+            getServers(serverType).forEach((name, server) -> {
+                if(!pas.contains(server.getIp() + ";" + server.getPort()))
+                {
+                    pas.add(server.getIp() + ";" + server.getPort());
+                    MessageClient.send(server.getIp(), server.getPort(), fullMsg, false);
+                }
 
+            });
         };
 
         if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);

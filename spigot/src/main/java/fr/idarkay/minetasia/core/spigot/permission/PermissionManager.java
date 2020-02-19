@@ -32,6 +32,7 @@ public class PermissionManager {
 
     public final HashMap<UUID, HashMap<String, PermissionAttachment>>  permissionAttachments = new HashMap<>();
     public final HashMap<String, Group> groups = new HashMap<>();
+    private final List<Group> defaultGroups = new ArrayList<>();
     private final MinetasiaCore plugin;
 
     public PermissionManager(MinetasiaCore plugin)
@@ -39,8 +40,9 @@ public class PermissionManager {
         this.plugin = plugin;
         for(Document d : plugin.getMongoDbManager().getAll(MongoCollections.GROUPS))
         {
-            Group g = new Group(d, this);
+            final Group g = new Group(d, this);
             groups.put(g.getName(), g);
+            if(g.isDefault()) defaultGroups.add(g);
         }
     }
 
@@ -63,6 +65,11 @@ public class PermissionManager {
         });
         groups.remove(group);
         plugin.getMongoDbManager().delete(MongoCollections.GROUPS, group);
+    }
+
+    public List<Group> getDefaultGroups()
+    {
+        return defaultGroups;
     }
 
     public void updateGroupToDB(String group)
@@ -115,14 +122,18 @@ public class PermissionManager {
         addTemp(player, permission, "temp_permission" ,during);
     }
 
+    private void addGroup(@NotNull UUID player, @NotNull String group, boolean update)
+    {
+        final Group g = groups.get(group);
+        if(g != null)
+        {
+            add(player, group, "group", update);
+        }
+    }
 
     public void addGroup(@NotNull UUID player, @NotNull String group)
     {
-        Group g = groups.get(group);
-        if(g != null)
-        {
-            add(player, group, "group");
-        }
+        addGroup(player, group, true);
     }
 
     public void addPermission(@NotNull UUID player, @NotNull String permission)
@@ -144,15 +155,28 @@ public class PermissionManager {
         });
     }
 
-    private void add(@NotNull UUID player, @NotNull String args, @NotNull String type)
+    public void addGroupWithoutUpdate(MinePlayer player, String group)
+    {
+        String data = (String) player.getData("group");
+        JsonArray p = data == null ? new JsonArray() : PARSER.parse(data).getAsJsonArray();
+        p.add(group);
+        player.putData("group", p.toString());
+    }
+
+    private void add(@NotNull UUID player, @NotNull String args, @NotNull String type, boolean update)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             String data = plugin.getPlayerData(player, type, String.class);
             JsonArray p = data == null ? new JsonArray() : PARSER.parse(data).getAsJsonArray();
             p.add(args);
             plugin.setPlayerData(player, type, p.toString());
-            sayUpdate(player);
+            if(update) sayUpdate(player);
         });
+    }
+
+    private void add(@NotNull UUID player, @NotNull String args, @NotNull String type)
+    {
+        add(player, args, type, true);
     }
 
     public void removeTempPermission(@NotNull UUID player, @NotNull String group)
@@ -354,89 +378,64 @@ public class PermissionManager {
 
     public void loadUser(@NotNull UUID uuid, boolean reset)
     {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
+        Object data =  plugin.getPlayerData(uuid, "group");
+        JsonArray group = data == null ? null : PARSER.parse(data.toString()).getAsJsonArray();
+        data = plugin.getPlayerData(uuid, "permission");
+        JsonArray permission = data == null ? null : PARSER.parse(data.toString()).getAsJsonArray();
+        data = plugin.getPlayerData(uuid, "temp_group");
+        JsonObject tempgroup = data == null ? null : PARSER.parse(data.toString()).getAsJsonObject();
+        data = plugin.getPlayerData(uuid, "temp_permission");
+        JsonObject tempPermission = data == null ? null : PARSER.parse(data.toString()).getAsJsonObject();
+
+        org.bukkit.entity.Player p = plugin.getServer().getPlayer(uuid);
+        if(p != null)
         {
-            Object data =  plugin.getPlayerData(uuid, "group");
-            JsonArray group = data == null ? null : PARSER.parse(data.toString()).getAsJsonArray();
-            data = plugin.getPlayerData(uuid, "permission");
-            JsonArray permission = data == null ? null : PARSER.parse(data.toString()).getAsJsonArray();
-            data = plugin.getPlayerData(uuid, "temp_group");
-            JsonObject tempgroup = data == null ? null : PARSER.parse(data.toString()).getAsJsonObject();
-            data = plugin.getPlayerData(uuid, "temp_permission");
-            JsonObject tempPermission = data == null ? null : PARSER.parse(data.toString()).getAsJsonObject();
-
-            org.bukkit.entity.Player p = plugin.getServer().getPlayer(uuid);
-            if(p != null)
+            if(reset)
             {
-                if(reset)
+                HashMap<String, PermissionAttachment> paa = permissionAttachments.get(uuid);
+                if(paa != null) paa.values().forEach(p::removeAttachment);
+            }
+            byte u =0;
+            final HashMap<String, PermissionAttachment> map = new HashMap<>();
+            final ArrayList<String> groupL = new ArrayList<>();
+            final HashMap<String, Long[]> tempgroupH = new HashMap<>();
+            final HashMap<String, Long[]> tempPermH = new HashMap<>();
+            if(group != null)
+            {
+                for(JsonElement j : group)
                 {
-                    HashMap<String, PermissionAttachment> paa = permissionAttachments.get(uuid);
-                    if(paa != null) paa.values().forEach(p::removeAttachment);
-                }
-                byte u =0;
-                final HashMap<String, PermissionAttachment> map = new HashMap<>();
-                final ArrayList<String> groupL = new ArrayList<>();
-                final HashMap<String, Long[]> tempgroupH = new HashMap<>();
-                final HashMap<String, Long[]> tempPermH = new HashMap<>();
-                if(group != null)
-                {
-                    for(JsonElement j : group)
+                    Group g = groups.get(j.getAsString());
+                    if(g != null)
                     {
-                        Group g = groups.get(j.getAsString());
-                        if(g != null)
-                        {
-                            PermissionAttachment pa = p.addAttachment(plugin);
-                            for(String perm : g.getPermissions()) {
-                                if(perm.equals("*")) p.setOp(true);
-                                pa.setPermission(perm, true);
-                            }
-                            map.put("group_" + g.getName(), pa);
-                            groupL.add(g.getName());
+                        PermissionAttachment pa = p.addAttachment(plugin);
+                        for(String perm : g.getPermissions()) {
+                            if(perm.equals("*")) p.setOp(true);
+                            pa.setPermission(perm, true);
+                        }
+                        map.put("group_" + g.getName(), pa);
+                        groupL.add(g.getName());
 
-                        } else {
-                            u |= 1;
-                        }
+                    } else {
+                        u |= 1;
                     }
                 }
-                if(permission != null)
-                {
-                    PermissionAttachment pa = p.addAttachment(plugin);
-                    for(JsonElement j : permission) {
-                        final String perm = j.getAsString();
-                        if(perm.equals("*")) p.setOp(true);
-                        pa.setPermission(perm, true);
-                    }
-                    map.put("permission", pa);
+            }
+            if(permission != null)
+            {
+                PermissionAttachment pa = p.addAttachment(plugin);
+                for(JsonElement j : permission) {
+                    final String perm = j.getAsString();
+                    if(perm.equals("*")) p.setOp(true);
+                    pa.setPermission(perm, true);
                 }
-                if(tempgroup != null)
+                map.put("permission", pa);
+            }
+            if(tempgroup != null)
+            {
+                for (Map.Entry<String, JsonElement> entry : tempgroup.entrySet())
                 {
-                    for (Map.Entry<String, JsonElement> entry : tempgroup.entrySet())
-                    {
-                        Group g = groups.get(entry.getKey());
-                        if(g != null)
-                        {
-                            JsonArray ja = entry.getValue().getAsJsonArray();
-                            long t1 = ja.get(0).getAsLong();
-                            long t2 =  ja.get(1).getAsLong();
-                            long tLeft =  t1 + t2  - System.currentTimeMillis();
-                            if(tLeft > 0)
-                            {
-                                PermissionAttachment pa = p.addAttachment(plugin, ((int) (tLeft / 50)));
-                                for(String perm : g.getPermissions()) {
-                                    if(perm.equals("*")) p.setOp(true);
-                                    Objects.requireNonNull(pa).setPermission(perm, true);
-                                }
-                                map.put("temp_group_" + g.getName(), pa);
-                                tempgroupH.put(g.getName(), new Long[] {t1, t2});
-                            }
-                            else u |= 1 << 1;
-                        }
-                        else  u |= 1 << 1;
-                    }
-                }
-                if(tempPermission != null)
-                {
-                    for (Map.Entry<String, JsonElement> entry : tempPermission.entrySet())
+                    Group g = groups.get(entry.getKey());
+                    if(g != null)
                     {
                         JsonArray ja = entry.getValue().getAsJsonArray();
                         long t1 = ja.get(0).getAsLong();
@@ -445,46 +444,68 @@ public class PermissionManager {
                         if(tLeft > 0)
                         {
                             PermissionAttachment pa = p.addAttachment(plugin, ((int) (tLeft / 50)));
-                            Objects.requireNonNull(pa).setPermission(entry.getKey(), true);
-                            if(entry.getKey().equals("*")) p.setOp(true);
-                            map.put("temp_permission_" + entry.getKey(), pa);
-                            tempPermH.put(entry.getKey(), new Long[] {t1, t2});
+                            for(String perm : g.getPermissions()) {
+                                if(perm.equals("*")) p.setOp(true);
+                                Objects.requireNonNull(pa).setPermission(perm, true);
+                            }
+                            map.put("temp_group_" + g.getName(), pa);
+                            tempgroupH.put(g.getName(), new Long[] {t1, t2});
                         }
-                        else u |= 1 << 2;
+                        else u |= 1 << 1;
                     }
+                    else  u |= 1 << 1;
                 }
-                if((u & 0x1) == 1)
-                {
-                    JsonArray ja = new JsonArray();
-                    groupL.forEach(ja::add);
-                    plugin.setPlayerData(uuid, "group", ja.toString());
-                }
-                if ((u >> 1 & 0x1) == 1)
-                {
-                    JsonObject jo = new JsonObject();
-                    tempgroupH.forEach((k, v) -> {
-                        JsonArray ja = new JsonArray();
-                        ja.add(v[0]);
-                        ja.add(v[1]);
-                        jo.add(k, ja);
-                    });
-                    plugin.setPlayerData(uuid, "temp_group", jo.toString());
-                }
-                if(((u >> 2 & 0x1) == 1))
-                {
-                    JsonObject jo = new JsonObject();
-                    tempPermH.forEach((k, v) -> {
-                        JsonArray ja = new JsonArray();
-                        ja.add(v[0]);
-                        ja.add(v[1]);
-                        jo.add(k, ja);
-                    });
-                    plugin.setPlayerData(uuid, "temp_permission", jo.toString());
-                }
-                permissionAttachments.put(uuid, map);
-                Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(new PlayerPermissionLoadEndEvent(p)));
             }
-            else Bukkit.getLogger().warning("Can't load permission of " + uuid.toString() + ", he isn't connected");
-        });
+            if(tempPermission != null)
+            {
+                for (Map.Entry<String, JsonElement> entry : tempPermission.entrySet())
+                {
+                    JsonArray ja = entry.getValue().getAsJsonArray();
+                    long t1 = ja.get(0).getAsLong();
+                    long t2 =  ja.get(1).getAsLong();
+                    long tLeft =  t1 + t2  - System.currentTimeMillis();
+                    if(tLeft > 0)
+                    {
+                        PermissionAttachment pa = p.addAttachment(plugin, ((int) (tLeft / 50)));
+                        Objects.requireNonNull(pa).setPermission(entry.getKey(), true);
+                        if(entry.getKey().equals("*")) p.setOp(true);
+                        map.put("temp_permission_" + entry.getKey(), pa);
+                        tempPermH.put(entry.getKey(), new Long[] {t1, t2});
+                    }
+                    else u |= 1 << 2;
+                }
+            }
+            if((u & 0x1) == 1)
+            {
+                JsonArray ja = new JsonArray();
+                groupL.forEach(ja::add);
+                plugin.setPlayerData(uuid, "group", ja.toString());
+            }
+            if ((u >> 1 & 0x1) == 1)
+            {
+                JsonObject jo = new JsonObject();
+                tempgroupH.forEach((k, v) -> {
+                    JsonArray ja = new JsonArray();
+                    ja.add(v[0]);
+                    ja.add(v[1]);
+                    jo.add(k, ja);
+                });
+                plugin.setPlayerData(uuid, "temp_group", jo.toString());
+            }
+            if(((u >> 2 & 0x1) == 1))
+            {
+                JsonObject jo = new JsonObject();
+                tempPermH.forEach((k, v) -> {
+                    JsonArray ja = new JsonArray();
+                    ja.add(v[0]);
+                    ja.add(v[1]);
+                    jo.add(k, ja);
+                });
+                plugin.setPlayerData(uuid, "temp_permission", jo.toString());
+            }
+            permissionAttachments.put(uuid, map);
+            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(new PlayerPermissionLoadEndEvent(p)));
+        }
+        else Bukkit.getLogger().warning("Can't load permission of " + uuid.toString() + ", he isn't connected");
     }
 }
