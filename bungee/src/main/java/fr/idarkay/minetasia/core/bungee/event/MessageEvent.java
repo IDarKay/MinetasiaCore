@@ -1,13 +1,11 @@
 package fr.idarkay.minetasia.core.bungee.event;
 
-import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.event.AsyncEvent;
-import net.md_5.bungee.api.plugin.Event;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * File <b>FRSMessageEvent</b> located on fr.idarkay.minetasia.core.bungee.utils
- * FRSMessageEvent is a part of MinetasiaCore.
+ * File <b>MessageEvent</b> located on fr.idarkay.minetasia.core.bungee.utils
+ * MessageEvent is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2019 MinetasiaCore.
  * <p>
@@ -15,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
  * @author Alois. B. (IDarKay),
  * Created the 26/11/2019 at 12:56
  */
-public final class FRSMessageEvent extends AsyncEvent<FRSMessageEvent> {
+public final class MessageEvent extends AsyncEvent<MessageEvent> {
 
     private final String chanel, value;
 
 
-    public FRSMessageEvent(@NotNull String chanel, @NotNull String value)
+    public MessageEvent(@NotNull String chanel, @NotNull String value)
     {
         super((result, error) -> {});
         this.chanel = chanel;

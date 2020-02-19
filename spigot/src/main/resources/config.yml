@@ -14,6 +14,9 @@ server_type: "hub"
 #   for hub set hub
 config_name: "hub"
 
+publish-port: 32000
+
+default-register: false
 # =========================================================================================================== #                                                                 #
 # host: url of the db (set localhost for local db)                                                            #
 # login: login for connect need have permission to create and edit table                                      #
@@ -28,6 +31,12 @@ db: # NO value here !
   dbname: ''
   system: 'mysql'
   connexion_args: '?allowMultiQueries=true&useSSL=false'
+
+dbm:
+  host: 'mongodb://localhost:27017'
+  dbname: 'minetasia'
+  login: ''
+  password: ''
 
 # =========================================================================================================== #
 # host: url of the frs (set 127.0.0.1 for local db)                                                            #

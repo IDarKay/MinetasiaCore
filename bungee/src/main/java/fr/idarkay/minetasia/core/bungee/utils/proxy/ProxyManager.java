@@ -1,12 +1,11 @@
 package fr.idarkay.minetasia.core.bungee.utils.proxy;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
-import fr.idarkay.minetasia.core.bungee.utils.FRSClient;
+import fr.idarkay.minetasia.core.bungee.MongoCollections;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
+import org.bson.Document;
 
 import java.net.InetSocketAddress;
 
@@ -24,42 +23,42 @@ public final class ProxyManager {
 
     public static String motd;
     private final MinetasiaCoreBungee plugin;
-    private final FRSClient frsClient;
     private Proxy proxy;
 
     public ProxyManager(MinetasiaCoreBungee plugin)
     {
         this.plugin = plugin;
-        this.frsClient = plugin.getFrsClient();
         motd = plugin.getConfig().getString("server_motd");
     }
 
     public void init()
     {
-        String ip =  plugin.getProxy().getConfig().getListeners().iterator().next().getHost().getHostName();
-        int port = plugin.getProxy().getConfig().getListeners().iterator().next().getHost().getPort();
+        final String ip =  plugin.getProxy().getConfig().getListeners().iterator().next().getHost().getHostName();
+        final int port = plugin.getProxy().getConfig().getListeners().iterator().next().getHost().getPort();
+        final int publishPort = plugin.getConfig().getInt("publish-port");
 
-        proxy = new Proxy(ip, port);
 
-        frsClient.setValue("proxy", proxy.getUuid().toString(), proxy.toJson());
+        proxy = new Proxy(ip, port, publishPort);
+
+        plugin.getMongoDBManager().insert(MongoCollections.PROXY, proxy.toDocument());
 
         plugin.getProxy().getConfig().getServers().clear();
         plugin.getProxy().getServers().clear();
 
-        for(String serverName : frsClient.getFields("server"))
+        for(Document d : plugin.getMongoDBManager().getAll(MongoCollections.SERVERS))
         {
             try
             {
-                JsonObject server = new JsonParser().parse(frsClient.getValue("server", serverName)).getAsJsonObject();
-                String sIp = server.get("ip").getAsString();
-                int sPort = server.get("port").getAsInt();
+                String sIp = d.getString("ip");
+                int sPort = d.getInteger("port");
+                String name = d.getString("_id");
 
-                if(!plugin.getProxy().getServers().containsKey(serverName))
+                if(!plugin.getProxy().getServers().containsKey(name))
                 {
-                    ServerInfo serverinfo = plugin.getProxy().constructServerInfo(serverName, InetSocketAddress.createUnresolved(sIp, sPort),
-                            motd.replace("%s", serverName) , false);
-                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("["+serverName+"]" + "<-> server registered"));
-                    plugin.getProxy().getServers().put(serverName, serverinfo);
+                    ServerInfo serverinfo = plugin.getProxy().constructServerInfo(name, InetSocketAddress.createUnresolved(sIp, sPort),
+                            motd.replace("%s", name) , false);
+                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("["+name+"]" + "<-> server registered"));
+                    plugin.getProxy().getServers().put(name, serverinfo);
                 }
             } catch (Exception ignore)
             {
@@ -69,8 +68,7 @@ public final class ProxyManager {
 
     public void disable()
     {
-        frsClient.setValue("proxy-player-count", proxy.getUuid().toString(), null, true);
-        frsClient.setValue("proxy", proxy.getUuid().toString(), null, true);
+        plugin.getMongoDBManager().delete(MongoCollections.PROXY, proxy.getUuid().toString());
     }
 
     public Proxy getProxy() {

@@ -60,7 +60,7 @@ public class MoneyRemoveCommand extends StepCommand implements FixCommand {
                     {
                         float a = Float.parseFloat(args[3]);
                         if (a < 0) throw new IllegalArgumentException("negative number");
-                        float m = plugin.getPlayerMoney(u, e);
+                        double m = plugin.getPlayerMoney(u, e);
                         if(m < a) sender.sendMessage(Lang.NO_AMOUNT_MONEY.get(lang, Lang.Argument.PLAYER.match(args[1])));
                         else
                         {

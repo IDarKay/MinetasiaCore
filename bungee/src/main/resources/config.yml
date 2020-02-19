@@ -13,6 +13,12 @@ db: # NO value here !
   system: 'mysql'
   connexion_args: '?allowMultiQueries=true&useSSL=false'
 
+dbm:
+  host: 'mongodb://localhost:27017'
+  dbname: 'minetasia'
+  login: ''
+  password: ''
+
 # =========================================================================================================== #
 # host: url of the frs (set 127.0.0.1 for local db)                                                            #
 # password: password for log          (def 4514)                                                              #
@@ -26,7 +32,7 @@ frs: # NO value Here
   timeout: 5000
 
 server_motd: "&9Mine&6Tasia&7>> %s"
-
+publish-port: 32001
 cache:
   user: 2
 

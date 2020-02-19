@@ -35,6 +35,11 @@ public interface Server extends Comparable<Server> {
     int getPort();
 
     /**
+     * @return the publish server port
+     */
+    int getPublishPort();
+
+    /**
      * @return the uuid of the server
      */
     @NotNull

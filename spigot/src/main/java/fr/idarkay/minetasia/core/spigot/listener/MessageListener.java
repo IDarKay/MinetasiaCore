@@ -1,10 +1,10 @@
 package fr.idarkay.minetasia.core.spigot.listener;
 
 import fr.idarkay.minetasia.core.api.Command;
-import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.event.FRSMessageEvent;
+import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
+import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
+import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.Args;
@@ -16,8 +16,8 @@ import org.bukkit.event.Listener;
 import java.util.UUID;
 
 /**
- * File <b>FRSMessageListener</b> located on fr.idarkay.minetasia.core.common.listener
- * FRSMessageListener is a part of MinetasiaCore.
+ * File <b>MessageListener</b> located on fr.idarkay.minetasia.core.common.listener
+ * MessageListener is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2019 MinetasiaCore.
  * <p>
@@ -25,19 +25,19 @@ import java.util.UUID;
  * @author Alois. B. (IDarKay),
  * Created the 20/11/2019 at 13:46
  */
-public final class FRSMessageListener implements Listener {
+public final class MessageListener implements Listener {
 
 
 
     private final MinetasiaCore plugin;
 
-    public FRSMessageListener(MinetasiaCore plugin)
+    public MessageListener(MinetasiaCore plugin)
     {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void onFRSMessageEvent(FRSMessageEvent e)
+    public void onMessageEvent(MessageReceivedEvent e)
     {
         switch (e.getChanel())
         {
@@ -55,6 +55,19 @@ public final class FRSMessageListener implements Listener {
                     }
                 }
                 break;
+            }
+            case "core-player-tp":
+            {
+                String[] msg = e.getValue().split(";",2);
+                if(msg.length > 1)
+                {
+                    final UUID playerUUID = UUID.fromString(msg[0]);
+                    final Server server = plugin.getServer(msg[1]);
+                    if(server != null)
+                    {
+                        plugin.movePlayerToServer(playerUUID, server);
+                    }
+                }
             }
             case "core-cmd":
             {
@@ -116,8 +129,8 @@ public final class FRSMessageListener implements Listener {
                                 UUID uu = plugin.getPlayerUUID(msg[3]);
                                 if(uu != null)
                                 {
-                                    String uus = uu.toString();
-                                    String data = plugin.getPlayerData(u, "last_talker");
+                                    final String uus = uu.toString();
+                                    final String data = plugin.getPlayerData(u, "last_talker").toString();
                                     if(data == null || !data.equals(uus))
                                         plugin.setPlayerData(u, "last_talker", uus);
                                 }
@@ -129,10 +142,10 @@ public final class FRSMessageListener implements Listener {
                 }
                 break;
             }
-            case CoreFRSMessage.CHANNEL:
+            case CoreMessage.CHANNEL:
             {
                 String[] split = e.getValue().split(";");
-                CoreFRSMessage msg = CoreFRSMessage.MESSAGE.get(split[0]);
+                CoreMessage msg = CoreMessage.MESSAGE.get(split[0]);
                 if(msg != null) msg.actionOnGet(plugin, split);
             }
         }
