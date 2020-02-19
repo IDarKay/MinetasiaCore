@@ -303,6 +303,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract Kit getKitKit(String name, String lang);
 
+    public abstract List<MainKit> getMainKits(String prefix);
+
     /**
      * get a kit from name no lang her
      * @param name name of the kit

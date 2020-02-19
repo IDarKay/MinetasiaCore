@@ -5,13 +5,7 @@
 # dbname: name of the db need be created always                                                               #
 # system: mysql -
 # =========================================================================================================== #
-db: # NO value here !
-  host: ''
-  login: ''
-  password: ''
-  dbname: ''
-  system: 'mysql'
-  connexion_args: '?allowMultiQueries=true&useSSL=false'
+
 
 dbm:
   host: 'mongodb://localhost:27017'
@@ -19,17 +13,7 @@ dbm:
   login: ''
   password: ''
 
-# =========================================================================================================== #
-# host: url of the frs (set 127.0.0.1 for local db)                                                            #
-# password: password for log          (def 4514)                                                              #
-# port:port listening by frs                                                                                    #
-# timeout: timeout time (def 5000)                                                                             #
-# =========================================================================================================== #
-frs: # NO value Here
-  host: ''
-  port: 4514
-  password: ''
-  timeout: 5000
+
 
 server_motd: "&9Mine&6Tasia&7>> %s"
 publish-port: 32001

@@ -1,12 +1,8 @@
 package fr.idarkay.minetasia.core.spigot.utils;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoCredential;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
-import com.mongodb.client.model.UpdateOptions;
 import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
 import org.bson.Document;
@@ -33,15 +29,8 @@ public class MongoDBManager implements MongoDbManager
     private final MongoClient mongoClient; // connection of the database
     private final MongoDatabase database;
 
-    public MongoDBManager(String host, String dbname, String user, String pass)
+    public MongoDBManager(String host, String dbname)
     {
-        final MongoCredential credential = MongoCredential.createCredential(user, dbname, pass.toCharArray());
-        final ConnectionString connectionString = new ConnectionString(host);
-        final MongoClientSettings settings = MongoClientSettings.builder()
-                .credential(credential)
-                .applyToSslSettings(builder -> builder.enabled(true))
-                .applyConnectionString(connectionString)
-                .build();
 
         this.mongoClient = MongoClients.create(host);
 

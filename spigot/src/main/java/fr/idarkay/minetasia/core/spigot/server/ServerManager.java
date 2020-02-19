@@ -49,7 +49,7 @@ public final class ServerManager {
         {
             plugin.getMongoDbManager().insert(MongoCollections.SERVERS, server.toDocument());
             plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
-            plugin.publishServerType(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()),"hub", true);
+            plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
             register = true;
         }
     }
@@ -58,7 +58,7 @@ public final class ServerManager {
     {
         plugin.getMongoDbManager().delete(MongoCollections.SERVERS, server.getName());
         plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
-        plugin.publishServerType(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()),"hub", true);
+        plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
     }
 
     public MineServer getServer()

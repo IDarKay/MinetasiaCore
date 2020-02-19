@@ -32,16 +32,8 @@ public class MongoDBManager
     private final MongoClient mongoClient; // connection of the database
     private final MongoDatabase database;
 
-    public MongoDBManager(String host, String dbname, String user, String pass)
+    public MongoDBManager(String host, String dbname)
     {
-        final MongoCredential credential = MongoCredential.createCredential(user, dbname, pass.toCharArray());
-        final ConnectionString connectionString = new ConnectionString(host);
-        final MongoClientSettings settings = MongoClientSettings.builder()
-                .credential(credential)
-                .applyToSslSettings(builder -> builder.enabled(true))
-                .applyConnectionString(connectionString)
-                .build();
-
         this.mongoClient = MongoClients.create(host);
 
         this.database = mongoClient.getDatabase(dbname);
