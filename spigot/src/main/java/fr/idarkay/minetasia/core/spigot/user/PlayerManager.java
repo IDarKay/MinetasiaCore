@@ -1,19 +1,13 @@
 package fr.idarkay.minetasia.core.spigot.user;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import fr.idarkay.minetasia.core.api.utils.Group;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.api.exception.FRSDownException;
 import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * File <b>PlayerManagement</b> located on fr.idarkay.minetasia.core.common.user
@@ -43,37 +37,31 @@ public class PlayerManager {
     public MinePlayer load(@NotNull UUID uuid)
     {
         Validate.notNull(uuid);
-        if(plugin.getFrsClient().isConnected())
+
+        final MinePlayer player = new MinePlayer(uuid, false);
+        byte p = Byte.MIN_VALUE;
+        Group g = null;
+
+        plugin.getPermissionManager().groups.forEach((k, v) -> System.out.println(k));
+
+        for (String gs : plugin.getPermissionManager().getGroupsOfUser(player))
         {
-            final MinePlayer player = new MinePlayer(uuid, false);
-            byte p = Byte.MIN_VALUE;
-            Group g = null;
-
-            plugin.getPermissionManager().groups.forEach((k, v) -> System.out.println(k));
-
-            for (String gs : plugin.getPermissionManager().getGroupsOfUser(player))
+            Group group = plugin.getPermissionManager().groups.get(gs);
+            byte i = group.getPriority();
+            if (g == null || i > p)
             {
-                Group group = plugin.getPermissionManager().groups.get(gs);
-                byte i = group.getPriority();
-                if (g == null || i > p)
-                {
-                    p = i;
-                    g = group;
-                }
+                p = i;
+                g = group;
             }
-
-            if (g != null)
-            {
-                player.setPartyBoost(g.getPartyBoost());
-                player.setPersonalBoost(g.getPersonalBoost());
-            }
-            userCache.put(uuid, player);
-            return player;
         }
-        else
+
+        if (g != null)
         {
-            throw new FRSDownException("can't get the player frs down ");
+            player.setPartyBoost(g.getPartyBoost());
+            player.setPersonalBoost(g.getPersonalBoost());
         }
+        userCache.put(uuid, player);
+        return player;
     }
 
     public void removePlayer(@NotNull UUID uuid)
@@ -82,14 +70,6 @@ public class PlayerManager {
         userCache.remove(uuid);
     }
 
-//    public void newPlayer(UUID uuid, String name)
-//    {
-//        MinePlayer p = new Player(uuid, name);
-//        userCache.put(uuid, p);
-//        plugin.getSqlManager().updateAsynchronously("INSERT INTO `uuid_username`(`uuid`, `username`) VALUE(?,?)", uuid.toString(), name);
-//        plugin.getFrsClient().setValue("usersData", uuid.toString(), p.getJson());
-//
-//    }
 
     public @Nullable MinePlayer getOnlyInCache(UUID uuid)
     {

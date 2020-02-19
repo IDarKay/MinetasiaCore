@@ -2,6 +2,7 @@ package fr.idarkay.minetasia.core.bungee.utils.proxy;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -21,28 +22,35 @@ public final class Proxy {
     private final long creatTime;
     private final UUID uuid;
     private final String ip;
-    private final int port;
+    private final int port, publishPort;
 
-    public Proxy(@NotNull String ip, int port)
+    public Proxy(@NotNull String ip, int port, int publishPort)
     {
         creatTime = System.currentTimeMillis();
         uuid = UUID.randomUUID();
         this.ip = ip;
         this.port = port;
+        this.publishPort = publishPort;
     }
 
-    private Proxy(@NotNull String ip, int port, @NotNull UUID uuid, long creatTime)
+    private Proxy(@NotNull String ip, int port, int publishPort, @NotNull UUID uuid, long creatTime)
     {
         this.creatTime = creatTime;
         this.uuid = uuid;
         this.ip = ip;
         this.port = port;
+        this.publishPort = publishPort;
+    }
+
+    public static Proxy getProxyFromDocument(Document d)
+    {
+        return new Proxy(d.getString("ip"), d.getInteger("port", -1), d.getInteger("publish_port", -2), UUID.fromString(d.getString("_id")), d.getLong("create_time"));
     }
 
     public static Proxy getProxyFromJson(String json)
     {
         JsonObject proxy = new JsonParser().parse(json).getAsJsonObject();
-        return new Proxy(proxy.get("ip").getAsString(), proxy.get("port").getAsInt()
+        return new Proxy(proxy.get("ip").getAsString(), proxy.get("port").getAsInt(), proxy.get("publish_port").getAsInt()
             , UUID.fromString(proxy.get("uuid").getAsString()), proxy.get("createTime").getAsLong());
     }
 
@@ -68,6 +76,15 @@ public final class Proxy {
         return uuid;
     }
 
+    public Document toDocument()
+    {
+        return new Document("_id", uuid.toString())
+                .append("ip", ip)
+                .append("port", port)
+                .append("publish_port", publishPort)
+                .append("create_time", creatTime);
+    }
+
     @NotNull
     public String toJson()
     {
@@ -75,6 +92,7 @@ public final class Proxy {
         proxy.addProperty("createTime", creatTime);
         proxy.addProperty("uuid", uuid.toString());
         proxy.addProperty("ip", ip);
+        proxy.addProperty("publish_port", publishPort);
         proxy.addProperty("port", port);
         return proxy.toString();
     }

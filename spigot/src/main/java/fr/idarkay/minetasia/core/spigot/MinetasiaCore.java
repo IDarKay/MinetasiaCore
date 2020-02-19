@@ -5,19 +5,20 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mongodb.client.model.Filters;
+import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
+import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.core.api.*;
+import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
-import fr.idarkay.minetasia.core.api.exception.FRSDownException;
+import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.Executor.*;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
-import fr.idarkay.minetasia.core.spigot.frs.CoreFRSMessage;
-import fr.idarkay.minetasia.core.spigot.frs.ServerFrsMessage;
+import fr.idarkay.minetasia.core.spigot.kits.KitMain;
 import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
 import fr.idarkay.minetasia.core.spigot.listener.*;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryClickListener;
@@ -26,22 +27,22 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
+import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
-import fr.idarkay.minetasia.core.spigot.utils.FRSClient;
-import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
-import fr.idarkay.minetasia.core.spigot.utils.SQLManager;
+import fr.idarkay.minetasia.core.spigot.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
-import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.anontation.MinetasiaGuiNoCallEvent;
 import org.apache.commons.lang.Validate;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -49,19 +50,15 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.sql.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * File <b>MinetasiaCore</b> located on fr.idarkay.mintasia.core.common
@@ -133,8 +130,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     private PartyServerBoost partyServerBoost = new PartyServerBoost();
 
-    private SQLManager sqlManager;
-    private FRSClient frsClient;
+    private MongoDBManager mongoDBManager;
     private PlayerManager playerManager;
     private ServerManager serverManager;
     private PermissionManager permissionManager;
@@ -150,6 +146,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private int commands = 0, maxPlayerCountAddAdmin;
 
     private Cache<Integer, Map<UUID, String>> onlinePlayer;
+    private MessageServer messageServer;
 
     @Override
     public void onLoad() {
@@ -169,81 +166,62 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         maxPlayerCountAddAdmin = getConfig().getInt("max-player-count-add-admin");
 
         // init db system
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load SQL");
-        sqlManager = new SQLManager(this);
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load FRS");
-        frsClient = new FRSClient(this);
-        frsClient.startConnection(System.out, getConfig().getString("frs.host"), getConfig().getInt("frs.port"),
-                getConfig().getString("frs.password"), getConfig().getInt("frs.timeout"));
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load messaging system");
 
-        // execute sql file
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Execute SQL");
-        String sqlFileName = "fr/idarkay/minetasia/core/sql/" + getConfig().getString("db.system") + ".sql";
-        try (InputStream is = getResource(sqlFileName)) {
-            if (is == null) {
-                throw new Exception("Couldn't locate schema file for " + sqlFileName);
+        messageServer = new MessageServer(getConfig().getInt("publish-port"));
+
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load mongo");
+        mongoDBManager = new MongoDBManager(Objects.requireNonNull(this.getConfig().getString("dbm.host")),
+                                            Objects.requireNonNull(this.getConfig().getString("dbm.dbname")),
+                                            Objects.requireNonNull(this.getConfig().getString("dbm.login")),
+                                            Objects.requireNonNull(this.getConfig().getString("dbm.password")));
+    }
+
+    public void initClientReceiver()
+    {
+        MessageClient.setReceiver(socket -> {
+            if(this.isEnabled())
+            {
+                Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                    try
+                    {
+                        final String msg = MessageClient.read(socket);
+
+                        if(msg == null)
+                        {
+                            socket.close();
+                            return;
+                        }
+
+                        final String[] split = msg.split(";", 2);
+                        if(split.length == 0)
+                        {
+                            socket.close();
+                            return;
+                        }
+
+
+                        final SocketPrePossesEvent e = new SocketPrePossesEvent(socket, split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]);
+                        Bukkit.getPluginManager().callEvent(e);
+
+                        if(e.getAnswer() != null)
+                        {
+                            MessageClient.send(socket, e.getAnswer());
+                        }
+
+                        socket.close();
+
+                        if(!e.isCancelled())
+                        {
+                            Bukkit.getPluginManager().callEvent(new MessageReceivedEvent(split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]));
+                        }
+                    } catch (IOException ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                });
             }
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-                List<String> queries = new LinkedList<>();
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.startsWith("--") || line.startsWith("#")) {
-                        continue;
-                    }
-
-                    sb.append(line);
-
-                    // check for end of declaration
-                    if (line.endsWith(";")) {
-                        sb.deleteCharAt(sb.length() - 1);
-
-                        String result = getStatementProcessor().apply(sb.toString().trim());
-                        if (!result.isEmpty()) {
-                            queries.add(result);
-                        }
-
-                        // reset
-                        sb = new StringBuilder();
-                    }
-                }
-
-                try (Connection connection = sqlManager.getSQL()) {
-                    boolean utf8mb4Unsupported = false;
-
-                    try (Statement s = connection.createStatement()) {
-                        for (String query : queries) {
-                            s.addBatch(query);
-                        }
-
-                        try {
-                            s.executeBatch();
-                        } catch (BatchUpdateException e) {
-                            if (e.getMessage().contains("Unknown character set")) {
-                                utf8mb4Unsupported = true;
-                            } else {
-                                throw e;
-                            }
-                        }
-                    }
-
-                    // try again
-                    if (utf8mb4Unsupported) {
-                        try (Statement s = connection.createStatement()) {
-                            for (String query : queries) {
-                                s.addBatch(query.replace("utf8mb4", "utf8"));
-                            }
-
-                            s.executeBatch();
-                        }
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
@@ -347,13 +325,20 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         registerListener();
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "start player count schedule");
+        initClientReceiver();
         startPlayerCountSchedule();
+
+        if(getConfig().getBoolean("default-register"))
+        {
+            this.setMaxPlayerCount(60);
+            this.setServerPhase(ServerPhase.STARTUP);
+        }
 
     }
 
     private void registerListener()
     {
-        getServer().getPluginManager().registerEvents(new FRSMessageListener(this), this);
+        getServer().getPluginManager().registerEvents(new MessageListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
@@ -364,15 +349,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     private void startPlayerCountSchedule()
     {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, ()
-                -> publish(ServerFrsMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.PLAYER_COUNT, getServer().getName(),  Bukkit.getServer().getOnlinePlayers().size())),
-        20, 20 * 10);
+        //todo: change
     }
 
     @Override
     public void onDisable() {
         serverManager.disable();
-        frsClient.shutdown(true);
+        mongoDBManager.close();
     }
 
     @Override
@@ -381,12 +364,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public fr.idarkay.minetasia.core.api.utils.SQLManager getSqlManager() {
-        return sqlManager;
-    }
-
-    @Override
-    public void setPlayerData(@NotNull UUID uuid, @NotNull String key, String value) {
+    public void setPlayerData(@NotNull UUID uuid, @NotNull String key, Object value) {
         Bukkit.getScheduler().runTaskAsynchronously(this, () ->
         {
             MinePlayer p;
@@ -397,7 +375,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         });
     }
 
-    public void setGeneralPlayerData(@NotNull UUID uuid, @NotNull String key, String value) {
+    @Deprecated
+    public void setGeneralPlayerData(@NotNull UUID uuid, @NotNull String key, Object value) {
         Bukkit.getScheduler().runTaskAsynchronously(this, () ->
         {
             MinePlayer p;
@@ -409,13 +388,20 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public String getPlayerData(@NotNull UUID uuid, @NotNull String key) {
+    public Object getPlayerData(@NotNull UUID uuid, @NotNull String key) {
         MinePlayer p;
         if((p = playerManager.get(uuid)) != null) return p.getData(key);
         else return null;
     }
 
-    public String getGeneralPlayerData(@NotNull UUID uuid, @NotNull String key) {
+    @Override
+    public <T> T getPlayerData(@NotNull UUID uuid, @NotNull String key, Class<T> cast)
+    {
+        return cast.cast(getPlayerData(uuid, key));
+    }
+
+    @Deprecated
+    public Object getGeneralPlayerData(@NotNull UUID uuid, @NotNull String key) {
         MinePlayer p;
         if((p = playerManager.get(uuid)) != null) return p.getGeneralData(key);
         else return null;
@@ -423,29 +409,15 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public @Nullable UUID getPlayerUUID(@NotNull String username) {
-        org.bukkit.entity.Player p;
-        if((p = Bukkit.getPlayer(username)) != null) return p.getUniqueId();
-        else
-        {
-            sqlManager.getSQL();
-            try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT uuid FROM `uuid_username` WHERE  username = ?"))
-            {
-                ps.setString(1, username);
-                ResultSet rs = ps.executeQuery();
-                if(rs.next())
-                {
-                    return UUID.fromString(rs.getString("uuid"));
-                }
-            }catch ( SQLException e)
-            {
-                e.printStackTrace();
-            }
-            return null;
-        }
+        final Player p = Bukkit.getPlayer(username);
+        if(p != null) return p.getUniqueId();
+        final Document d = mongoDBManager.getCollection(MongoCollections.USERS).find(Filters.eq("username", username)).first();
+        if (d == null) return null;
+        else return UUID.fromString(d.getString("_id"));
     }
 
     @Override
-    public float getPlayerMoney(UUID uuid, Economy economy) {
+    public double getPlayerMoney(UUID uuid, Economy economy) {
         MinePlayer p = playerManager.get(uuid);
         if(p != null) return p.getMoney(economy);
         else return -1.0F;
@@ -476,12 +448,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             MinePlayer p = playerManager.get(uuid);
             if(p != null)
             {
-                m.forEach((k, v )-> {
-                    if(v < 0) throw new IllegalArgumentException("negative money amount");
-
-                    p.addMoneyWithoutSave(k, v);
-                });
-                p.saveGeneralData();
+                p.incrementMoney(m);
             }
             else throw new PlayerNotFoundException("can't add money to not found user");
         };
@@ -563,109 +530,114 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
 
     @Override
-    public boolean isPlayerOnline(@NotNull UUID uuid) {
+    public boolean isPlayerOnline(@NotNull UUID uuid)
+    {
         if(Bukkit.getPlayer(uuid) != null) return true;
-        sqlManager.getSQL();
-        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE uuid = ?"))
-        {
-            ps.setString(1, uuid.toString());
-            final ResultSet rs = ps.executeQuery();
-            return rs.next();
-        }catch ( SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public List<UUID> getPlayerOnlineUUID()
-    {
-        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT uuid FROM `online_player`"))
-        {
-            final List<UUID> back = new ArrayList<>();
-            final ResultSet rs = ps.executeQuery();
-            while (rs.next())
-            {
-                back.add(UUID.fromString(rs.getString("uuid")));
-            }
-            return back;
-        }catch ( SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
-    }
-
-    public List<String> getPlayerOnlineName()
-    {
-        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT username FROM `online_player`"))
-        {
-            final List<String> back = new ArrayList<>();
-            final ResultSet rs = ps.executeQuery();
-            while (rs.next())
-            {
-                back.add(rs.getString("username"));
-            }
-            return back;
-        }catch ( SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
+        return mongoDBManager.match(MongoCollections.ONLINE_USERS, uuid.toString());
     }
 
     @Override
     public boolean isPlayerOnline(@NotNull String name) {
         if(Bukkit.getPlayer(name) != null) return true;
-        sqlManager.getSQL();
-        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE username = ?"))
+        return mongoDBManager.match(MongoCollections.ONLINE_USERS, "username", name);
+    }
+
+    public List<UUID> getPlayerOnlineUUID()
+    {
+        return StreamSupport.stream(mongoDBManager.getAll(MongoCollections.ONLINE_USERS).spliterator(), false).map(document -> UUID.fromString(document.getString("_id"))).collect(Collectors.toList());
+    }
+
+    public List<String> getPlayerOnlineName()
+    {
+        return StreamSupport.stream(mongoDBManager.getAll(MongoCollections.ONLINE_USERS).spliterator(), false).map(document -> document.getString("username")).collect(Collectors.toList());
+    }
+
+    @Override
+    public void publishGlobal(@NotNull String chanel, String message, boolean proxy, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+            if(proxy)
+            {
+                mongoDBManager.getAll(MongoCollections.PROXY).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("port"), fullMsg, false));
+            }
+
+
+
+            final Map<String, Integer> ipPortMap = getServers().values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort));
+
+            ipPortMap.forEach((ip, port) -> MessageClient.send(ip, port, fullMsg, false));
+
+        };
+
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
+    }
+
+    @Override
+    public void publishProxy(@NotNull String chanel, String message, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            mongoDBManager.getAll(MongoCollections.PROXY).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
+        };
+
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
+    }
+
+
+    @Override
+    public void publishServerType(@NotNull String chanel, String message, String serverType, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            getServers(serverType).values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort)).forEach((ip, port) -> MessageClient.send(ip, port, fullMsg, false));
+
+        };
+
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
+    }
+
+    @Override
+    public String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync)
+    {
+        Validate.notNull(chanel);
+        Validate.notNull(target);
+
+        if(rep && !sync) throw new IllegalArgumentException("cant get rep in async");
+
+        final String fullMsg = chanel + ";" + (message == null ? "" : message);
+        if(sync)
         {
-            ps.setString(1, name);
-            final ResultSet rs = ps.executeQuery();
-            return rs.next();
-        }catch ( SQLException e)
-        {
-            e.printStackTrace();
+            return MessageClient.send(target.getIp(), target.getPublishPort(), fullMsg, rep);
         }
-        return false;
-    }
-
-
-    @Override
-    public void publish(@NotNull String chanel, String message, boolean... sync) {
-        if(frsClient.isConnected())
-            frsClient.publish(chanel, message, sync);
-        else throw new FRSDownException("can't publish frs is down");
+        else
+        {
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> MessageClient.send(target.getIp(), target.getPublishPort(), fullMsg, false));
+            return null;
+        }
     }
 
     @Override
-    public String getValue(String key, String field) {
-        return getValue(key + "/" + field);
-    }
-
-    public String getValue(String key ) {
-        return frsClient.getValue(key);
-    }
-
-    @Override
-    public Set<String> getFields(String key) {
-        return frsClient.getFields(key);
-    }
-
-    @Override
-    public Map<String, String> getValues(String key, Set<String> fields) {
-        return frsClient.getValues(key, fields);
-    }
-
-    @Override
-    public void setValue(String key, String field, String value, boolean... sync)
+    public String publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean rep, boolean sync)
     {
-        setValue(key + "/" + field, value, sync.length == 0 || sync[0]);
+        return publishTarget(chanel, message, getPlayerStatue(target).getServer(), rep, sync);
     }
 
-    public void setValue(String key, String value, boolean sync)
+    @Override
+    public String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync)
     {
-        frsClient.setValue(key, value, sync);
+        return publishTarget(chanel, message, target.getServer(), rep, sync);
     }
 
     @Override
@@ -700,6 +672,17 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public void movePlayerToServer(@NotNull UUID player, Server server)
+    {
+        final Player p = Bukkit.getPlayer(player);
+        if(p != null) movePlayerToServer(p, server);
+        else
+        {
+            publishTargetPlayer("core-player-tp", player.toString() + ";" +  server.getName(), player, false, false);
+        }
+    }
+
+    @Override
     public String getPlayerLang(@NotNull UUID uuid) {
         return getPlayer(uuid).getLang();
     }
@@ -710,115 +693,91 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         if((p = Bukkit.getPlayer(uuid)) != null) return p.getName();
         else
         {
-            sqlManager.getSQL();
-            try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT username FROM `uuid_username` WHERE uuid = ?"))
-            {
-                ps.setString(1, uuid.toString());
-                ResultSet rs = ps.executeQuery();
-                if(rs.next())
-                {
-                    return rs.getString("username");
-                }
-            }catch ( SQLException e)
-            {
-                e.printStackTrace();
-            }
-            return null;
+            final Document d = mongoDBManager.getByKey(MongoCollections.USERS, uuid.toString());
+            if(d == null) return null;
+            else return d.getString("username");
         }
     }
 
     @Override
     public PlayerStatueFix getPlayerStatue(UUID uuid) {
-        sqlManager.getSQL();
-        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE uuid = ?"))
-        {
-            ps.setString(1, uuid.toString());
-            ResultSet rs = ps.executeQuery();
-            if(rs.next())
-            {
-                return new PlayerStatueFixC(uuid, rs.getNString("username"), rs.getString("proxy"), getServer(rs.getString("server")));
-            }
-            else return null;
-        }catch ( SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return null;
+        final Document d = mongoDBManager.getWithReferenceAndMatch(MongoCollections.ONLINE_USERS, "_id", uuid.toString(), "servers", "server_id", "_id", "server").first();
+        if(d == null) return null;
+
+        return new PlayerStatueFixC(
+                uuid,
+                d.getString("username"),
+                d.getString("proxy_id"),
+                MineServer.getServerFromDocument(d.getList("server", Document.class).get(0))
+        );
     }
 
     @Override
     public PlayerStatueFix getPlayerStatue(String name) {
-        sqlManager.getSQL();
-        try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT * FROM `online_player` WHERE username = ?"))
-        {
-            ps.setString(1, name);
-            ResultSet rs = ps.executeQuery();
-            if(rs.next())
-            {
-                return new PlayerStatueFixC(UUID.fromString(rs.getString("uuid")), name, rs.getString("proxy"), getServer(rs.getString("server")));
-            }
-            else return null;
-        }catch ( SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return null;
+        final Document d = mongoDBManager.getWithReferenceAndMatch(MongoCollections.ONLINE_USERS, "username", name, "servers", "server_id", "_id", "server").first();
+        if(d == null) return null;
+
+        return new PlayerStatueFixC(
+                UUID.fromString(d.getString("_id")),
+                name,
+                d.getString("proxy_id"),
+                MineServer.getServerFromDocument(d.getList("server", Document.class).get(0))
+        );
+    }
+
+    public Document getPlayerKitDocument(UUID uuid)
+    {
+        return getPlayerData(uuid, "kits", Document.class);
     }
 
     @Override
     public Map<String, Integer> getPlayerKitsLvl(UUID uuid) {
-        String data = getPlayerData(uuid, "kits");
-        Map<String, Integer> back = new HashMap<>();
-        if(data != null)
-        {
-
-            JsonObject jsonObject = JSON_PARSER.parse(data).getAsJsonObject();
-            for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet())
-            {
-                back.put(entry.getKey(), entry.getValue().getAsInt());
-            }
-        }
-        return back;
+        return getPlayerKitDocument(uuid).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> ((Integer) e.getValue())));
     }
 
     @Override
     public Map<String, Integer> getPlayerKitsLvl(UUID uuid, String gameFilter) {
-        String data = getPlayerData(uuid, "kits");
-        Map<String, Integer> back = new HashMap<>();
-        if(data != null)
-        {
-            JsonObject jsonObject = JSON_PARSER.parse(data).getAsJsonObject();
-            for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet())
-            {
-                if(entry.getKey().startsWith(gameFilter))
-                    back.put(entry.getKey(), entry.getValue().getAsInt());
-            }
-        }
-        return back;
+        return getPlayerKitDocument(uuid).entrySet().stream().filter(e -> e.getKey().startsWith(gameFilter)).collect(Collectors.toMap(Map.Entry::getKey, e -> ((Integer) e.getValue())));
     }
 
     @Override
     public int getPlayerKitLvl(UUID uuid, String kitName) {
-
-        return getPlayerKitsLvl(uuid).getOrDefault(kitName, 0);
+        return getPlayerKitDocument(uuid).getInteger(kitName, 0);
     }
 
     @Override
     public Kit getKitKit(String name, String lang) {
-        Kit k = kitsManager.getKits().get(name + "_" + lang);
-        if(k == null && !lang.equals(MinetasiaLang.BASE_LANG)) k = kitsManager.getKits().get(name + "_" + MinetasiaLang.BASE_LANG);
-        return k;
+        return getKitLang(name, lang);
     }
 
     @Override
-    public void saveDefaultKit(Kit kit) {
-        if(!kitsManager.getKits().containsKey(kit.getName() + "_" + kit.getIsoLang()))
+    public MainKit getMainKit(String name)
+    {
+        return kitsManager.getKits().get(name);
+    }
+
+    @Override
+    public Kit getKitLang(String kitName, String lang)
+    {
+        return getMainKit(kitName).getLang(lang);
+    }
+
+    @Override
+    public void saveDefaultKit(MainKit kit)
+    {
+        if(!kitsManager.getKits().containsKey(kit.getName()))
         {
-            fr.idarkay.minetasia.core.spigot.kits.Kit k = new fr.idarkay.minetasia.core.spigot.kits.Kit(kit);
-            setValue("kits", kit.getName() + "_" + kit.getIsoLang(), k.getJsonString());
-            kitsManager.getKits().put(kit.getName() + "_" + kit.getIsoLang(), k);
+            kitsManager.getKits().put(kit.getName(), kit);
+            mongoDBManager.insert(MongoCollections.KITS, kit.toDocument());
         }
     }
+
+    @Override
+    public MainKit createKit(String isoLang, String name, String displayName, int maxLvl, int[] price, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
+    }
+
 
     @Override
     public PlayerStats getPlayerStats(@NotNull UUID uuid)
@@ -916,25 +875,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     @NotNull
     public Map<UUID, String> getOnlinePlayers() {
-        try {
-            return onlinePlayer.get(1, () -> {
-                sqlManager.getSQL();
-                try(PreparedStatement ps = sqlManager.getSQL().prepareStatement("SELECT uuid, username FROM `online_player`"); ResultSet rs = ps.executeQuery())
-                {
-                    Map<UUID, String> online = new HashMap<>();
-                    while (rs.next()) online.put(UUID.fromString(rs.getString("uuid")), rs.getString("username"));
-                    request = false;
-                    return online;
-                }catch ( SQLException e)
-                {
-                    e.printStackTrace();
-                }
-                return new HashMap<>();
-            });
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return new HashMap<>();
+        return StreamSupport.stream(mongoDBManager.getAll(MongoCollections.ONLINE_USERS).spliterator(), false).collect(Collectors.toMap(document -> UUID.fromString(document.getString("_id")), document -> document.getString("username")));
     }
 
     @Override
@@ -965,7 +906,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public Server getServer(String name) {
-        return serverManager.getServers().get(name);
+        return serverManager.getServer(name);
     }
 
     @Override
@@ -1015,19 +956,25 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void setServerPhase(@NotNull ServerPhase phase)
     {
         Validate.notNull(phase);
-        if(isHub) throw new IllegalArgumentException("cant change phase in hub !");
         //check if max player is not -1
         if(phase != ServerPhase.LOAD && getThisServer().getMaxPlayerCount() < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
-        //add place for admin
-        if(phase == ServerPhase.GAME)
+        getThisServer().setPhase(phase);
+        if(phase == ServerPhase.STARTUP)
         {
-            setMaxPlayerCount( getThisServer().getMaxPlayerCount() + maxPlayerCountAddAdmin, false);
+            serverManager.registerServer();
+            messageServer.open();
         }
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.SERVER_STATUE, getThisServer().getName(), phase.name()));
-            setValue("server", getThisServer().getName(), serverManager.getServer().toJson());
-        });
-
+        else
+        {
+            //add place for admin
+            if(phase == ServerPhase.GAME)
+            {
+                setMaxPlayerCount( getThisServer().getMaxPlayerCount() + maxPlayerCountAddAdmin, false);
+            }
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                mongoDBManager.getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(getThisServer().getName()), new Document("phase", phase.ordinal()));
+            });
+        }
     }
 
     @Override
@@ -1039,14 +986,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void setMaxPlayerCount(int maxPlayer)
     {
-        if(isHub) throw new IllegalArgumentException("cant set max player in hub with this methods use public void setMaxPlayerCount(int maxPlayer, boolean startup)  !");
         setMaxPlayerCount(maxPlayer, true);
         getThisServer().setMaxPlayerCount(maxPlayer);
-        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
-        {
-            publish(CoreFRSMessage.CHANNEL, ServerFrsMessage.getMessage(ServerFrsMessage.SERVER_MAX_PLAYER, getThisServer().getName(), maxPlayer));
-            setValue("server", getThisServer().getName(), serverManager.getServer().toJson());
-        });
     }
 
     @Override
@@ -1114,6 +1055,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return playerManager.get(uuid);
     }
 
+    @Override
+    public MongoDbManager getMongoDbManager()
+    {
+        return mongoDBManager;
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         if(startup && getThisServer().getServerPhase() != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
@@ -1127,29 +1074,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             e.printStackTrace();
         }
     }
-
-//    @Override
-//    public int getKitLevelOfUser(UUID player, String kitName) {
-//        String data = getPlayerData(player, "kits");
-//        JsonObject jo;
-//        if(data != null) jo = JSON_PARSER.parse(data).getAsJsonObject();
-//        else return 0;
-//        JsonElement lvl = jo.get(kitName);
-//        if(lvl == null) return 0;
-//        return lvl.getAsInt();
-//    }
-//
-//    @Override
-//    public void setKitLvlOfUser(UUID player, String kitName, int lvl) {
-//        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-//            String data = getPlayerData(player, "kits");
-//            JsonObject jo;
-//            if(data != null) jo = JSON_PARSER.parse(data).getAsJsonObject();
-//            else jo = new JsonObject();
-//            jo.addProperty(kitName, lvl);
-//            setPlayerData(player, "kits", jo.toString());
-//        });
-//    }
 
     private void setCommandsIsEnable(byte b, boolean value)
     {
@@ -1193,10 +1117,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return serverManager;
     }
 
-    public FRSClient getFrsClient() {
-        return frsClient;
-    }
-
     public FriendsExecutor getFriendsExecutor() {
         return friendsExecutor;
     }
@@ -1231,5 +1151,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public static MinetasiaCore getCoreInstance()
     {
         return instance;
+    }
+
+    public MessageServer getMessageServer()
+    {
+        return messageServer;
     }
 }

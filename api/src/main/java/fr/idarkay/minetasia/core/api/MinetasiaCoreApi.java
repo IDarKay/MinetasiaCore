@@ -3,7 +3,9 @@ package fr.idarkay.minetasia.core.api;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
+import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,20 +52,10 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     /**
      * test function connexion between core and api
-     * @deprecated
      * @return "pong" if connexion work
      * @since 1.0
      */
     public abstract String ping();
-
-    /**
-     * return complete {@link SQLManager} instance  to be use for get The connexion to SQL
-     * don't create self connexion.
-     * @see SQLManager
-     * @return complete {@link SQLManager} instance
-     * @since 1.0
-     */
-    public abstract SQLManager getSqlManager();
 
     /**
      * set a data to a specific player if key already exist this will be replaced by the new values
@@ -73,7 +65,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @throws IllegalStateException if one or more parameter are null
      * @since 1.0
      */
-    public abstract void setPlayerData(@NotNull UUID uuid, @NotNull String key, String value);
+    public abstract void setPlayerData(@NotNull UUID uuid, @NotNull String key, Object value);
 
     /**
      * get a data of a specific player and key
@@ -83,7 +75,19 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @throws IllegalStateException if one or more parameter are null
      * @since 1.0
      */
-    public abstract String getPlayerData(@NotNull UUID uuid, @NotNull String key);
+    public abstract Object getPlayerData(@NotNull UUID uuid, @NotNull String key);
+
+    /**
+     * get a data of a specific player and key
+     * @param uuid {@link NotNull} uuid of the player
+     * @param key  {@link NotNull} String key of the data
+     * @param cast cast type
+     * @param <T> type of return object given in cast
+     * @return String value or {@code null} if player not found or data not found
+     * @throws IllegalStateException if one or more parameter are null
+     * @since 1.0
+     */
+    public abstract <T> T getPlayerData(@NotNull UUID uuid, @NotNull String key, Class<T> cast);
 
     /**
      * get the uuid of a player from user name
@@ -102,7 +106,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @return float amount or -1 if player not found
      * @since 1.0
      */
-    public abstract float getPlayerMoney(UUID uuid, Economy economy);
+    public abstract double getPlayerMoney(UUID uuid, Economy economy);
 
     /**
      * async task
@@ -190,53 +194,28 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract boolean isPlayerOnline(@NotNull String name);
 
     /**
-     * publish a message to the redis system
-     * the message will be get by all only server with the {@link fr.idarkay.minetasia.core.api.event.FRSMessageEvent}
      *
-     * @param chanel  {@link NotNull} chanel of the message
+     * @param chanel  chanel of the message
      * @param message  message
+     * @param proxy only when for server create msg
      * @param sync if need be sync or not
-     * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
-     * @since 1.0
      */
-    public abstract void publish(@NotNull String chanel, String message, boolean... sync);
+    public abstract void publishGlobal(@NotNull String chanel, String message, boolean proxy, boolean sync);
 
-    /**
-     * get value of field
-     * @param key - key
-     * @param field - field
-     * @return String data or null
-     */
-    public abstract String getValue(String key, String field);
+    public abstract void publishProxy(@NotNull String chanel, String message, boolean sync);
 
-    /**
-     * get all field of a key
-     * @param key - key
-     * @return list of fields or empty list
-     */
-    public abstract Set<String> getFields(String key);
+    public abstract void publishServerType(@NotNull String chanel, String message, String serverType , boolean sync);
 
-    /**
-     * get all values for key and Set of field
-     * @param key - key
-     * @param fields - fields
-     * @return map of fields - value or empty map
-     */
-    public abstract Map<String, String> getValues(String key, Set<String> fields);
+    public abstract String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync);
 
-    /**
-     * set data value
-     * @param key - key
-     * @param field - field
-     * @param value - data
-     * @param sync to do in sync or async
-     */
-    public abstract void setValue(String key, String field, String value, boolean... sync);
+    public abstract String publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean rep, boolean sync);
+
+    public abstract String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync);
+
 
     /**
      * move a player to random lobby
      * @param player {@link NotNull}  to return to the lobby
-     * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
      * @since 1.0
      */
     public abstract void movePlayerToHub(@NotNull Player player);
@@ -248,6 +227,14 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param server where move player
      */
     public abstract void movePlayerToServer(@NotNull Player player, Server server);
+
+    /**
+     *  move a player to server the player not need to be connect on this server
+     *  use {@link MinetasiaCoreApi#movePlayerToHub(Player)} to move ot hub !
+     * @param player to move
+     * @param server where move player
+     */
+    public abstract void movePlayerToServer(@NotNull UUID player, Server server);
 
     /**
      * get the lang of player in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
@@ -317,11 +304,41 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract Kit getKitKit(String name, String lang);
 
     /**
-     * save a kit in frs if not exist  <br>
+     * get a kit from name no lang her
+     * @param name name of the kit
+     * @return void
+     */
+    public abstract MainKit getMainKit(String name);
+
+    /**
+     * get a kit with a lang in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a> <br>
+     * if not found will be retail with default lang
+     * @param kitName name of the kit
+     * @param lang lang of the kit in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
+     * @return Kit or null
+     */
+    public abstract Kit getKitLang(String kitName, String lang);
+
+    /**
+     * save a kit in database if not exist  <br>
      *  in {@link Kit} please not set color char just {@code '&'}
      * @param kit to save
      */
-    public abstract void saveDefaultKit(Kit kit);
+    public abstract void saveDefaultKit(MainKit kit);
+
+    /**
+     *
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param maxLvl the max lvl of the kit
+     * @param price the price for each lvl 0 not count ; price.length = maxLvl
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for each lvl in lan iso lang ; lvlDesc.length = maxLvl
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public abstract MainKit createKit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, Material displayMat, final String[] lvlDesc, final String... desc);
 
     /**
      * get Stats of a user
@@ -491,5 +508,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract String getServerConfig();
 
     public abstract MinetasiaPlayer getPlayer(UUID uuid);
+
+    public abstract MongoDbManager getMongoDbManager();
 
 }

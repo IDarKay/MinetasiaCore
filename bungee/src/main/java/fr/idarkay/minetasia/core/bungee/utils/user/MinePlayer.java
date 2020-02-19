@@ -1,12 +1,11 @@
 package fr.idarkay.minetasia.core.bungee.utils.user;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
-import fr.idarkay.minetasia.core.bungee.utils.FRSClient;
-import fr.idarkay.minetasia.core.bungee.utils.FRSKey;
-import fr.idarkay.minetasia.core.bungee.utils.JSONUtils;
+import fr.idarkay.minetasia.core.bungee.MongoCollections;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,51 +24,62 @@ import java.util.*;
 public class MinePlayer
 {
 
-    private static final FRSClient CORE = MinetasiaCoreBungee.getInstance().getFrsClient();
-    private static final JsonParser PARSER = new JsonParser();
-
+    private static final MinetasiaCoreBungee CORE = MinetasiaCoreBungee.getInstance();
 
     @NotNull private final UUID uuid;
 
-    @NotNull private final JsonObject moneys;
+    private final Map<String, Object> data;
+//    private final Map<UUID, String> friends;
 
-    @NotNull private Map<String, String> generalData;
     @NotNull private String username;
 
+//    private Stats stats;
+
+    public MinePlayer(@NotNull UUID uuid, String username)
+    {
+        this.uuid = uuid;
+        this.username = username;
+        this.data = new HashMap<>();
+    }
+
+    public void saveNew()
+    {
+        final Document d = new Document("_id", uuid.toString())
+                .append("username", username)
+                .append("data", new Document(data));
+
+        CORE.getMongoDBManager().insert(MongoCollections.USERS, d);
+    }
 
     public MinePlayer(@NotNull UUID uuid)
     {
-        this.uuid = Objects.requireNonNull(uuid);
+        this.uuid = uuid;
 
-        final String data = Objects.requireNonNull(CORE.getValue(FRSKey.DATA.getKey(uuid)));
-        final JsonObject dataJson = PARSER.parse(data).getAsJsonObject();
+        final Document doc = CORE.getMongoDBManager().getByKey(MongoCollections.USERS, uuid.toString());
+        if(doc == null) throw new NullPointerException();
+        username = doc.getString("username");
 
-        this.generalData = JSONUtils.jsonObjectToStringMap(dataJson);
 
-        this.username = Objects.requireNonNull(generalData.get("username"));
-        if(!generalData.containsKey("money"))
-            this.moneys = new JsonObject();
-        else
-            this.moneys = dataJson.getAsJsonObject("money");
-        saveGeneralData();
-    }
+//        this.friends = new HashMap<>();
+//        if(doc.containsKey("friends"))
+//            doc.get("friends", Document.class).forEach((k, v) -> friends.put(UUID.fromString(k), v.toString()));
 
-    public MinePlayer(@NotNull UUID uuid, @NotNull String name)
-    {
-        this.uuid = Objects.requireNonNull(uuid);
+        this.data = new HashMap<>();
+        if(doc.containsKey("data"))
+            doc.get("data", Document.class).forEach(data::put);
 
-        this.generalData = new HashMap<>();
-
-        this.username = name;
-        this.moneys = new JsonObject();
+//        if(doc.containsKey("stats"))
+//            this.stats = new Stats(doc.get("stats", Document.class));
+//        else
+//            this.stats = new Stats();
     }
 
     public void setUsername(@NotNull String username)
     {
         this.username = username;
-        generalData.put("username", username);
-        saveGeneralData();
+        set("username", username);
     }
+
 
     public @NotNull UUID getUUID()
     {
@@ -84,32 +94,89 @@ public class MinePlayer
 
     public @NotNull String getLang()
     {
-        return generalData.getOrDefault("lang", MinetasiaLang.BASE_LANG);
+        return data.getOrDefault("lang", MinetasiaLang.BASE_LANG).toString();
     }
 
-    public @Nullable String getGeneralData(@NotNull String key)
+    @Deprecated
+    public @Nullable Object getGeneralData(@NotNull String key)
     {
-        return generalData.get(key);
+        return getData(key);
     }
 
     
-    public synchronized void putGeneralData(@NotNull String key, @Nullable String value)
+    @Deprecated
+    public synchronized void putGeneralData(@NotNull String key, @Nullable Object value)
     {
-        if(value == null)
-        {
-            if(generalData.remove(key) == null) return;
-        }
-        else generalData.put(key, value);
-        saveGeneralData();
+        putData(key, value);
+    }
+
+    
+    public @Nullable Object getData(@NotNull String key)
+    {
+        return data.get(key);
+    }
+
+    
+    public synchronized void putData(@NotNull String key, @Nullable Object value)
+    {
+            if(value == null)
+            {
+                if(data.remove(key) == null) return;
+                unset("data." + key);
+            }
+            else
+            {
+                data.put(key, value);
+                set("data." + key, value);
+            }
     }
 
 
-    public synchronized void saveGeneralData()
+
+    
+//    public void updatePlayerStats(@NotNull StatsUpdater updater)
+//    {
+//        stats.update(updater);
+//        if(validateNotCache(PlayerMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString()))
+//        {
+//
+//            final Document doc =  new Document();
+//            updater.getUpdate().forEach(doc::append);
+//
+//            CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), new Document("$inc", doc));
+//        }
+//    }
+
+
+    public int getStatus()
     {
-        generalData.putIfAbsent("lang", MinetasiaLang.BASE_LANG);
-        final JsonObject object = JSONUtils.mapToJsonObject(generalData);
-        object.add("money", moneys);
-        CORE.setValue(FRSKey.DATA.getKey(uuid), object.toString(), true);
+        return (int) data.getOrDefault("statue", 0);
     }
+
+
+
+    private synchronized void set(String key, Object value)
+    {
+        CORE.getMongoDBManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.addToSet(key, value));
+    }
+
+    private synchronized void increment(String key, Number increment)
+    {
+        CORE.getMongoDBManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.inc(key, increment));
+    }
+
+    private synchronized void unset(String key)
+    {
+        CORE.getMongoDBManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.unset(key));
+    }
+
+//    private void saveFriends()
+//    {
+//        final List<Document> all = new ArrayList<>();
+//        friends.forEach((k, v) -> all.add(new Document("uuid", k.toString()).append("name", v)));
+//        set("friends", all);
+//    }
+
+
 
 }

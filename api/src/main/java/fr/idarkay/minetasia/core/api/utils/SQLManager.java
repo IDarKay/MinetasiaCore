@@ -16,6 +16,7 @@ import java.sql.Connection;
  * for update methods use {@link SQLManager#updateAsynchronously(String, Object...)}
  * for get use {@link SQLManager#getSQL()} and create yourself statement
  */
+@Deprecated
 public interface SQLManager {
 
     /**
@@ -23,6 +24,7 @@ public interface SQLManager {
      *
      * @return The connection of the database (can be null or closed)
      */
+    @Deprecated
     Connection getSQL();
 
     /**
@@ -37,6 +39,7 @@ public interface SQLManager {
      * @param query Query (with '?') which will be send to the database
      * @param args  Object which will replace the '?' (in order) of the query
      */
+    @Deprecated
     void update(String query, Object... args);
 
     /**
@@ -46,6 +49,7 @@ public interface SQLManager {
      * @param query Query (with {@code '?'}) which will be send to the database
      * @param args  Object which will replace the {@code '?'} (in order) of the query
      */
+    @Deprecated
     void updateAsynchronously(String query, Object... args);
 
     /**
@@ -53,6 +57,7 @@ public interface SQLManager {
      *
      * @return True if the connection work, false otherwise
      */
+    @Deprecated
     boolean connectionIsOk();
     
 }

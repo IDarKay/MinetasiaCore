@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.frs;
+package fr.idarkay.minetasia.core.spigot.messages;
 
 import com.google.common.collect.ImmutableMap;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 /**
- * File <b>FRSMessage</b> located on fr.idarkay.minetasia.core.spigot.utils
- * CoreFRSMessage is a part of MinetasiaCore.
+ * File <b>CoreMessage</b> located on fr.idarkay.minetasia.core.spigot.messages
+ * CoreMessage is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
  * <p>
@@ -17,15 +17,15 @@ import java.util.Map;
  * @author alice. B. (IDarKay),
  * Created the 01/02/2020 at 13:41
  */
-public interface CoreFRSMessage
+public interface CoreMessage
 {
 
-   Map<String, CoreFRSMessage> MESSAGE = new ImmutableMap.Builder<String, CoreFRSMessage>()
-            .put(ServerFrsMessage.getIdentifier(), new ServerFrsMessage())
-            .put(PlayerFrsMessage.getIdentifier(), new PlayerFrsMessage())
+   Map<String, CoreMessage> MESSAGE = new ImmutableMap.Builder<String, CoreMessage>()
+            .put(ServerMessage.getIdentifier(), new ServerMessage())
+            .put(PlayerMessage.getIdentifier(), new PlayerMessage())
             .build();
 
-    String CHANNEL = "core-frs-msg";
+    String CHANNEL = "core-messaging";
 
     void actionOnGet(MinetasiaCore plugin, String... args);
 

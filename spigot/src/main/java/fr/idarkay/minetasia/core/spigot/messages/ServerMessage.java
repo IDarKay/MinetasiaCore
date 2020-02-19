@@ -1,17 +1,17 @@
-package fr.idarkay.minetasia.core.spigot.frs;
+package fr.idarkay.minetasia.core.spigot.messages;
 
 import fr.idarkay.minetasia.core.api.ServerPhase;
 import fr.idarkay.minetasia.core.api.event.ServerPlayerCountUpdateEvent;
 import fr.idarkay.minetasia.core.api.event.ServerRegisterEvent;
 import fr.idarkay.minetasia.core.api.event.ServerUnregisterEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.server.Server;
+import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * File <b>ServerFrsMessage</b> located on fr.idarkay.minetasia.core.spigot.frs
- * ServerFrsMessage is a part of MinetasiaCore.
+ * File <b>ServerMessage</b> located on fr.idarkay.minetasia.core.spigot.messages
+ * ServerMessage is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
  * <p>
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  * @author alice. B. (IDarKay),
  * Created the 01/02/2020 at 13:45
  */
-public class    ServerFrsMessage implements CoreFRSMessage
+public class ServerMessage implements CoreMessage
 {
 
     public static final String CREATE = "create";
@@ -35,13 +35,13 @@ public class    ServerFrsMessage implements CoreFRSMessage
         {
             if (args[1].equals(CREATE))
             {
-                final Server server = Server.getServerFromJson(CoreFRSMessage.concat(args, ";", 2));
+                final MineServer server = MineServer.getServerFromJson(CoreMessage.concat(args, ";", 2));
                 plugin.getServerManager().addServer(server);
                 Bukkit.getPluginManager().callEvent(new ServerRegisterEvent(server));
             }
             else if (args[1].equals(REMOVE))
             {
-                final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(CoreFRSMessage.concat(args, ";", 2));
+                final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(CoreMessage.concat(args, ";", 2));
                 if(server != null)
                 {
                     Bukkit.getPluginManager().callEvent(new ServerUnregisterEvent(server));
@@ -53,11 +53,12 @@ public class    ServerFrsMessage implements CoreFRSMessage
                 try
                 {
                     final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(args[2]);
+                    final int old = server.getPlayerCount();
                     final int count = Integer.parseInt(args[3]);
-                    if(server.getPlayerCount() != count)
+                    if(old != count)
                     {
                         server.setPlayerCount(count);
-                        Bukkit.getPluginManager().callEvent(new ServerPlayerCountUpdateEvent(server, count));
+                        Bukkit.getPluginManager().callEvent(new ServerPlayerCountUpdateEvent(server, count, old));
                     }
 
                 } catch (Exception ignore)
@@ -86,7 +87,7 @@ public class    ServerFrsMessage implements CoreFRSMessage
     public static @NotNull String getMessage(Object... args)
     {
         if(!goodObject(args)) throw new IllegalArgumentException();
-        return CoreFRSMessage.getMessage(getIdentifier(), args);
+        return CoreMessage.getMessage(getIdentifier(), args);
     }
 
     public static boolean goodObject(Object... args)
