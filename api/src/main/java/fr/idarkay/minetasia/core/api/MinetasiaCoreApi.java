@@ -286,6 +286,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract Map<String, Integer> getPlayerKitsLvl(UUID uuid, String gameFilter);
 
+    public abstract void setPlayerKitLvl(UUID uuid, String kitName, int lvl);
+
     /**
      * get the lvl of a kit of a user
      * @param uuid of teh player

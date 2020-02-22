@@ -399,6 +399,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public void setPlayerKitLvl(UUID uuid, String kitName, int lvl)
+    {
+
+    }
+
+    @Override
     public int getPlayerKitLvl(UUID uuid, String s)
     {
         return 1;
@@ -410,6 +416,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     public Kit getKitKit(String s, String s1)
     {
         return getMainKit(s).getLang(s1);
+    }
+
+    @Override
+    public List<MainKit> getMainKits(String prefix)
+    {
+        return kits.values().stream().filter(k -> k.getName().startsWith(prefix)).collect(Collectors.toList());
     }
 
     @Override
@@ -789,9 +801,9 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
-        public int getStatus()
+        public long getStatus()
         {
-            return 0;
+            return 0L;
         }
 
         @Override

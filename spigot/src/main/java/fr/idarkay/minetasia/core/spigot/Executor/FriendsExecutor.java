@@ -6,7 +6,6 @@ import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.core.spigot.utils.PlayerStatue;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;

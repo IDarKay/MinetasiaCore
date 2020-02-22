@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.utils;
+package fr.idarkay.minetasia.core.api;
 
 /**
  * File <b>PlayerStatue</b> located on fr.idarkay.minetasia.core.spigot.utils
@@ -12,7 +12,8 @@ package fr.idarkay.minetasia.core.spigot.utils;
  */
 public enum PlayerStatue {
 
-    SOCIAL_SPY(((byte) (0))),
+    SOCIAL_SPY((byte) 0),
+    HIDE_POWDER((byte) 1),
     ;
 
     public final byte by;
