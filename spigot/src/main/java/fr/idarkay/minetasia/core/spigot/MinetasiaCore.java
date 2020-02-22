@@ -7,6 +7,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonParser;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
 import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.core.api.*;
@@ -743,9 +744,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         );
     }
 
+    private final static Document EMPTY_DOC = new Document();
+
+    @NotNull
     public Document getPlayerKitDocument(UUID uuid)
     {
-        return getPlayerData(uuid, "kits", Document.class);
+        final Document doc = getPlayerData(uuid, "kits", Document.class);
+        return doc == null ? EMPTY_DOC : doc;
     }
 
     @Override
@@ -756,6 +761,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public Map<String, Integer> getPlayerKitsLvl(UUID uuid, String gameFilter) {
         return getPlayerKitDocument(uuid).entrySet().stream().filter(e -> e.getKey().startsWith(gameFilter)).collect(Collectors.toMap(Map.Entry::getKey, e -> ((Integer) e.getValue())));
+    }
+
+    @Override
+    public void setPlayerKitLvl(UUID uuid, String kitName, int lvl)
+    {
+        setPlayerData(uuid, "kits", getPlayerKitDocument(uuid).append(kitName, lvl));
     }
 
     @Override
@@ -868,7 +879,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 Map<Economy, Float> newMap = new HashMap<>();
                 moneyUpdater.getUpdate().forEach((k,v) ->{
                     final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
-                    System.out.println(b);
                     newMap.put(k, v * b);
                     if(v * b > 0)
                     {
@@ -996,7 +1006,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 setMaxPlayerCount( getThisServer().getMaxPlayerCount() + maxPlayerCountAddAdmin, false);
             }
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-                mongoDBManager.getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(getThisServer().getName()), new Document("phase", phase.ordinal()));
+                mongoDBManager.getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(getThisServer().getName()), Updates.set("phase", phase.ordinal()));
             });
         }
     }
@@ -1107,7 +1117,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             commands &= ~(1 << b);
     }
 
-    public int setBoolIsValue(int bool, byte b, boolean value)
+    public long setBoolIsValue(long bool, byte b, boolean value)
     {
         if(value)
             bool |= 1 << b;
@@ -1116,7 +1126,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return bool;
     }
 
-    public boolean isBollTrue(int bool, byte b)
+    public boolean isBollTrue(long bool, byte b)
     {
         return ((bool >> b) & 0x1) == 1;
     }

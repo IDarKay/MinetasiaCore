@@ -32,7 +32,8 @@ public class PlayerManager {
 
     public @Nullable MinePlayer get(UUID uuid)
     {
-        return userCache.getOrDefault(uuid, new MinePlayer(uuid, true));
+        final MinePlayer p = userCache.get(uuid);
+        return p == null ? new MinePlayer(uuid, true) : p;
     }
 
     public MinePlayer load(@NotNull UUID uuid)

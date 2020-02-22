@@ -128,7 +128,7 @@ public class MinePlayer implements MinetasiaPlayer
         if(validateNotCache(PlayerMessage.ActionType.ADD_MONEY, economy, amount))
         {
             moneys.merge(economy, (long) (amount * 100), Long::sum);
-            increment("money." + economy.name, (long) (amount * 100));
+            increment("money." + economy.name(), (long) (amount * 100));
         }
     }
 
@@ -142,7 +142,7 @@ public class MinePlayer implements MinetasiaPlayer
                 if(oldV < newV) throw new IllegalArgumentException("cant remove "+ amount + " " + economy.displayName + " to " + username);
                 return oldV - newV;
             });
-            increment("money." + economy.name, (long) (amount * -100));
+            increment("money." + economy.name(), (long) (amount * -100));
         }
     }
 
@@ -153,7 +153,7 @@ public class MinePlayer implements MinetasiaPlayer
         if(validateNotCache(PlayerMessage.ActionType.SET_MONEY, economy, amount))
         {
             moneys.put(economy, (long) (amount * 100));
-            set("money." + economy.name, (long) (amount * 100));
+            set("money." + economy.name(), (long) (amount * 100));
         }
     }
 
@@ -277,9 +277,9 @@ public class MinePlayer implements MinetasiaPlayer
     }
 
     @Override
-    public int getStatus()
+    public long getStatus()
     {
-        return (int) data.getOrDefault("statue", 0);
+        return (long) data.getOrDefault("statue", 0L);
     }
 
     @Override
@@ -348,11 +348,11 @@ public class MinePlayer implements MinetasiaPlayer
     {
         final Document money = new Document();
 
-        m.forEach((k,v ) -> money.append("money." + k.name, (long) (v * 100)));
+        m.forEach((k,v ) -> money.append("money." + k.name(), (long) (v * 100)));
 
         CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()),  new Document("$inc", money));
         final JsonObject json = new JsonObject();
-        m.forEach((k,v ) -> json.addProperty(k.name, (long) (v * 100)));
+        m.forEach((k,v ) -> json.addProperty(k.name(), (long) (v * 100)));
         if(validateNotCache(PlayerMessage.ActionType.ADD_MONEYS, json.toString()))
         {
             incrementMoney(json);
