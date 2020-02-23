@@ -24,3 +24,5 @@ commands:
     aliases: []
   tp:
     aliases: []
+  party:
+    aliases: [p, partie, parties]

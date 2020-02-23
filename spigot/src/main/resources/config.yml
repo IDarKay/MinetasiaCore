@@ -49,6 +49,7 @@ commands:
   money: true
   msg: true
   tp: true
+  party: true
 
 gui:
   lang:
@@ -75,10 +76,6 @@ chat_char: ' > '
 kits_load:
   - '*'
 
-# Defines if "opped" players should be able to use all LuckPerms commands by default.
-#
-# - Set to false to only allow users who have the permissions access to the commands
-commands-allow-op: true
 
 # in phase Game and end add  maxPlayerCount by next number only for admin spectator
 max-player-count-add-admin: 5

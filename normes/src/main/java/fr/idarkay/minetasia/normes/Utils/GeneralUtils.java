@@ -21,6 +21,13 @@ import java.util.List;
 public class GeneralUtils
 {
 
+    public static  @NotNull String concat(String[] array, String split, int indexFrom)
+    {
+        StringBuilder result = new StringBuilder();
+        for(int i = indexFrom; i < array.length; i++) result.append(i != indexFrom && split != null ? split : "").append(array[i]);
+        return result.toString();
+    }
+
     public static long parseLongOrDefault(@Nullable String rawNumber, long defaultN)
     {
         return rawNumber == null ? defaultN : Long.parseLong(rawNumber);

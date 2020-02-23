@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.spigot.user;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.core.api.Economy;
@@ -36,6 +37,7 @@ public class MinePlayer implements MinetasiaPlayer
     private static final MinetasiaCore CORE = MinetasiaCore.getCoreInstance();
     private static final JsonParser PARSER = new JsonParser();
 
+
     @NotNull private final UUID uuid;
     private final boolean isCache;
 
@@ -48,7 +50,6 @@ public class MinePlayer implements MinetasiaPlayer
     private Stats stats;
 
     private Boost personalBoost = HashMap::new, partyBoost = HashMap::new;
-    private Party party;
 
     public MinePlayer(@NotNull UUID uuid, boolean isCache)
     {
@@ -56,7 +57,37 @@ public class MinePlayer implements MinetasiaPlayer
         this.uuid = uuid;
         this.isCache = isCache;
 
-        final Document doc = CORE.getMongoDbManager().getByKey(MongoCollections.USERS, uuid.toString());
+        final Document doc;
+        if(isCache)
+        {
+            doc = CORE.getMongoDbManager().getByKey(MongoCollections.USERS, uuid.toString());
+        }
+        else
+        {
+            final Document main = CORE.getMongoDbManager().getCollection(MongoCollections.ONLINE_USERS).aggregate(
+                    Arrays.asList(
+                            Aggregates.match(Filters.eq(uuid.toString())),
+                            Aggregates.lookup(MongoCollections.USERS.name, "_id", "_id", "users"),
+                            Aggregates.lookup(MongoCollections.USERS.name, "party_id", "_id", "party")
+                    )
+            ).first();
+
+            if(main == null) throw new NullPointerException("player not in online user");
+
+            final List<Document> party = main.getList("party", Document.class);
+            if(party != null && party.size() > 0)
+                CORE.getPartyManager().load(party.get(0));
+
+            doc =  main.getList("users", Document.class).get(0);
+            if(!main.getString("server_id").equals(CORE.getThisServer().getName()))
+            {
+                CORE.getMongoDbManager().getCollection(MongoCollections.ONLINE_USERS).updateOne(
+                        Filters.eq(uuid.toString()),
+                        Updates.set("server_id", CORE.getThisServer().getName())
+                );
+            }
+        }
+
         username = doc.getString("username");
 
         this.moneys = new HashMap<>();
@@ -76,29 +107,6 @@ public class MinePlayer implements MinetasiaPlayer
             this.stats = new Stats(doc.get("stats", Document.class));
         else
             this.stats = new Stats();
-
-        //todo: party
-        //temp value
-        party = new Party()
-        {
-            @Override
-            public UUID getOwner()
-            {
-                return uuid;
-            }
-
-            @Override
-            public List<UUID> getPlayers()
-            {
-                return Collections.singletonList(uuid);
-            }
-
-            @Override
-            public int limitSize()
-            {
-                return 10;
-            }
-        };
 
     }
 
@@ -285,7 +293,7 @@ public class MinePlayer implements MinetasiaPlayer
     @Override
     public Party getParty()
     {
-        return party;
+        return CORE.getPartyManager().getByPlayer(uuid);
     }
 
     public Boost getPersonalBoost()

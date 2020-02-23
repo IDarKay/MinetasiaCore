@@ -58,6 +58,22 @@ public enum Lang implements IMinetasiaLang {
                                                             "&6End game of : &a" + Argument.SERVER_TYPE +
                                                             "\n&6Rewards: " + Argument.REWARDS +
                                                             "&c=========================================="),
+    //party
+    PARTY_NOT_IN_PARTY("&cSorry you're not in party"),
+    PARTY_NOT_OWNER("&cSorry you're not the party owner"),
+    PARTY_DELETE("&cSorry this party was disband"),
+    PARTY_FULL("&cThis party is full"),
+    PARTY_NOT_REQUEST("&cSorry you haven't join party request"),
+    PARTY_MAX_SIZE("&cSorry you reach max party size"),
+    PARTY_REQUEST_COMING("&aYou received party join request from " + Argument.PLAYER),
+    PARTY_LEAVE("&aYou leave the party"),
+    PARTY_DISBAND("&aYou disband your party"),
+    PARTY_JOIN("&aYou join party of " + Argument.PLAYER),
+    PARTY_ALREADY_INCITE("&cYou have already invite this player"),
+    WAIT_BETWEEN_USE("&cYou must wait &e" + Argument.TIME + "s&c between uses!"),
+    YOUR_PARTY("&aYou're in " + Argument.PLAYER + "'s party@@&aMembers : &6" + Argument.MEMBERS),
+    PARTY_INVITE_SEND("&aYou send invitation to " + Argument.PLAYER),
+    PARTY_INVITE_SELF("&cSorry you can't had your self has friend"),
 
     //money
     MONEY_WRONG_TYPE                            ("&cInvalid money type"),
@@ -156,6 +172,12 @@ public enum Lang implements IMinetasiaLang {
     DESC_TP_USER                                ("if no second argument tp the executor to the player, else tp player to second argument"),
     DESC_TP_A                                   ("tp all player of the server (no all proxy) to second argument"),
 
+    DESC_PARTY(""),
+    DESC_PARTY_JOIN(""),
+    DESC_PARTY_INVITE(""),
+    DESC_PARTY_LEAVE("")
+
+
     ;
 
     public static String prefix;
@@ -195,11 +217,18 @@ public enum Lang implements IMinetasiaLang {
         sender.sendMessage(get(sender instanceof Player ? api.getPlayerLang(((Player) sender).getUniqueId()) : MinetasiaLang.BASE_LANG, args));
     }
 
+    public static final String newlineRegex = "@@";
+
+    @SafeVarargs
+    public final <T> String[] getWithSplit(String lang, Tuple<? extends Args, T>... args)
+    {
+        return getWithoutPrefix(lang, args).split(newlineRegex);
+    }
 
     public enum Argument implements Args
     {
         PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
-        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE
+        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME
         ;
 
         String node;

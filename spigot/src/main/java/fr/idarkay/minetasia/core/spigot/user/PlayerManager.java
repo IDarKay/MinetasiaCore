@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class PlayerManager {
 
     private final TreeMap<UUID, MinePlayer> userCache = new TreeMap<>();
+    private final TreeMap<UUID, CorePlayer> coreUser = new TreeMap<>();
     private final MinetasiaCore plugin;
 
     public PlayerManager(MinetasiaCore minetasiaCore)
@@ -36,11 +38,17 @@ public class PlayerManager {
         return p == null ? new MinePlayer(uuid, true) : p;
     }
 
+    @NotNull
+    public CorePlayer getCorePlayer(UUID uuid)
+    {
+        return Objects.requireNonNull(coreUser.get(uuid), "player not only to this server");
+    }
+
     public MinePlayer load(@NotNull UUID uuid)
     {
         Validate.notNull(uuid);
-
         final MinePlayer player = new MinePlayer(uuid, false);
+        coreUser.put(uuid, new CorePlayer(uuid, player.getName()));
         byte p = Byte.MIN_VALUE;
         Group g = null;
 
@@ -82,6 +90,7 @@ public class PlayerManager {
     {
         Validate.notNull(uuid);
         userCache.remove(uuid);
+        coreUser.remove(uuid);
     }
 
 
