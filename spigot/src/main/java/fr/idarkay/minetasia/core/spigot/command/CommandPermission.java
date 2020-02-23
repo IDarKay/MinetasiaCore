@@ -69,6 +69,7 @@ public enum CommandPermission {
 
     TP("tp", ALL),
     HUB("hub", ALL),
+    PARTY("party", ALL);
 
     ;
 

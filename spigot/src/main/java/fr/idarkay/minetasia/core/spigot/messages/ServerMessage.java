@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Alois. B. (IDarKay),
  * Created the 01/02/2020 at 13:45
  */
-public class ServerMessage implements CoreMessage
+public class ServerMessage extends CoreMessage
 {
 
     public static final String CREATE = "create";
@@ -27,6 +27,11 @@ public class ServerMessage implements CoreMessage
     public static final String PLAYER_COUNT = "playerCount";
     public static final String SERVER_STATUE = "serverStatue";
     public static final String SERVER_MAX_PLAYER = "serverMaxPlayer";
+
+    public ServerMessage()
+    {
+        super(getIdentifier());
+    }
 
     @Override
     public void actionOnGet(MinetasiaCore plugin, String... args)

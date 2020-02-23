@@ -12,14 +12,15 @@ package fr.idarkay.minetasia.core.api;
  */
 public enum Command {
 
-    FRIEND(((byte) (0))),
-    LANG(((byte) (1))),
-    PERMISSION(((byte) (2))),
-    HUB(((byte) (3))),
-    MONEY(((byte) (4))),
-    MSG(((byte) (5))),
-    TP(((byte) (6))),
-    PARTY_XP_BOOST(((byte) (7))),
+    FRIEND((byte) 0),
+    LANG((byte) 1),
+    PERMISSION((byte) 2),
+    HUB((byte) 3),
+    MONEY((byte) 4),
+    MSG((byte) 5),
+    TP((byte) 6),
+    PARTY_XP_BOOST((byte) 7),
+    PARTY((byte) 8)
     ;
 
     public final byte by;

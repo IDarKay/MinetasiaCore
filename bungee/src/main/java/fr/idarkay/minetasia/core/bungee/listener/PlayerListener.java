@@ -60,9 +60,9 @@ public final class PlayerListener implements Listener {
                 return;
             }
             try{
-                PendingConnection proxiedPlayer = e.getConnection();
-                UUID uuid = proxiedPlayer.getUniqueId();
-                MinePlayer player = plugin.getPlayerManager().get(uuid);
+                final PendingConnection proxiedPlayer = e.getConnection();
+                final UUID uuid = proxiedPlayer.getUniqueId();
+                final MinePlayer player = plugin.getPlayerManager().get(uuid);
                 if(player != null)
                 {
                     String name;
@@ -86,6 +86,11 @@ public final class PlayerListener implements Listener {
 
                     plugin.getPlayerManager().newPlayer(uuid, proxiedPlayer.getName(), c);
                 }
+
+                final String proxyName = plugin.getProxyManager().getProxy().getUuid().toString();
+                final String playerName = proxiedPlayer.getName();
+
+                plugin.getMongoDBManager().insertOrReplaceIfExist(MongoCollections.ONLINE_USERS, uuid.toString(), new Document("_id", uuid.toString()).append("proxy_id", proxyName).append("username", playerName));
 
             } catch (Exception e1)
             {

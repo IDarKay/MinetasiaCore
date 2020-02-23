@@ -18,8 +18,12 @@ import java.util.function.BiConsumer;
  * @author Alois. B. (IDarKay),
  * Created the 05/02/2020 at 21:25
  */
-public class PlayerMessage implements CoreMessage
+public class PlayerMessage extends CoreMessage
 {
+    public PlayerMessage()
+    {
+        super(getIdentifier());
+    }
 
 
     // message architecture : (core-player) {uuid} {type} {data...}

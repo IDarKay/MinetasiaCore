@@ -682,7 +682,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
 
     public class MinePlayer implements MinetasiaPlayer
     {
-
+        private final UUID partyUUID = UUID.randomUUID();
         private final UUID uuid;
 
         public MinePlayer(UUID uuid)
@@ -812,15 +812,27 @@ public class MinetasiaTest extends MinetasiaCoreApi
             return new Party()
             {
                 @Override
+                public UUID getId()
+                {
+                    return partyUUID;
+                }
+
+                @Override
                 public UUID getOwner()
                 {
                     return uuid;
                 }
 
                 @Override
-                public List<UUID> getPlayers()
+                public String getOwnerName()
                 {
-                    return Collections.singletonList(uuid);
+                    return getName();
+                }
+
+                @Override
+                public Map<UUID, String> getPlayers()
+                {
+                    return Collections.singletonMap(uuid, getName());
                 }
 
                 @Override

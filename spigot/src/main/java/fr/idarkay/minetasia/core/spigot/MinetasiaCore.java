@@ -31,6 +31,7 @@ import fr.idarkay.minetasia.core.spigot.gui.GUI;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
+import fr.idarkay.minetasia.core.spigot.user.PartyManager;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
 import fr.idarkay.minetasia.core.spigot.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
@@ -137,6 +138,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private PermissionManager permissionManager;
     private CommandManager commandManager;
     private KitsManager kitsManager;
+    private PartyManager partyManager;
     private GUI gui;
 
     private FriendsExecutor friendsExecutor;
@@ -228,7 +230,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         try {
             PluginManager pm = getServer().getPluginManager();
-            PermissionDefault permDefault = getConfig().getBoolean("commands-allow-op") ? PermissionDefault.OP : PermissionDefault.FALSE;
+            PermissionDefault permDefault = PermissionDefault.OP;
 
             // register command permissions (core)
             console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register core permission");
@@ -262,6 +264,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         commandManager = new CommandManager(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init kits manager");
         kitsManager = new KitsManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init party manager");
+        partyManager = new PartyManager(this);
         gui = new GUI(this);
 
         // register command
@@ -306,6 +310,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         if(isCommandEnable(Command.HUB))
         {
             Objects.requireNonNull(getCommand("hub")).setExecutor(new HubExecutor(this));
+        }
+
+        setCommandsIsEnable(Command.PARTY.by, getConfig().getBoolean("commands.party", true));
+        if(isCommandEnable(Command.PARTY))
+        {
+            Objects.requireNonNull(getCommand("party")).setExecutor(customCommandExecutor);
         }
 
         setCommandsIsEnable(Command.MSG.by, getConfig().getBoolean("commands.hub", true));
@@ -1190,5 +1200,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public MessageServer getMessageServer()
     {
         return messageServer;
+    }
+
+    public PartyManager getPartyManager()
+    {
+        return partyManager;
     }
 }
