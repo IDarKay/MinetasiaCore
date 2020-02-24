@@ -76,6 +76,7 @@ public class PlayerListener implements Listener {
     public void onPlayerQuitEvent(PlayerQuitEvent e)
     {
         plugin.getPlayerManager().removePlayer(e.getPlayer().getUniqueId());
+        plugin.getPartyManager().disconnectPlayer(e.getPlayer().getUniqueId());
         plugin.getPermissionManager().removePlayer(e.getPlayer().getUniqueId());
         plugin.socialSpyPlayer.remove(e.getPlayer());
         e.setQuitMessage(null);

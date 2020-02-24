@@ -57,10 +57,8 @@ public class PlayerManager {
         //default group
         for (fr.idarkay.minetasia.core.spigot.permission.Group defaultGroup : plugin.getPermissionManager().getDefaultGroups())
         {
-            System.out.println(defaultGroup.getName());
             if(!groupsOfUser.contains(defaultGroup.getName()))
             {
-                System.out.println(true);
                 plugin.getPermissionManager().addGroupWithoutUpdate(player, defaultGroup.getName());
                 groupsOfUser.add(defaultGroup.getName());
             }

@@ -24,7 +24,7 @@ public class PartyLeaveCommand extends SubCommand implements FixCommand
 {
     public PartyLeaveCommand(@NotNull MinetasiaCore plugin)
     {
-        super(plugin, Lang.PARTY_LEAVE, CommandPermission.PARTY, 2);
+        super(plugin, Lang.DESC_PARTY_LEAVE, CommandPermission.PARTY, 2);
     }
 
     @Override

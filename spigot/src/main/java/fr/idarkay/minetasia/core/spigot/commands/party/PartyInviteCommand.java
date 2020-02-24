@@ -17,7 +17,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -66,12 +65,21 @@ public class PartyInviteCommand extends StepCommand implements FixCommand
         {
             if(sender instanceof Player)
             {
-
+                //check not self
                 if(sender.getName().equalsIgnoreCase(args[1]))
                 {
                     sender.sendMessage(Lang.PARTY_INVITE_SELF.get(getLangOfSender(sender)));
                     return;
                 }
+
+                Party p = plugin.getPlayer(((Player) sender).getUniqueId()).getParty();
+                //check not already in team
+                if(p != null && p.getPlayers().containsValue(args[1]))
+                {
+                    sender.sendMessage(Lang.PARTY_ALREADY_IN_TEAM.get(getLangOfSender(sender)));
+                    return;
+                }
+
 
                 final CorePlayer c = plugin.getPlayerManager().getCorePlayer(((Player) sender).getUniqueId());
                 if(!c.isEndCountDown(CorePlayer.CountdownType.INVITE_PARTY))
@@ -82,7 +90,7 @@ public class PartyInviteCommand extends StepCommand implements FixCommand
                 }
                 if(System.currentTimeMillis() - c.getInvitedPlayerParty().getOrDefault(args[1], 0L) < CorePlayer.CountdownType.INVITE_SAME_PLAYER_PARTY.getTime())
                 {
-                    sender.sendMessage(Lang.PARTY_ALREADY_INCITE.get(getLangOfSender(sender)));
+                    sender.sendMessage(Lang.PARTY_ALREADY_INVITE.get(getLangOfSender(sender)));
                     return;
                 }
 
@@ -109,7 +117,7 @@ public class PartyInviteCommand extends StepCommand implements FixCommand
                     server = playerStatueFix.getServer();
                 }
 
-                Party p = plugin.getPlayer(((Player) sender).getUniqueId()).getParty();
+
                 if (p == null)
                 {
                     p = plugin.getPartyManager().createParty((Player) sender);
@@ -138,7 +146,7 @@ public class PartyInviteCommand extends StepCommand implements FixCommand
         @Override
         public boolean isAllPossibilities()
         {
-            return false;
+            return true;
         }
 
         @Override

@@ -98,7 +98,6 @@ public class PartyManager
                 add = true;
             }
         }
-        getPlayersParty().keySet().forEach(System.out::println);
         if(!add)
         {
             getPartyMap().remove(p.getId());
@@ -113,7 +112,7 @@ public class PartyManager
 
     public void deleteAndUpdate(UUID id)
     {
-        final PlayerParty p = getPartyMap().remove(id);
+        final PlayerParty p = getPartyMap().get(id);
         if(p != null)
         {
             if(delete(id))
@@ -165,16 +164,51 @@ public class PartyManager
         return notAll;
     }
 
-    private boolean isNoOnePlayerPartyInThisServer(PlayerParty p, UUID player)
+    private boolean isNoOnePlayerPartyInThisServer(PlayerParty p)
     {
         if(p != null)
         {
             for (UUID uuid : p.getPlayers().keySet())
             {
-                if(uuid.equals(player)) return false;
+                if(Bukkit.getPlayer(uuid) != null) return false;
             }
         }
         return true;
+    }
+
+    public void setLeaderAndUpdate(@NotNull UUID pUUID, Player player)
+    {
+        final PlayerParty party = getPartyMap().get(pUUID);
+
+        party.setMaxSize(player);
+        party.setOwner(player);
+
+        final String id = pUUID.toString();
+        final Document doc = party.toDocument();
+        if(setLeader(pUUID, doc))
+        {
+            final Set<String> past = new HashSet<>();
+            past.add(core.getThisServer().getName());
+            core.getMongoDbManager().getWithReferenceAndMatch(MongoCollections.ONLINE_USERS, "party_id", id,"servers", "server_id", "_id", "server").forEach(d -> {
+                if(!past.contains(d.getString("server_id")))
+                {
+                    past.add(d.getString("server_id"));
+
+                    final MineServer s = MineServer.getServerFromDocument(d.getList("server", Document.class).get(0));
+                    core.publishTarget(CoreMessage.CHANNEL, PartyMessage.getPartyMakeLeaderSecond(party, doc), s, false, true);
+                }
+            });
+        }
+
+        core.getMongoDbManager().replace(MongoCollections.PARTY, pUUID.toString(), doc);
+    }
+
+    public boolean setLeader(UUID pUUID, Document doc)
+    {
+        final PlayerParty party = getPartyMap().get(pUUID);
+        party.update(doc);
+        load(party);
+        return isNotAllPartyPlayerIsInThisServer(party);
     }
 
     public void removePlayerAdnUpdate(@NotNull UUID pUUID, UUID player)
@@ -221,11 +255,23 @@ public class PartyManager
         party.removePlayer(player);
         getPlayersParty().remove(player);
 
-        if(isNoOnePlayerPartyInThisServer(party, player)) getPartyMap().remove(party.getId());
+        if(isNoOnePlayerPartyInThisServer(party)) getPartyMap().remove(party.getId());
+        else load(party);
 
         return isNotAllPartyPlayerIsInThisServer(party);
     }
 
+    public void disconnectPlayer(@NotNull UUID player)
+    {
+        final PlayerParty party = getPlayersParty().remove(player);
+        if(party != null)
+        {
+            if(isNoOnePlayerPartyInThisServer(party)) {
+                getPartyMap().remove(party.getId());
+            }
+        }
+
+    }
 
     public void addPlayerAndUpdate(@NotNull PlayerParty p, UUID player, String name)
     {

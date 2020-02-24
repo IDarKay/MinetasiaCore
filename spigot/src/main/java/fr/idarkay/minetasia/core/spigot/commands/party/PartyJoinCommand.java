@@ -27,7 +27,7 @@ public class PartyJoinCommand extends SubCommand implements FixCommand
 {
     public PartyJoinCommand(@NotNull MinetasiaCore plugin)
     {
-        super(plugin, Lang.PARTY_JOIN, CommandPermission.PARTY, 1);
+        super(plugin, Lang.DESC_PARTY_JOIN, CommandPermission.PARTY, 1);
     }
 
     @Override
