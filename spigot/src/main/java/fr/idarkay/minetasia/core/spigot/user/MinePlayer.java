@@ -118,18 +118,11 @@ public class MinePlayer implements MinetasiaPlayer
             {
                 final String texture = BukkitUtils.getTextureFromPlayer(p);
                 final String actual = (String) data.get("head_texture");
-                if(actual == null || !actual.equals(texture))
+                if(!texture.equals(actual))
                 {
                     putData("head_texture", texture);
                 }
             }
-
-
-        }
-
-        if(!data.containsKey("head_texture") && !isCache)
-        {
-
         }
     }
 

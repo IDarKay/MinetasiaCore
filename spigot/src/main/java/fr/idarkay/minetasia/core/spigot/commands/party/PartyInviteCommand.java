@@ -76,7 +76,7 @@ public class PartyInviteCommand extends StepCommand implements FixCommand
                 //check not already in team
                 if(p != null && p.getPlayers().containsValue(args[1]))
                 {
-                    sender.sendMessage(Lang.PARTY_ALREADY_IN_TEAM.get(getLangOfSender(sender)));
+                    sender.sendMessage(Lang.PARTY_ALREADY_IN_PARTY.get(getLangOfSender(sender)));
                     return;
                 }
 

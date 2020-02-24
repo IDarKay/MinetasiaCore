@@ -27,19 +27,22 @@ public final class GUI {
 
 
     private final LangGui langGui;
+    private final PartyGui partyGui;
 
     public GUI(MinetasiaCore plugin)
     {
         this.langGui = new LangGui(plugin);
+        this.partyGui = new PartyGui(plugin);
     }
 
-    public void createLangInventory()
-    {
-
-    }
 
     public LangGui getLangGui()
     {
         return langGui;
+    }
+
+    public PartyGui getPartyGui()
+    {
+        return partyGui;
     }
 }

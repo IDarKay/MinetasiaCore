@@ -224,10 +224,24 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      */
     public static ItemStack createHead(int amount, String name, String textures,  String... lore)
     {
+        return createHead(amount, name, textures, Arrays.asList(lore));
+    }
+
+    /**
+     * create a head with many argument
+     * @param amount of the head need ∈ [0 ; 64]
+     * @param name  of the head
+     * @param textures the texture
+     * @param lore of the head
+     * @return the head in {@link ItemStack}
+     * @since 1.0
+     */
+    public static ItemStack createHead(int amount, String name, String textures,  List<String> lore)
+    {
         ItemStack back = new ItemStack(Material.PLAYER_HEAD, amount);
         ItemMeta meta = Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         meta.setDisplayName(name);
-        meta.setLore(Arrays.asList(lore));
+        meta.setLore(lore);
         headFromTexturesRef(textures, meta);
         back.setItemMeta(meta);
         return back;

@@ -515,4 +515,10 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract MongoDbManager getMongoDbManager();
 
+    /**
+     * open the party gui to a player
+     * @param player to open gui
+     */
+    public abstract void openPartyGui(@NotNull Player player);
+
 }

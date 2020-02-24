@@ -147,7 +147,7 @@ public final class PlayerListener implements Listener {
                     }
                     one = true;
                 }
-                catch (ArrayIndexOutOfBoundsException ignore)
+                catch (IndexOutOfBoundsException ignore)
                 {
                     //some time on /end
                 }
