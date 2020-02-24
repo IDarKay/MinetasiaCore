@@ -1,11 +1,15 @@
 package fr.idarkay.minetasia.normes.Utils;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import fr.idarkay.minetasia.normes.Reflection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -13,6 +17,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -88,6 +95,44 @@ public class BukkitUtils
         im.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
         itemStack.setItemMeta(im);
         return itemStack;
+    }
+
+    private final static Class<?> CRAFT_PLAYER_CLASS = Reflection.getCraftBukkitClass("entity.CraftPlayer");
+    private final static Method CRAFT_PLAYER_GET_HANDLE = Reflection.getMethod(Objects.requireNonNull(CRAFT_PLAYER_CLASS), true, "getHandle");
+    private final static Class<?> ENTITY_PLAYER_CLASS = Objects.requireNonNull(Reflection.getNMSClass("EntityHuman"));
+    private final static Method ENTITY_PLAYER_GET_PROFILE = Reflection.getMethod(ENTITY_PLAYER_CLASS, true,"getProfile");
+//    private final static Field ENTITY_PLAYER_BT = Reflection.getField(ENTITY_PLAYER_CLASS, )
+
+    /**
+     *
+     * return the texture of the head of the player mit signature if is present
+     *
+     * @param player that get head
+     * @return texture + _ + signature
+     */
+    @NotNull
+    public static String getTextureFromPlayer(@NotNull Player player)
+    {
+        try
+        {
+            final Object entityPlayer = CRAFT_PLAYER_GET_HANDLE.invoke(CRAFT_PLAYER_CLASS.cast(player));
+           final GameProfile gameProfile = (GameProfile) ENTITY_PLAYER_GET_PROFILE.invoke(entityPlayer);
+           final Property property = gameProfile.getProperties().get("textures").iterator().next();
+           final String texture = property.getValue();
+           final String signature = property.getSignature();
+
+           if(signature == null || signature.isEmpty())
+           {
+               return texture;
+           }
+
+           return texture + "_" + signature;
+        }
+            catch (IllegalAccessException | InvocationTargetException  e)
+        {
+            e.printStackTrace();
+        }
+        throw new NullPointerException("no texture found");
     }
 
 }

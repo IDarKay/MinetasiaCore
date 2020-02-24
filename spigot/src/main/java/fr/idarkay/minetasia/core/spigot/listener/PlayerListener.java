@@ -85,7 +85,7 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerPermissionLoadEndEvent(PlayerPermissionLoadEndEvent e)
     {
-        if(plugin.getServerPhase() == ServerPhase.GAME)
+        if(plugin.getServerPhase() == ServerPhase.GAME && !plugin.isHub())
         {
             if(Bukkit.getOnlinePlayers().size() > plugin.getMaxPlayerCount())
             {

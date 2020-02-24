@@ -13,6 +13,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -46,6 +47,17 @@ public final class PlayerListener implements Listener {
             reader = new DatabaseReader.Builder(countryFile).build();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPreLogEvent(PreLoginEvent e)
+    {
+        if(plugin.getProxy().getServers().size() == 0)
+        {
+            e.setCancelled(true);
+            e.setCancelReason(TextComponent.fromLegacyText("No online server retry later !"));
+            e.completeIntent(plugin);
         }
     }
 
