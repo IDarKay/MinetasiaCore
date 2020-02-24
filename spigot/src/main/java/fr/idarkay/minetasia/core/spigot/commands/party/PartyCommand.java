@@ -31,49 +31,7 @@ public class PartyCommand extends MainCommand implements FixCommand
         child.add(new PartyInviteCommand(plugin));
         child.add(new PartyKickCommand(plugin));
         child.add(new PartyMakeLeaderCommand(plugin));
-    }
-
-    @Override
-    public void execute(@NotNull MinetasiaCore plugin, @NotNull CommandSender sender, @NotNull String[] args, @NotNull String label)
-    {
-        if(args.length > 0)
-            super.execute(plugin, sender, args, label);
-        else
-        {
-            if(sender instanceof Player)
-            {
-                final Party p =  plugin.getPlayer(((Player) sender).getUniqueId()).getParty();
-                if(p != null)
-                {
-                    final StringBuilder m = new StringBuilder();
-                    boolean first = true;
-                    for (String value : p.getPlayers().values())
-                    {
-                        if(!first)
-                        {
-                            m.append(", ");
-                        }
-                        else
-                            first = false;
-
-                        m.append(value);
-                    }
-
-                    final String[] msg = Lang.YOUR_PARTY.getWithSplit(getLangOfSender(sender), Lang.Argument.PLAYER.match(p.getOwnerName()),
-                            Lang.Argument.MEMBERS.match(m.toString()));
-
-                    for (String s : msg)
-                    {
-                        sender.sendMessage(s);
-                    }
-
-                }
-                else
-                {
-                    super.execute(plugin, sender, args, label);
-                }
-            }
-        }
+        child.add(new PartyListCommand(plugin));
     }
 
     @Override

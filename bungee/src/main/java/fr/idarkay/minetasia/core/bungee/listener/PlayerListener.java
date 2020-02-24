@@ -134,7 +134,12 @@ public final class PlayerListener implements Listener {
                         MessageClient.send(ip, port, msg, false);
                     }
                     one = true;
-                } catch (NullPointerException e1)
+                }
+                catch (ArrayIndexOutOfBoundsException ignore)
+                {
+                    //some time on /end
+                }
+                catch (NullPointerException e1)
                 {
                     e1.printStackTrace();
                 }
