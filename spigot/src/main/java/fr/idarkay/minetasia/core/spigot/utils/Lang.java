@@ -79,6 +79,8 @@ public enum Lang implements IMinetasiaLang {
     PARTY_PLAYER_KICK("&aYou have kick &6" + Argument.PLAYER),
     PARTY_MAKE_LEADER("&aNew Leaders is &6" + Argument.PLAYER),
     PARTY_YOU_ARE_LEADER("&cYou're the leaders"),
+    PARTY_GUI_NAME("Your party"),
+
 
     //money
     MONEY_WRONG_TYPE                            ("&cInvalid money type"),

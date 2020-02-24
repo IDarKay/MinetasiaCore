@@ -13,8 +13,11 @@ import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
 import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Utils.BukkitUtils;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,6 +110,27 @@ public class MinePlayer implements MinetasiaPlayer
         else
             this.stats = new Stats();
 
+        //head
+        if(!isCache)
+        {
+            final Player p = Bukkit.getPlayer(uuid);
+            if(p != null)
+            {
+                final String texture = BukkitUtils.getTextureFromPlayer(p);
+                final String actual = (String) data.get("head_texture");
+                if(actual == null || !actual.equals(texture))
+                {
+                    putData("head_texture", texture);
+                }
+            }
+
+
+        }
+
+        if(!data.containsKey("head_texture") && !isCache)
+        {
+
+        }
     }
 
     public void setUsername(@NotNull String username)

@@ -1,6 +1,9 @@
 package fr.idarkay.minetasia.normes;
 
 import com.google.common.collect.ForwardingMultimap;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -10,6 +13,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -298,25 +302,20 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      */
     public static ItemMeta headFromTexturesRef(String textures, ItemMeta meta) {
         try {
-            Field profileField = meta.getClass().getDeclaredField("profile");
+            final Field profileField = meta.getClass().getDeclaredField("profile");
             profileField.setAccessible(true);
 
             String[] data = textures.split("_");
 
-            Constructor<?> gameprofileConstructor = Class.forName("com.mojang.authlib.GameProfile").getConstructor(UUID.class, String.class);
-            Object gameprofileInstance = gameprofileConstructor.newInstance(UUID.randomUUID(), null);
-            Object propertiesMap = gameprofileInstance.getClass().getDeclaredMethod("getProperties").invoke(gameprofileInstance);
+            final GameProfile gameProfile = new GameProfile(UUID.randomUUID(),null);
+            final PropertyMap propertyMap = gameProfile.getProperties();
 
-            Constructor<?> propTexture = Class.forName("com.mojang.authlib.properties.Property").getConstructor(String.class, String.class);
-            Constructor<?> propTextureSignature = Class.forName("com.mojang.authlib.properties.Property").getConstructor(String.class, String.class, String.class);
+            final Property property;
+            if(data.length > 1) property = new Property("textures", data[0], data[1]);
+            else property = new Property("textures", textures);
+            propertyMap.put("textures", property);
 
-            Object property;
-            if(data.length > 1) property = propTextureSignature.newInstance("textures", data[0], data[1]);
-            else property = propTexture.newInstance("textures", textures);
-
-            ForwardingMultimap.class.getDeclaredMethod("put", Object.class, Object.class).invoke(propertiesMap, "textures", property);
-
-            profileField.set(meta, gameprofileInstance);
+            profileField.set(meta, gameProfile);
         }
         catch (Exception e) { e.printStackTrace(); }
         return meta;
