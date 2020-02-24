@@ -1,5 +1,7 @@
 package fr.idarkay.minetasia.normes;
 
+import fr.idarkay.minetasia.normes.packet.PlayerConnectionListener;
+import fr.idarkay.minetasia.normes.sign.PlayerPacketListener;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -27,6 +29,18 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
 
 
     private MinetasiaLang minetasiaLang;
+
+    private boolean playerPacketComingEventRegister = false;
+
+    public void registerPlayerPacketComingEvent()
+    {
+        if(!playerPacketComingEventRegister)
+        {
+            playerPacketComingEventRegister = true;
+            new PlayerConnectionListener(this);
+            new PlayerPacketListener(this);
+        }
+    }
 
     /**
      * @see MinetasiaLang

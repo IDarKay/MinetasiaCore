@@ -57,7 +57,6 @@ public final class PlayerListener implements Listener {
         {
             e.setCancelled(true);
             e.setCancelReason(TextComponent.fromLegacyText("No online server retry later !"));
-            e.completeIntent(plugin);
         }
     }
 

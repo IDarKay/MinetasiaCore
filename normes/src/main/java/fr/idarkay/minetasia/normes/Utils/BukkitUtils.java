@@ -97,10 +97,10 @@ public class BukkitUtils
         return itemStack;
     }
 
-    private final static Class<?> CRAFT_PLAYER_CLASS = Reflection.getCraftBukkitClass("entity.CraftPlayer");
-    private final static Method CRAFT_PLAYER_GET_HANDLE = Reflection.getMethod(Objects.requireNonNull(CRAFT_PLAYER_CLASS), true, "getHandle");
-    private final static Class<?> ENTITY_PLAYER_CLASS = Objects.requireNonNull(Reflection.getNMSClass("EntityHuman"));
-    private final static Method ENTITY_PLAYER_GET_PROFILE = Reflection.getMethod(ENTITY_PLAYER_CLASS, true,"getProfile");
+    public final static Class<?> CRAFT_PLAYER_CLASS = Reflection.getCraftBukkitClass("entity.CraftPlayer");
+    public final static Method CRAFT_PLAYER_GET_HANDLE = Reflection.getMethod(Objects.requireNonNull(CRAFT_PLAYER_CLASS), true, "getHandle");
+    public final static Class<?> ENTITY_PLAYER_CLASS = Objects.requireNonNull(Reflection.getNMSClass("EntityHuman"));
+    public final static Method ENTITY_PLAYER_GET_PROFILE = Reflection.getMethod(ENTITY_PLAYER_CLASS, true,"getProfile");
 //    private final static Field ENTITY_PLAYER_BT = Reflection.getField(ENTITY_PLAYER_CLASS, )
 
     /**
@@ -115,7 +115,7 @@ public class BukkitUtils
     {
         try
         {
-            final Object entityPlayer = CRAFT_PLAYER_GET_HANDLE.invoke(CRAFT_PLAYER_CLASS.cast(player));
+            final Object entityPlayer = CRAFT_PLAYER_GET_HANDLE.invoke(player);
            final GameProfile gameProfile = (GameProfile) ENTITY_PLAYER_GET_PROFILE.invoke(entityPlayer);
            final Property property = gameProfile.getProperties().get("textures").iterator().next();
            final String texture = property.getValue();
