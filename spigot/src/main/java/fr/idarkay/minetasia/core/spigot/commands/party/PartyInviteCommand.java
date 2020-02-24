@@ -110,7 +110,7 @@ public class PartyInviteCommand extends StepCommand implements FixCommand
                     if(playerStatueFix == null)
                     {
                         sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(getLangOfSender(sender)));
-                        c.isEndCountDown(CorePlayer.CountdownType.INVITE_PARTY);
+                        c.startCountDown(CorePlayer.CountdownType.INVITE_PARTY);
                         return;
                     }
                     uuid = playerStatueFix.getUUID();

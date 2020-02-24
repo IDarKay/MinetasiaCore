@@ -1,9 +1,12 @@
 package fr.idarkay.minetasia.core.spigot.gui;
 
 import fr.idarkay.minetasia.core.api.utils.Party;
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
+import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
 import fr.idarkay.minetasia.core.spigot.messages.PartyMessage;
+import fr.idarkay.minetasia.core.spigot.user.CorePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PlayerParty;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.GUIFlags;
@@ -11,6 +14,7 @@ import fr.idarkay.minetasia.normes.InventoryFileType;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.Utils.BukkitUtils;
+import fr.idarkay.minetasia.normes.sign.MinetasiaSignGui;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * File <b>PartyGui</b> located on fr.idarkay.minetasia.core.spigot.gui
@@ -138,15 +143,95 @@ public class PartyGui extends MinetasiaGUI<MinetasiaCore>
                 //invite => /p invite
                 if(e.getSlot() == 4)
                 {
-                    if(p != null)
+                    if(p == null || p.getOwner().equals(player.getUniqueId()))
                     {
-                        if(p.getOwner().equals(player.getUniqueId()))
-                        {
-                            //todo sign ...
-                        }
-                        else player.sendMessage(Lang.PARTY_NOT_OWNER.get(lang));
+                        new MinetasiaSignGui((pl, l) -> {
+                            PlayerParty p2 = p;
+
+                            final String ps = l[0].replace(">", "").replace(" ", "");
+                            if(ps.length() < 3)
+                            {
+                                pl.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
+                                return;
+                            }
+                            //check not self
+                            if(pl.getName().equalsIgnoreCase(ps))
+                            {
+                                pl.sendMessage(Lang.PARTY_INVITE_SELF.get(lang));
+                                return;
+                            }
+
+                            //check not already in team
+                            if(p2 != null && p2.getPlayers().containsValue(ps))
+                            {
+                                pl.sendMessage(Lang.PARTY_ALREADY_IN_PARTY.get(lang));
+                                return;
+                            }
+
+
+                            final CorePlayer c = plugin.getPlayerManager().getCorePlayer(pl.getUniqueId());
+                            if(!c.isEndCountDown(CorePlayer.CountdownType.INVITE_PARTY))
+                            {
+                                pl.sendMessage(Lang.WAIT_BETWEEN_USE.get(lang, Lang.Argument.TIME.match(
+                                        TimeUnit.MILLISECONDS.toSeconds( c.getCountDown(CorePlayer.CountdownType.INVITE_PARTY)))));
+                                return;
+                            }
+                            if(System.currentTimeMillis() - c.getInvitedPlayerParty().getOrDefault(ps, 0L) < CorePlayer.CountdownType.INVITE_SAME_PLAYER_PARTY.getTime())
+                            {
+                                pl.sendMessage(Lang.PARTY_ALREADY_INVITE.get(lang));
+                                return;
+                            }
+
+                            c.getInvitedPlayerParty().put(ps, System.currentTimeMillis());
+
+                            final UUID uuid;
+                            final Server server;
+                            final Player bukkitP = Bukkit.getPlayer(ps);
+                            if(bukkitP != null)
+                            {
+                                uuid = bukkitP.getUniqueId();
+                                server = plugin.getThisServer();
+                            }
+                            else
+                            {
+                                final PlayerStatueFix playerStatueFix = plugin.getPlayerStatue(ps);
+                                if(playerStatueFix == null)
+                                {
+                                    pl.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
+                                    c.startCountDown(CorePlayer.CountdownType.INVITE_PARTY);
+                                    return;
+                                }
+                                uuid = playerStatueFix.getUUID();
+                                server = playerStatueFix.getServer();
+                            }
+
+
+                            if (p2 == null)
+                            {
+                                p2 = plugin.getPartyManager().createParty(pl);
+                            }
+                            if(p2.getOwner().equals(pl.getUniqueId()))
+                            {
+                                if(p2.limitSize() > p2.getPlayers().size())
+                                {
+                                    final String msg = PartyMessage.getInvitePlayerMessage(p2, uuid, pl.getName());
+                                    if(server.getName().equals(plugin.getThisServer().getName()))
+                                    {
+                                        PartyMessage.ActionType.INVITE.run(plugin, msg.split(";"));
+                                        c.getInvitedPlayerParty().put(ps, System.currentTimeMillis());
+                                    }
+                                    else
+                                        plugin.publishTarget(CoreMessage.CHANNEL, msg, server, false, true);
+                                    pl.sendMessage(Lang.PARTY_INVITE_SEND.get(lang, Lang.Argument.PLAYER.match(ps)));
+                                }
+                                else pl.sendMessage(Lang.PARTY_MAX_SIZE.get(lang));
+                            }
+                            else pl.sendMessage(Lang.PARTY_NOT_OWNER.get(lang));
+                            
+                            
+                        }).setLines("> ", "set player name", "to invite", "===============").open(player);
                     }
-                    else player.sendMessage(Lang.PARTY_NOT_IN_PARTY.get(lang));
+                    else player.sendMessage(Lang.PARTY_NOT_OWNER.get(lang));
                     return;
                 }
 

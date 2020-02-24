@@ -342,6 +342,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             this.setServerPhase(ServerPhase.STARTUP);
         }
 
+        //for sign
+        registerPlayerPacketComingEvent();
+
     }
 
     private void registerListener()
