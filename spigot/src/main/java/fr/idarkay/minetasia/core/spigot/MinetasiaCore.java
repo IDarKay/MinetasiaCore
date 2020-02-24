@@ -880,6 +880,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
     {
+        if(moneyUpdater.getUpdate().isEmpty()) return;
         if(isCommandEnable(Command.PARTY_XP_BOOST))
         {
             Consumer<BukkitTask> bukkitTaskConsumer = bukkitTask -> {

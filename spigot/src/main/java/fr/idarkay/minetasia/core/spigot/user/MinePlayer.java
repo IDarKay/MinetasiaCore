@@ -71,7 +71,6 @@ public class MinePlayer implements MinetasiaPlayer
                             Aggregates.lookup(MongoCollections.PARTY.name, "party_id", "_id", "party")
                     )
             ).first();
-            //todo: change for getOneAndUpdate
             if(main == null) throw new NullPointerException("player not in online user");
 
             final List<Document> party = main.getList("party", Document.class);
