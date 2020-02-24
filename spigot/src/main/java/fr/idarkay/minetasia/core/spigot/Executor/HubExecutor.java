@@ -29,13 +29,17 @@ public class HubExecutor implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull  String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull  String[] args)
+    {
         if(sender instanceof Player)
-            if(!minetasiaCore.isHub() && sender.hasPermission(CommandPermission.HUB.getPermission()))
+        {
+            if(minetasiaCore.isHub()) return true;
+            if(sender.hasPermission(CommandPermission.HUB.getPermission()))
             {
                 minetasiaCore.movePlayerToHub((Player) sender);
             }
             else sender.sendMessage(Lang.NO_PERMISSION.get(minetasiaCore.getPlayerLang(((org.bukkit.entity.Player) sender).getUniqueId())));
+        }
         return true;
     }
 }
