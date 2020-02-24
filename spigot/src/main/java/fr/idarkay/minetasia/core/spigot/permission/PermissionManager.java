@@ -409,7 +409,7 @@ public class PermissionManager {
                     {
                         PermissionAttachment pa = p.addAttachment(plugin);
                         for(String perm : g.getPermissions()) {
-                            if(perm.equals("*")) p.setOp(true);
+                            if(perm.equals("*")) Bukkit.getScheduler().runTask(plugin, () -> p.setOp(true));
                             pa.setPermission(perm, true);
                         }
                         map.put("group_" + g.getName(), pa);

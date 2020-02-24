@@ -581,7 +581,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
         if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
         //add place for admin
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
-        System.out.println("Server Phase set to " + phase.name());
     }
 
     @Override

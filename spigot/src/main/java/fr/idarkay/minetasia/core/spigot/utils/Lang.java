@@ -65,15 +65,20 @@ public enum Lang implements IMinetasiaLang {
     PARTY_FULL("&cThis party is full"),
     PARTY_NOT_REQUEST("&cSorry you haven't join party request"),
     PARTY_MAX_SIZE("&cSorry you reach max party size"),
-    PARTY_REQUEST_COMING("&aYou received party join request from " + Argument.PLAYER),
+    PARTY_REQUEST_COMING("&aYou received party join request from &6" + Argument.PLAYER),
     PARTY_LEAVE("&aYou leave the party"),
     PARTY_DISBAND("&aYou disband your party"),
-    PARTY_JOIN("&aYou join party of " + Argument.PLAYER),
-    PARTY_ALREADY_INCITE("&cYou have already invite this player"),
+    PARTY_JOIN("&aYou join party of &6" + Argument.PLAYER),
+    PARTY_ALREADY_INVITE("&cYou have already invite this player"),
     WAIT_BETWEEN_USE("&cYou must wait &e" + Argument.TIME + "s&c between uses!"),
-    YOUR_PARTY("&aYou're in " + Argument.PLAYER + "'s party@@&aMembers : &6" + Argument.MEMBERS),
-    PARTY_INVITE_SEND("&aYou send invitation to " + Argument.PLAYER),
-    PARTY_INVITE_SELF("&cSorry you can't had your self has friend"),
+    YOUR_PARTY("&aYou're in &6" + Argument.PLAYER + "'s&a party@@&aMembers : &6" + Argument.MEMBERS),
+    PARTY_INVITE_SEND("&aYou send invitation to &6" + Argument.PLAYER),
+    PARTY_INVITE_SELF("&cSorry you can't invite your self"),
+    PARTY_ALREADY_IN_TEAM("&cSorry, this player is on your team"),
+    PARTY_PLAYER_NOT_IN_PARTY("&cSorry this player isn't in your party"),
+    PARTY_PLAYER_KICK("&aYou have kick &6" + Argument.PLAYER),
+    PARTY_MAKE_LEADER("&aNew Leaders is &6" + Argument.PLAYER),
+    PARTY_YOU_ARE_LEADER("&cYou're the leaders"),
 
     //money
     MONEY_WRONG_TYPE                            ("&cInvalid money type"),
@@ -173,9 +178,11 @@ public enum Lang implements IMinetasiaLang {
     DESC_TP_A                                   ("tp all player of the server (no all proxy) to second argument"),
 
     DESC_PARTY(""),
-    DESC_PARTY_JOIN(""),
-    DESC_PARTY_INVITE(""),
-    DESC_PARTY_LEAVE("")
+    DESC_PARTY_JOIN("join the last party invitation"),
+    DESC_PARTY_INVITE("<player> invite a given player to your party"),
+    DESC_PARTY_LEAVE("leave your party or disband if you are leader"),
+    DESC_PARTY_KICK("<player> kick a player from your party"),
+    DESC_MAKER_LEADER("<player> set the new owner of the group"),
 
 
     ;

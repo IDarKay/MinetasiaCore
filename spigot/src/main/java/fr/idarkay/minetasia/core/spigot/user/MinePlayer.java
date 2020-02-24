@@ -68,10 +68,10 @@ public class MinePlayer implements MinetasiaPlayer
                     Arrays.asList(
                             Aggregates.match(Filters.eq(uuid.toString())),
                             Aggregates.lookup(MongoCollections.USERS.name, "_id", "_id", "users"),
-                            Aggregates.lookup(MongoCollections.USERS.name, "party_id", "_id", "party")
+                            Aggregates.lookup(MongoCollections.PARTY.name, "party_id", "_id", "party")
                     )
             ).first();
-
+            //todo: change for getOneAndUpdate
             if(main == null) throw new NullPointerException("player not in online user");
 
             final List<Document> party = main.getList("party", Document.class);
@@ -79,7 +79,7 @@ public class MinePlayer implements MinetasiaPlayer
                 CORE.getPartyManager().load(party.get(0));
 
             doc =  main.getList("users", Document.class).get(0);
-            if(!main.getString("server_id").equals(CORE.getThisServer().getName()))
+            if(!CORE.getThisServer().getName().equals(main.getString("server_id")))
             {
                 CORE.getMongoDbManager().getCollection(MongoCollections.ONLINE_USERS).updateOne(
                         Filters.eq(uuid.toString()),

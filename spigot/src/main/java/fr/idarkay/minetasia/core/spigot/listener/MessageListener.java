@@ -152,7 +152,6 @@ public final class MessageListener implements Listener {
             {
                 String[] split = e.getValue().split(";");
                 CoreMessage msg = CoreMessage.MESSAGE.get(split[0]);
-                System.out.println(msg != null);
                 if(msg != null) msg.actionOnGet(plugin, split);
             }
         }

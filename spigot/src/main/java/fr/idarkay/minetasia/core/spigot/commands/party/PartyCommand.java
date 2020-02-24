@@ -29,6 +29,8 @@ public class PartyCommand extends MainCommand implements FixCommand
         child.add(new PartyLeaveCommand(plugin));
         child.add(new PartyJoinCommand(plugin));
         child.add(new PartyInviteCommand(plugin));
+        child.add(new PartyKickCommand(plugin));
+        child.add(new PartyMakeLeaderCommand(plugin));
     }
 
     @Override
@@ -68,9 +70,6 @@ public class PartyCommand extends MainCommand implements FixCommand
                 }
                 else
                 {
-                    plugin.getPartyManager().getPlayersParty().keySet().forEach(System.out::println);
-                    System.out.println("============");
-                    plugin.getPartyManager().getPartyMap().keySet().forEach(System.out::println);
                     super.execute(plugin, sender, args, label);
                 }
             }
