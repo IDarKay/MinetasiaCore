@@ -178,6 +178,7 @@ public enum Lang implements IMinetasiaLang {
     DESC_TP_A                                   ("tp all player of the server (no all proxy) to second argument"),
 
     DESC_PARTY(""),
+    DESC_PARTY_LIST("show all player in your team"),
     DESC_PARTY_JOIN("join the last party invitation"),
     DESC_PARTY_INVITE("<player> invite a given player to your party"),
     DESC_PARTY_LEAVE("leave your party or disband if you are leader"),
