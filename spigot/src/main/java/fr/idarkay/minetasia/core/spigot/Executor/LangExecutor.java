@@ -51,7 +51,7 @@ public final class LangExecutor implements TabExecutor {
                 }
                 else if(sender instanceof Player)
                 {
-                   Bukkit.getScheduler().runTask(minetasiaCore, () -> minetasiaCore.getGui().openLangInventory((Player) sender));
+                   Bukkit.getScheduler().runTask(minetasiaCore, () -> minetasiaCore.getGui().getLangGui().open((Player) sender));
                 }
                 else sender.sendMessage(Lang.NEED_BE_PLAYER.get(MinetasiaLang.BASE_LANG));
             }
