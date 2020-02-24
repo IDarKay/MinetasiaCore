@@ -72,7 +72,7 @@ public class PartyJoinCommand extends SubCommand implements FixCommand
 
                 if(newParty.limitSize() > newParty.getPlayers().size())
                 {
-                    plugin.getPartyManager().addPlayerAndUpdate(newParty, ((Player) sender).getUniqueId(), sender.getName());
+                    plugin.getPartyManager().addPlayerAndUpdate(newParty, ((Player) sender).getUniqueId(), sender.getName(), plugin.getPlayerData(((Player) sender).getUniqueId(), "head_texture", String.class));
                     sender.sendMessage(Lang.PARTY_JOIN.get(getLangOfSender(sender), Lang.Argument.PLAYER.match(newParty.getOwnerName())));
                 }
                 else sender.sendMessage(Lang.PARTY_FULL.get(getLangOfSender(sender)));

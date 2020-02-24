@@ -62,7 +62,7 @@ public class PartyManager
 
     public PlayerParty createParty(Player player)
     {
-        final PlayerParty p = new PlayerParty(player);
+        final PlayerParty p = new PlayerParty(player, core.getPlayerData(player.getUniqueId(), "head_texture", String.class));
         load(p);
         core.getMongoDbManager().getCollection(MongoCollections.ONLINE_USERS).updateMany(
                 Filters.eq(player.getUniqueId().toString()), Updates.set("party_id", p.getId().toString())
@@ -273,10 +273,10 @@ public class PartyManager
 
     }
 
-    public void addPlayerAndUpdate(@NotNull PlayerParty p, UUID player, String name)
+    public void addPlayerAndUpdate(@NotNull PlayerParty p, @NotNull  UUID player, @NotNull  String name, @Nullable String texture)
     {
         final String id = p.getId().toString();
-        p.addPlayers(player, name);
+        p.addPlayers(player, name, texture);
         load(p);
         if(isNotAllPartyPlayerIsInThisServer(p))
         {
@@ -285,10 +285,16 @@ public class PartyManager
             core.getMongoDbManager().getWithReferenceAndMatch(MongoCollections.ONLINE_USERS, "party_id", id,"servers", "server_id", "_id", "server").forEach(d -> {
                 if(!past.contains(d.getString("server_id")))
                 {
-                    past.add(d.getString("server_id"));
+                    try
+                    {
+                        final MineServer s = MineServer.getServerFromDocument(d.getList("server", Document.class).get(0));
+                        core.publishTarget(CoreMessage.CHANNEL, PartyMessage.getAddPlayer( p), s, false, true);
+                        past.add(d.getString("server_id"));
+                    } catch (ArrayIndexOutOfBoundsException e)
+                    {
+                        // some time when disconnect
+                    }
 
-                    final MineServer s = MineServer.getServerFromDocument(d.getList("server", Document.class).get(0));
-                    core.publishTarget(CoreMessage.CHANNEL, PartyMessage.getAddPlayer( p), s, false, true);
                 }
             });
         }

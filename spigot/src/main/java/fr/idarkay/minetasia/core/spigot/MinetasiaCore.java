@@ -301,7 +301,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         setCommandsIsEnable(Command.LANG.by, getConfig().getBoolean("commands.lang", true));
         if(isCommandEnable(Command.LANG))
         {
-            gui.createLangInventory();
             Objects.requireNonNull(getCommand("lang")).setExecutor(new LangExecutor(this));
         }
 
@@ -1104,6 +1103,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public MongoDbManager getMongoDbManager()
     {
         return mongoDBManager;
+    }
+
+    @Override
+    public void openPartyGui(@NotNull Player player)
+    {
+        Validate.notNull(player);
+        gui.getPartyGui().open(player);
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)

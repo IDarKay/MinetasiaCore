@@ -664,6 +664,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return null;
     }
 
+    @Override
+    public void openPartyGui(@NotNull Player player)
+    {
+        player.sendMessage("no gui with test core");
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
