@@ -299,6 +299,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         return max;
     }
 
+
     /**
      * read schematic from  plugin/{@code <plugin name>}/schematic/{@code <schematic_name>}.minetasiaschem
      * @param name nam of schematic
@@ -307,10 +308,21 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      */
     public Schematic readSchematic(String name) throws IOException
     {
-        File file = new File(getDataFolder(), "schematic/" + name + ".minetasiaschem");
+        final File file = new File(getDataFolder(), "schematic/" + name + ".minetasiaschem");
         if(!file.exists()) throw new IOException("file not exist");
 
-        try(FileInputStream fis = new FileInputStream(file))
+        return readSchematic(file);
+    }
+
+    /**
+     * read schematic from  plugin/{@code <plugin schemFile>}/schematic/{@code <schematic_name>}.minetasiaschem
+     * @param schemFile file  of the schematic
+     * @return create schematic from data
+     * @throws IOException if error on read data
+     */
+    public Schematic readSchematic(File schemFile) throws IOException
+    {
+        try(FileInputStream fis = new FileInputStream(schemFile))
         {
             MaterialID[] value = MaterialID.values();
             FileChannel fc = fis.getChannel();
