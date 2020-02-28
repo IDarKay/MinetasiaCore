@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -53,7 +54,8 @@ public class PlayerConnectionListener implements Listener
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception
             {
-                javaPlugin.getServer().getPluginManager().callEvent(new PlayerPacketComingEvent(player, msg));
+                final PlayerPacketComingEvent e = new PlayerPacketComingEvent(player, msg);
+                javaPlugin.getServer().getPluginManager().callEvent(e);
                 super.channelRead(ctx, msg);
             }
         };

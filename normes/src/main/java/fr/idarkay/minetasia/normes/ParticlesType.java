@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.normes;
 
+
 import java.util.HashMap;
 import java.util.Objects;
 

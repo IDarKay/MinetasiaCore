@@ -2,6 +2,7 @@ package fr.idarkay.minetasia.normes.packet;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -16,12 +17,13 @@ import org.jetbrains.annotations.NotNull;
  * @author Alois. B. (IDarKay),
  * Created the 24/02/2020 at 22:02
  */
-public class PlayerPacketComingEvent extends Event
+public class PlayerPacketComingEvent extends Event implements Cancellable
 {
     private static HandlerList handlerList = new HandlerList();
 
     private final Object packet;
     private final Player player;
+    private boolean cancelled = false;
 
     public PlayerPacketComingEvent(@NotNull  final Player player, @NotNull final Object packet)
     {
@@ -50,5 +52,17 @@ public class PlayerPacketComingEvent extends Event
     public static HandlerList getHandlerList()
     {
         return handlerList;
+    }
+
+    @Override
+    public boolean isCancelled()
+    {
+        return cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean b)
+    {
+        cancelled = b;
     }
 }
