@@ -1,5 +1,7 @@
 package fr.idarkay.minetasia.normes;
 
+import org.bukkit.Location;
+
 /**
  * File <b>Direction</b> located on fr.idarkay.minetasia.normes
  * Direction is a part of MinetasiaCore.
@@ -60,6 +62,13 @@ public enum Direction
     public int z(int x, int z, int mx, int mz)
     {
         return z0 ? (!x0 ? x : z) : (-(x0 ? x : z) + mz);
+    }
+
+    public Location loc(Location loc, int mx, int mz)
+    {
+        loc.setX(x(loc.getBlockX(), loc.getBlockZ(), mx, mz));
+        loc.setX(z(loc.getBlockX(), loc.getBlockZ(), mx, mz));
+        return loc;
     }
 
 }
