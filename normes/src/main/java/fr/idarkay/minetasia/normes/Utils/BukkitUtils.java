@@ -7,7 +7,6 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -17,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -98,9 +96,9 @@ public class BukkitUtils
     }
 
     public final static Class<?> CRAFT_PLAYER_CLASS = Reflection.getCraftBukkitClass("entity.CraftPlayer");
-    public final static Method CRAFT_PLAYER_GET_HANDLE = Reflection.getMethod(Objects.requireNonNull(CRAFT_PLAYER_CLASS), true, "getHandle");
+    public final static Method CRAFT_PLAYER_GET_HANDLE = Reflection.getDeclaredMethod(Objects.requireNonNull(CRAFT_PLAYER_CLASS), true, "getHandle");
     public final static Class<?> ENTITY_PLAYER_CLASS = Objects.requireNonNull(Reflection.getNMSClass("EntityHuman"));
-    public final static Method ENTITY_PLAYER_GET_PROFILE = Reflection.getMethod(ENTITY_PLAYER_CLASS, true,"getProfile");
+    public final static Method ENTITY_PLAYER_GET_PROFILE = Reflection.getDeclaredMethod(ENTITY_PLAYER_CLASS, true,"getProfile");
 //    private final static Field ENTITY_PLAYER_BT = Reflection.getField(ENTITY_PLAYER_CLASS, )
 
     /**

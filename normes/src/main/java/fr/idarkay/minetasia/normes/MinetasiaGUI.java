@@ -1,11 +1,13 @@
 package fr.idarkay.minetasia.normes;
 
-import com.google.common.collect.ForwardingMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import fr.idarkay.minetasia.normes.Utils.ReflectionVar;
+import net.minecraft.server.v1_15_R1.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
@@ -13,13 +15,12 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -318,21 +319,38 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
         try {
             final Field profileField = meta.getClass().getDeclaredField("profile");
             profileField.setAccessible(true);
-
-            String[] data = textures.split("_");
-
-            final GameProfile gameProfile = new GameProfile(UUID.randomUUID(),null);
-            final PropertyMap propertyMap = gameProfile.getProperties();
-
-            final Property property;
-            if(data.length > 1) property = new Property("textures", data[0], data[1]);
-            else property = new Property("textures", textures);
-            propertyMap.put("textures", property);
-
-            profileField.set(meta, gameProfile);
+            profileField.set(meta, getGameProfile(textures));
         }
         catch (Exception e) { e.printStackTrace(); }
         return meta;
+    }
+
+
+    public static void headFromTexturesRefToBlock(String textures, Skull skull) {
+        try
+        {
+            final Object world = ReflectionVar.GET_WORLD_HANDLE.invoke(skull.getWorld());
+            final Object tileSkull = ReflectionVar.GET_WORLD_TILE_ENTITY.invoke(world, ReflectionVar.BLOCK_POSITION_CONSTRUCTOR.newInstance(skull.getX(), skull.getY(), skull.getZ()));
+            ReflectionVar.SET_GAME_PROFILE.invoke(tileSkull, getGameProfile(textures));
+        }
+        catch (IllegalAccessException | InvocationTargetException | InstantiationException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static GameProfile getGameProfile(String textures)
+    {
+        final String[] data = textures.split("_");
+
+        final GameProfile gameProfile = new GameProfile(UUID.randomUUID(),null);
+        final PropertyMap propertyMap = gameProfile.getProperties();
+
+        final Property property;
+        if(data.length > 1) property = new Property("textures", data[0], data[1]);
+        else property = new Property("textures", textures);
+        propertyMap.put("textures", property);
+        return gameProfile;
     }
 
 }
