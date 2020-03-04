@@ -132,7 +132,7 @@ public class SchematicUtils
                 {
                     int i = y * length * width + z * length + x;
                     final Material m = blocks[i];
-                    if(!ignoreAir || m.isAir())
+                    if(!ignoreAir || !m.isAir())
                     {
                         Block block = w.getBlockAt(d.x(x, z, length, width) + x0, y + y0, d.z(x, z, length , width) + z0);
                         block.setType(m, true);
