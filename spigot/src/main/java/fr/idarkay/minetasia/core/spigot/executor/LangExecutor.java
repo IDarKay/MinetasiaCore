@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.Executor;
+package fr.idarkay.minetasia.core.spigot.executor;
 
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * File <b>LangExecutor</b> located on fr.idarkay.minetasia.core.common.executor
