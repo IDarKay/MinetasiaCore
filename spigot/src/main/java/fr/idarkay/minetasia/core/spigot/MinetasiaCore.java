@@ -839,7 +839,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         Validate.notNull(uuid, "uuid can't be null");
         Validate.notNull(statsUpdater, "statsUpdater can't be null");
-
+        if(statsUpdater.getUpdate().isEmpty()) return;
         final Consumer<BukkitTask> c = bukkitTask -> {
             try
             {
@@ -882,7 +882,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
     {
-        if(moneyUpdater.getUpdate().isEmpty()) return;
+        if(moneyUpdater.getUpdateMoney().isEmpty()) return;
+        if(Bukkit.getPlayer(uuid) == null)
+        {
+            addGameWonMoneyToOfflinePlayer(uuid, moneyUpdater, boost, async);
+            return;
+        }
         if(isCommandEnable(Command.PARTY_XP_BOOST))
         {
             Consumer<BukkitTask> bukkitTaskConsumer = bukkitTask -> {
@@ -890,7 +895,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 StringBuilder money = new StringBuilder();
 
                 Map<Economy, Float> newMap = new HashMap<>();
-                moneyUpdater.getUpdate().forEach((k,v) ->{
+                moneyUpdater.getUpdateMoney().forEach((k,v) ->{
+                    if(k == Economy.SHOPEX) return;
                     final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
                     newMap.put(k, v * b);
                     if(v * b > 0)
@@ -900,12 +906,44 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                     }
                 });
 
-                addPlayerMoneys(uuid, newMap, false);
+
 
                 String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), Lang.Argument.SERVER_TYPE.match(serverType), Lang.Argument.REWARDS.match(money.toString())).split("\n");
                 org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
                 if(p != null)
                     for(String s : toSend) p.sendMessage(s);
+
+
+                addPlayerMoneys(uuid, newMap, false);
+            };
+
+            if(async)
+                Bukkit.getScheduler().runTaskAsynchronously(this, bukkitTaskConsumer);
+            else
+                bukkitTaskConsumer.accept(null);
+        }
+        else
+            Bukkit.getLogger().warning("plugin :" + getName() + " want give party won money but server have PARTY_XP_BOOST = false");
+    }
+
+    private void addGameWonMoneyToOfflinePlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
+    {
+        if(moneyUpdater.getUpdateMoney().isEmpty()) return;
+        if(isCommandEnable(Command.PARTY_XP_BOOST))
+        {
+            Consumer<BukkitTask> bukkitTaskConsumer = bukkitTask -> {
+                final MinePlayer mp = playerManager.get(uuid);
+                if(mp == null) return;
+
+                Boost playerBoost = mp.getPersonalBoost();
+
+                Map<Economy, Float> newMap = new HashMap<>();
+                moneyUpdater.getUpdateMoney().forEach((k,v) ->{
+                    if(k == Economy.SHOPEX) return;
+                    final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
+                    newMap.put(k, v * b);
+                });
+                addPlayerMoneys(uuid, newMap, false);
             };
 
             if(async)
@@ -1040,7 +1078,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public int getMaxPlayerCount()
     {
-        return getThisServer().getServerPhase() == ServerPhase.GAME || getThisServer().getServerPhase() == ServerPhase.END ? getThisServer().getMaxPlayerCount() - maxPlayerCountAddAdmin : getThisServer().getMaxPlayerCount();
+        return getThisServer().getMaxPlayerCount();
     }
 
     @Override
