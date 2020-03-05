@@ -49,7 +49,6 @@ public class ChunkedSchematic
     public void apply(World world, int cx, int cz, ChunkGenerator.ChunkData chunkData, @NotNull BiConsumer<Location, String> metadata)
     {
         if(!isInclude(cx, cz)) return;
-        System.out.println("CHUNK => " +cx + " ; " + cz);
         final int ccz = ChunkLocation.chunkInCord(cz);
         final int ccx = ChunkLocation.chunkInCord(cx);
         final int sZ = getStartZ(cz), mZ = getMaxZ(cz), sY = Math.max(0, min.getY()), mY = Math.min(chunkData.getMaxHeight(), max.getY());

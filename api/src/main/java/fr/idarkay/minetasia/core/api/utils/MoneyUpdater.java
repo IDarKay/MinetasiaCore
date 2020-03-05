@@ -17,5 +17,5 @@ import java.util.Map;
  */
 public interface MoneyUpdater
 {
-    @NotNull Map<@NotNull Economy, @NotNull Float> getUpdate();
+    @NotNull Map<@NotNull Economy, @NotNull Float> getUpdateMoney();
 }
