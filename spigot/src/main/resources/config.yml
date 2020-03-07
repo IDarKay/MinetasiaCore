@@ -50,6 +50,7 @@ commands:
   msg: true
   tp: true
   party: true
+  rank_in_tab: true
 
 gui:
   lang:
@@ -71,6 +72,7 @@ gui:
 #prefix show before msg for all plugins
 prefix: "&9Mine&6Tasia&7>>"
 chat_char: ' > '
+ip: "play.minetasia.com"
 
 # kit to load set * to first for all else the name of the plugin
 kits_load:

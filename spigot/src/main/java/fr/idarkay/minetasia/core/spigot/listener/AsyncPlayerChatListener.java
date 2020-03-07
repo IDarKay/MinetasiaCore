@@ -34,8 +34,8 @@ public class AsyncPlayerChatListener implements Listener {
     public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent e)
     {
         Player p = e.getPlayer();
-        StringBuilder format = new StringBuilder(plugin.getGroupDisplay(p.getUniqueId()));
-        format.append("  %1$s");
+        StringBuilder format = new StringBuilder(plugin.getPlayerManager().getCorePlayer(p.getUniqueId()).getPrefix());
+        format.append(" %1$s");
 
         if(p.hasPermission(CommandPermission.UTILS_CHAT_WHITE.getPermission())) format.append(ChatColor.WHITE);
         else format.append(ChatColor.GRAY);

@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.normes;
 
+import fr.idarkay.minetasia.normes.Utils.ReflectionVar;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -29,9 +30,8 @@ public class Reflection
      */
     public static void sendPacket(Player player, Object packet) {
         try {
-            Object handle = player.getClass().getMethod("getHandle").invoke(player);
-            Object playerConnection = handle.getClass().getField("playerConnection").get(handle);
-            playerConnection.getClass().getMethod("sendPacket", getNMSClass("Packet")).invoke(playerConnection, packet);
+            final Object playerConnection = ReflectionVar.ENTITY_PLAYER_CONFECTION_FIELD.get(ReflectionVar.CRAFT_PLAYER_GET_HANDLE.invoke(player));
+            ReflectionVar.SEND_PACKET_METHOD.invoke(playerConnection, packet);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -119,17 +119,17 @@ public class Reflection
     // redefined auu private field for work
 
 
-    private final static Field worldBorderFieldI = getField(worldBorderClass, "i", true);
+    private final static Field worldBorderFieldI = getDeclaredField(worldBorderClass, "i", true);
 
-    private final static Field packetFieldAEnum = getField(packetPlayOutWorldBorderClass, "a", true);;
-    private final static Field packetFieldCCenterX = getField(packetPlayOutWorldBorderClass, "c", true);
-    private final static Field packetFieldDCenterZ = getField(packetPlayOutWorldBorderClass, "d", true);
-    private final static Field packetFieldFSize = getField(packetPlayOutWorldBorderClass, "f", true);
-    private final static Field packetFieldE  = getField(packetPlayOutWorldBorderClass, "e", true);
-    private final static Field packetFieldG  = getField(packetPlayOutWorldBorderClass, "g", true);
-    private final static Field packetFieldB  = getField(packetPlayOutWorldBorderClass, "b", true);
-    private final static Field packetFieldIWarningDistance = getField(packetPlayOutWorldBorderClass, "i", true);
-    private final static Field packetFieldHWarningTime = getField(packetPlayOutWorldBorderClass, "h", true);
+    private final static Field packetFieldAEnum = getDeclaredField(packetPlayOutWorldBorderClass, "a", true);;
+    private final static Field packetFieldCCenterX = getDeclaredField(packetPlayOutWorldBorderClass, "c", true);
+    private final static Field packetFieldDCenterZ = getDeclaredField(packetPlayOutWorldBorderClass, "d", true);
+    private final static Field packetFieldFSize = getDeclaredField(packetPlayOutWorldBorderClass, "f", true);
+    private final static Field packetFieldE  = getDeclaredField(packetPlayOutWorldBorderClass, "e", true);
+    private final static Field packetFieldG  = getDeclaredField(packetPlayOutWorldBorderClass, "g", true);
+    private final static Field packetFieldB  = getDeclaredField(packetPlayOutWorldBorderClass, "b", true);
+    private final static Field packetFieldIWarningDistance = getDeclaredField(packetPlayOutWorldBorderClass, "i", true);
+    private final static Field packetFieldHWarningTime = getDeclaredField(packetPlayOutWorldBorderClass, "h", true);
 
     /**
      * get the packet WorldBorder from {@link BossBar}
@@ -191,7 +191,7 @@ public class Reflection
     private static final Constructor<?> packetPlayOutBossCo = getConstructor(getNMSClass("PacketPlayOutBoss"), false, action, bossBattleCl0);
     private static final Constructor<?> bossBattleCo = getConstructor(bossBattleCl, false, getNMSClass("IChatBaseComponent"), color, division);
 
-    private static final Field bossUUIDField = getField(bossBattleCl0, "h", true);
+    private static final Field bossUUIDField = getDeclaredField(bossBattleCl0, "h", true);
 
     private static final Method setHeal = getDeclaredMethod(bossBattleCl0, false, "a", float.class);
     private static final Method setCF = getDeclaredMethod(bossBattleCl0, false, "a", boolean.class);
@@ -371,10 +371,22 @@ public class Reflection
         }
     }
 
-    public static Field getField(Class<?> clazz, String name, boolean setAccessible)
+    public static Field getDeclaredField(Class<?> clazz, String name, boolean setAccessible)
     {
         try {
             Field f = clazz.getDeclaredField(name);
+            if(setAccessible) f.setAccessible(true);
+            return f;
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Field getField(Class<?> clazz, String name, boolean setAccessible)
+    {
+        try {
+            Field f = clazz.getField(name);
             if(setAccessible) f.setAccessible(true);
             return f;
         } catch (NoSuchFieldException e) {

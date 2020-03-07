@@ -34,6 +34,8 @@ public class CorePlayer
     @NotNull
     private final Map<CountdownType, Long> countdown = new EnumMap<>(CountdownType.class);
 
+    private String prefix;
+
     public CorePlayer(@NotNull UUID uuid, @NotNull String name)
     {
         this.uuid = Objects.requireNonNull(uuid);
@@ -84,6 +86,15 @@ public class CorePlayer
         return invitedPlayerParty;
     }
 
+    public String getPrefix()
+    {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix)
+    {
+        this.prefix = prefix;
+    }
 
     public enum CountdownType
     {

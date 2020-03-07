@@ -95,12 +95,6 @@ public class BukkitUtils
         return itemStack;
     }
 
-    public final static Class<?> CRAFT_PLAYER_CLASS = Reflection.getCraftBukkitClass("entity.CraftPlayer");
-    public final static Method CRAFT_PLAYER_GET_HANDLE = Reflection.getDeclaredMethod(Objects.requireNonNull(CRAFT_PLAYER_CLASS), true, "getHandle");
-    public final static Class<?> ENTITY_PLAYER_CLASS = Objects.requireNonNull(Reflection.getNMSClass("EntityHuman"));
-    public final static Method ENTITY_PLAYER_GET_PROFILE = Reflection.getDeclaredMethod(ENTITY_PLAYER_CLASS, true,"getProfile");
-//    private final static Field ENTITY_PLAYER_BT = Reflection.getField(ENTITY_PLAYER_CLASS, )
-
     /**
      *
      * return the texture of the head of the player mit signature if is present
@@ -113,8 +107,8 @@ public class BukkitUtils
     {
         try
         {
-            final Object entityPlayer = CRAFT_PLAYER_GET_HANDLE.invoke(player);
-           final GameProfile gameProfile = (GameProfile) ENTITY_PLAYER_GET_PROFILE.invoke(entityPlayer);
+            final Object entityPlayer = ReflectionVar.CRAFT_PLAYER_GET_HANDLE.invoke(player);
+           final GameProfile gameProfile = (GameProfile) ReflectionVar.ENTITY_PLAYER_GET_PROFILE.invoke(entityPlayer);
            final Property property = gameProfile.getProperties().get("textures").iterator().next();
            final String texture = property.getValue();
            final String signature = property.getSignature();

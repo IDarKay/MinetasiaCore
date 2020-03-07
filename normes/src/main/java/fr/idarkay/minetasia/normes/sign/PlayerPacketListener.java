@@ -23,7 +23,7 @@ public class PlayerPacketListener implements Listener
 {
 
     private static final Class<?> PACKET_PLAY_IN_UPDATE_SIGN = Objects.requireNonNull(Reflection.getNMSClass("PacketPlayInUpdateSign"));
-    private static final Field PACKET_PLAY_IN_UPDATE_SIGN_FIELD_B = Reflection.getField(PACKET_PLAY_IN_UPDATE_SIGN, "b", true);
+    private static final Field PACKET_PLAY_IN_UPDATE_SIGN_FIELD_B = Reflection.getDeclaredField(PACKET_PLAY_IN_UPDATE_SIGN, "b", true);
 
     public PlayerPacketListener(JavaPlugin javaPlugin)
     {
