@@ -20,7 +20,8 @@ public enum Command {
     MSG((byte) 5),
     TP((byte) 6),
     PARTY_XP_BOOST((byte) 7),
-    PARTY((byte) 8)
+    PARTY((byte) 8),
+    TAB_RANK((byte) 9),
     ;
 
     public final byte by;

@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.BoostType;
 import fr.idarkay.minetasia.core.api.utils.Boost;
 import org.bson.Document;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -34,6 +35,7 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
     private byte priority = 0;
     private Boost personalBoost, partyBoost;
     private boolean defaultt;
+    private Team team;
 
     public Group(PermissionManager pm, String name)
     {
@@ -220,6 +222,16 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
 
     public void setPriority(byte priority) {
         this.priority = priority;
+    }
+
+    public void setTeam(Team team)
+    {
+        this.team = team;
+    }
+
+    public Team getTeam()
+    {
+        return team;
     }
 
     public Document toDocument()

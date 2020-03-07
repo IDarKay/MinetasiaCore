@@ -8,9 +8,13 @@ import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.event.PlayerPermissionLoadEndEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
+import org.apache.commons.lang.Validate;
 import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -26,30 +30,91 @@ import java.util.*;
  * Created the 28/11/2019 at 20:22
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class PermissionManager {
+public class PermissionManager
+{
 
     private final static JsonParser PARSER = new JsonParser();
 
-    public final HashMap<UUID, HashMap<String, PermissionAttachment>>  permissionAttachments = new HashMap<>();
+    public final HashMap<UUID, HashMap<String, PermissionAttachment>> permissionAttachments = new HashMap<>();
     public final HashMap<String, Group> groups = new HashMap<>();
     private final List<Group> defaultGroups = new ArrayList<>();
     private final MinetasiaCore plugin;
+    private boolean tabGroup = false;
 
     public PermissionManager(MinetasiaCore plugin)
     {
         this.plugin = plugin;
-        for(Document d : plugin.getMongoDbManager().getAll(MongoCollections.GROUPS))
+        for (Document d : plugin.getMongoDbManager().getAll(MongoCollections.GROUPS))
         {
             final Group g = new Group(d, this);
             groups.put(g.getName(), g);
-            if(g.isDefault()) defaultGroups.add(g);
+            if (g.isDefault())
+                defaultGroups.add(g);
         }
+    }
+
+    private Scoreboard mainScoreboard;
+
+    public void loadTabGroup()
+    {
+        this.tabGroup = true;
+        mainScoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
+        groups.values().forEach(g ->
+        {
+            final String name = (g.getPriority() * -1) + "_" + g.getName();
+            Team team = mainScoreboard.getTeam(name);
+            if (team == null)
+                team = mainScoreboard.registerNewTeam(name);
+
+            team.setDisplayName(ChatColor.translateAlternateColorCodes('&', g.getDisplayName()));
+            team.setPrefix(ChatColor.translateAlternateColorCodes('&', g.getDisplayName()) + " ");
+            team.setColor(getLastChatColor(team.getPrefix()));
+            g.setTeam(team);
+        });
+    }
+
+    private ChatColor getLastChatColor(@NotNull String input)
+    {
+        Validate.notNull(input);
+        String result = "";
+        int length = input.length();
+
+        for (int index = length - 1; index > -1; --index)
+        {
+            char section = input.charAt(index);
+            if (section == 167 && index < length - 1)
+            {
+                char c = input.charAt(index + 1);
+                ChatColor color = ChatColor.getByChar(c);
+                if (color != null)
+                {
+                    result = color.toString() + result;
+                    if (color.isColor() || color.equals(ChatColor.RESET))
+                    {
+                        return color;
+                    }
+                }
+            }
+        }
+        System.out.println("no found");
+        return ChatColor.RESET;
     }
 
     public Group createGroup(String name)
     {
         Group g = new Group(this, name);
         groups.put(name, g);
+        if(tabGroup)
+        {
+            final String tname = (g.getPriority() * -1) + "_" + g.getName();
+            Team team = mainScoreboard.getTeam(tname);
+            if(team == null)
+                team = mainScoreboard.registerNewTeam(tname);
+            team.setDisplayName(ChatColor.translateAlternateColorCodes('&', g.getDisplayName()));
+            team.setPrefix(ChatColor.translateAlternateColorCodes('&', g.getDisplayName()) + " ");
+            team.setColor(getLastChatColor(team.getPrefix()));
+            g.setTeam(team);
+        }
         plugin.getMongoDbManager().insert(MongoCollections.GROUPS, g.toDocument());
         return g;
     }
@@ -504,6 +569,14 @@ public class PermissionManager {
                 plugin.setPlayerData(uuid, "temp_permission", jo.toString());
             }
             permissionAttachments.put(uuid, map);
+
+            plugin.getPlayerManager().getCorePlayer(uuid).setPrefix(plugin.getGroupDisplay(uuid));
+            if(tabGroup)
+            {
+                Group playerMasterGroup = (Group) plugin.getPlayerMasterGroup(uuid);
+                playerMasterGroup.getTeam().addEntry(p.getName());
+                p.setPlayerListName(ChatColor.translateAlternateColorCodes('&', playerMasterGroup.getDisplayName()) + p.getName());
+            }
             Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(new PlayerPermissionLoadEndEvent(p)));
         }
         else Bukkit.getLogger().warning("Can't load permission of " + uuid.toString() + ", he isn't connected");

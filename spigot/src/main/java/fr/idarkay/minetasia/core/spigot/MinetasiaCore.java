@@ -28,6 +28,7 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
+import fr.idarkay.minetasia.core.spigot.runnable.PlayerListRunnable;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
@@ -139,11 +140,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private CommandManager commandManager;
     private KitsManager kitsManager;
     private PartyManager partyManager;
+    private PlayerListRunnable playerListRunnable;
     private GUI gui;
 
     private FriendsExecutor friendsExecutor;
 
-    private String serverType, prefix = "", serverConfig = "";
+    private String serverType, prefix = "", serverConfig = "", ip = "";
     private boolean isHub;
 
     private int commands = 0, maxPlayerCountAddAdmin;
@@ -164,6 +166,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Lang.api = this;
 
         serverType = getConfig().getString("server_type");
+        ip = getConfig().getString("ip");
         isHub = serverType.startsWith(HUB_NAME);
 
         maxPlayerCountAddAdmin = getConfig().getInt("max-player-count-add-admin");
@@ -344,7 +347,14 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         //for sign
         registerPlayerPacketComingEvent();
+        playerListRunnable = new PlayerListRunnable(this);
+        playerListRunnable.runTaskTimerAsynchronously(this, 20L, 10L);
 
+        setCommandsIsEnable(Command.TAB_RANK.by, getConfig().getBoolean("commands.rank_in_tab", true));
+        if(isCommandEnable(Command.TAB_RANK))
+        {
+           Bukkit.getScheduler().runTaskLater(this, this.permissionManager::loadTabGroup, 1L);
+        }
     }
 
     private void registerListener()
@@ -1019,6 +1029,14 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @NotNull
     public String getGroupDisplay(UUID player) {
 
+        final Group g = getPlayerMasterGroup(player);
+        if(g == null) return "";
+        else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
+    }
+
+    @Nullable
+    public Group getPlayerMasterGroup(UUID player)
+    {
         byte p = Byte.MIN_VALUE;
         Group g = null;
 
@@ -1033,8 +1051,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             }
         }
 
-        if(g == null) return "";
-        else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
+        return g;
     }
 
     @Override
@@ -1159,7 +1176,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         try
         {
             Object playerList = Reflection.getCraftBukkitClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
-            Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
+            Field maxPlayers =  Reflection.getDeclaredField(playerList.getClass().getSuperclass(), "maxPlayers", true);
             maxPlayers.set(playerList, maxPlayer);
         } catch (Exception e)
         {
@@ -1253,5 +1270,15 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public PartyManager getPartyManager()
     {
         return partyManager;
+    }
+
+    public String getIp()
+    {
+        return ip;
+    }
+
+    public PlayerListRunnable getPlayerListRunnable()
+    {
+        return playerListRunnable;
     }
 }

@@ -141,10 +141,10 @@ public class PlayerScoreBoard
 
     private static final Class<?> packetPlayOutScoreboardObjectiveClass = Reflection.getNMSClass("PacketPlayOutScoreboardObjective");
     private static final Constructor<?> packetPlayOutScoreboardObjectiveClassConstructor = Reflection.getConstructor(packetPlayOutScoreboardObjectiveClass, false);
-    private static final Field pPOSOFAName = Reflection.getField(packetPlayOutScoreboardObjectiveClass, "a", true);
-    private static final Field pPOSOFBDisplay = Reflection.getField(packetPlayOutScoreboardObjectiveClass, "b", true);
-    private static final Field pPOSOFDMode = Reflection.getField(packetPlayOutScoreboardObjectiveClass, "d", true);
-    private static final Field pPOSOFCType = Reflection.getField(packetPlayOutScoreboardObjectiveClass, "c", true);
+    private static final Field pPOSOFAName = Reflection.getDeclaredField(packetPlayOutScoreboardObjectiveClass, "a", true);
+    private static final Field pPOSOFBDisplay = Reflection.getDeclaredField(packetPlayOutScoreboardObjectiveClass, "b", true);
+    private static final Field pPOSOFDMode = Reflection.getDeclaredField(packetPlayOutScoreboardObjectiveClass, "d", true);
+    private static final Field pPOSOFCType = Reflection.getDeclaredField(packetPlayOutScoreboardObjectiveClass, "c", true);
     private static final Object integerTypeEnum;
 
     static {
@@ -176,8 +176,8 @@ public class PlayerScoreBoard
 
     private static final Class<?> packetPlayOutScoreboardDisplayObjectiveClass = Reflection.getNMSClass("PacketPlayOutScoreboardDisplayObjective");
     private static final Constructor<?> packetPlayOutScoreboardDisplayObjectiveConstructor = Reflection.getConstructor(packetPlayOutScoreboardDisplayObjectiveClass, false);
-    private static final Field pPOSDOFAPosition = Reflection.getField(packetPlayOutScoreboardDisplayObjectiveClass, "a", true);
-    private static final Field pPOSDOFBName = Reflection.getField(packetPlayOutScoreboardDisplayObjectiveClass, "b", true);
+    private static final Field pPOSDOFAPosition = Reflection.getDeclaredField(packetPlayOutScoreboardDisplayObjectiveClass, "a", true);
+    private static final Field pPOSDOFBName = Reflection.getDeclaredField(packetPlayOutScoreboardDisplayObjectiveClass, "b", true);
 
     private Object getShowPacket() throws InstantiationException, IllegalAccessException, InvocationTargetException
     {

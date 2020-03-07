@@ -196,6 +196,16 @@ public enum Lang implements IMinetasiaLang {
     DESC_PARTY_KICK("<player> kick a player from your party"),
     DESC_MAKER_LEADER("<player> set the new owner of the group"),
 
+    LIST_PLAYER_HEADER("&3>>>&a&lMine&6&lTasia&r&3<<<@@" +
+            "@@" +
+            "&7Welcome " + Argument.PLAYER  + " on &a&lMine&6&lTasia&r &7 enjoy !@@" +
+            "&7&lPING :&a " + Argument.MS + " &r&7&l| Connected on : &a" + Argument.SERVER_TYPE +
+            "@@@@"),
+    LIST_PLAYER_FOOTER("@@" +
+            "&7&lDiscord: &r&3https://discord.minetasia.com@@" +
+            "&7&lSites: &r&3https://www.minetasia.com@@" +
+            "@@" +
+            Argument.IP)
 
     ;
 
@@ -247,7 +257,7 @@ public enum Lang implements IMinetasiaLang {
     public enum Argument implements Args
     {
         PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
-        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME
+        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP,
         ;
 
         String node;

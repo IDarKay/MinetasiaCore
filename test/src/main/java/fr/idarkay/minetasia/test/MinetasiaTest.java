@@ -677,7 +677,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
         try
         {
             Object playerList = Reflection.getCraftBukkitClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
-            Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
+            Field maxPlayers =  Reflection.getDeclaredField(playerList.getClass().getSuperclass(), "maxPlayers", true);
             maxPlayers.set(playerList, maxPlayer);
         } catch (Exception e)
         {

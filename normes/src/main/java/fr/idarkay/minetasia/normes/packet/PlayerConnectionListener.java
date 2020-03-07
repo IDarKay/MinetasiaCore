@@ -1,14 +1,11 @@
 package fr.idarkay.minetasia.normes.packet;
 
 import fr.idarkay.minetasia.normes.Reflection;
-import fr.idarkay.minetasia.normes.Utils.BukkitUtils;
+import fr.idarkay.minetasia.normes.Utils.ReflectionVar;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -41,9 +38,9 @@ public class PlayerConnectionListener implements Listener
     }
 
     private static final Class<?> ENTITY_PLAYER_CLASS = Objects.requireNonNull(Reflection.getNMSClass("EntityPlayer"));
-    private static final Field PLAYER_CONNECTION = Reflection.getField(ENTITY_PLAYER_CLASS, "playerConnection", false);
-    private static final Field NETWORK_MANAGER = Reflection.getField(PLAYER_CONNECTION.getType(), "networkManager", false);
-    private static final Field CHANNEL = Reflection.getField(NETWORK_MANAGER.getType(), "channel", false);
+    private static final Field PLAYER_CONNECTION = Reflection.getDeclaredField(ENTITY_PLAYER_CLASS, "playerConnection", false);
+    private static final Field NETWORK_MANAGER = Reflection.getDeclaredField(PLAYER_CONNECTION.getType(), "networkManager", false);
+    private static final Field CHANNEL = Reflection.getDeclaredField(NETWORK_MANAGER.getType(), "channel", false);
 
     @EventHandler
     private void onPlayerJoin(PlayerJoinEvent e)
@@ -61,7 +58,7 @@ public class PlayerConnectionListener implements Listener
         };
         try
         {
-            ((Channel) CHANNEL.get(NETWORK_MANAGER.get(PLAYER_CONNECTION.get(BukkitUtils.CRAFT_PLAYER_GET_HANDLE.invoke(player))))).pipeline()
+            ((Channel) CHANNEL.get(NETWORK_MANAGER.get(PLAYER_CONNECTION.get(ReflectionVar.CRAFT_PLAYER_GET_HANDLE.invoke(player))))).pipeline()
                     .addBefore("packet_handler", player.getName(), channelDuplexHandler);
         }
         catch (IllegalAccessException | InvocationTargetException ex)
@@ -75,7 +72,7 @@ public class PlayerConnectionListener implements Listener
     {
         try
         {
-            final Channel channel = ((Channel) CHANNEL.get(NETWORK_MANAGER.get(PLAYER_CONNECTION.get(BukkitUtils.CRAFT_PLAYER_GET_HANDLE.invoke(e.getPlayer())))));
+            final Channel channel = ((Channel) CHANNEL.get(NETWORK_MANAGER.get(PLAYER_CONNECTION.get(ReflectionVar.CRAFT_PLAYER_GET_HANDLE.invoke(e.getPlayer())))));
             channel.eventLoop().submit(() -> channel.pipeline().remove(e.getPlayer().getName()));
         }
         catch (IllegalAccessException | InvocationTargetException ex)

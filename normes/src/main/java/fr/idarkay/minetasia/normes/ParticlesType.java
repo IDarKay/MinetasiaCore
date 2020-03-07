@@ -92,7 +92,7 @@ public enum ParticlesType implements Particles
         {
             try
             {
-                Object o = Reflection.getField(PARTICLES, name(), true).get(null);
+                Object o = Reflection.getDeclaredField(PARTICLES, name(), true).get(null);
                 load.put(this, o);
                 return o;
             } catch (IllegalAccessException e)
