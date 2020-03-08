@@ -835,6 +835,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return new KitMain(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
     }
 
+    @Override
+    public MainKit createMonoLvlCoinsKit(String isoLang, String name, String displayName, Economy economy, int price, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, economy, price, displayMat, lvlDesc, desc);
+    }
+
+    @Override
+    public MainKit createMonoLvlPermsKit(String isoLang, String name, String displayName, String perm, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, perm, displayMat, lvlDesc, desc);
+    }
+
 
     @Override
     public PlayerStats getPlayerStats(@NotNull UUID uuid)
