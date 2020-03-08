@@ -1,7 +1,21 @@
 package fr.idarkay.minetasia.test;
 
-import fr.idarkay.minetasia.core.api.*;
-import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.core.api.Command;
+import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.core.api.GeneralPermission;
+import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.api.ServerPhase;
+import fr.idarkay.minetasia.core.api.utils.Boost;
+import fr.idarkay.minetasia.core.api.utils.Kit;
+import fr.idarkay.minetasia.core.api.utils.MainKit;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
+import fr.idarkay.minetasia.core.api.utils.MoneyUpdater;
+import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
+import fr.idarkay.minetasia.core.api.utils.Party;
+import fr.idarkay.minetasia.core.api.utils.PlayerStats;
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
+import fr.idarkay.minetasia.core.api.utils.Server;
+import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
@@ -446,6 +460,18 @@ public class MinetasiaTest extends MinetasiaCoreApi
     public MainKit createKit(String isoLang, String name, String displayName, int maxLvl, int[] price, Material displayMat, String[] lvlDesc, String... desc)
     {
         return new KitMain(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
+    }
+
+    @Override
+    public MainKit createMonoLvlCoinsKit(String isoLang, String name, String displayName, Economy economy, int price, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, economy, price, displayMat, lvlDesc, desc);
+    }
+
+    @Override
+    public MainKit createMonoLvlPermsKit(String isoLang, String name, String displayName, String perm, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, perm, displayMat, lvlDesc, desc);
     }
 
     public class Stats implements PlayerStats

@@ -30,7 +30,7 @@ public class KitsManager {
         {
             if(all || validate(d.getString("_id"), filter))
             {
-                kits.put(d.getString("_id"), new KitMain(d));
+                kits.put(d.getString("_id"), new KitMain(d, plugin));
             }
         }
     }

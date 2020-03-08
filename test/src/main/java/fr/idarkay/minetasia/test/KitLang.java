@@ -1,10 +1,12 @@
 package fr.idarkay.minetasia.test;
 
+import fr.idarkay.minetasia.core.api.KitType;
 import fr.idarkay.minetasia.core.api.utils.Kit;
 import org.bson.Document;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +50,7 @@ public class KitLang implements Kit
 
     }
 
-    public KitLang(final KitMain kitMain, final String isoLang, final String displayName,  final String[] lvlDesc, final String... desc)
+    public KitLang(final KitMain kitMain, final String isoLang, final String displayName, final String[] lvlDesc, final String... desc)
     {
         this.kitMain = kitMain;
         this.lang = isoLang;
@@ -108,12 +110,14 @@ public class KitLang implements Kit
         return kitMain.getPrice();
     }
 
+    @NotNull
     @Override
     public Material getDisplayMet()
     {
         return kitMain.getDisplayMet();
     }
 
+    @NotNull
     @Override
     public Kit getLang(String lang)
     {
@@ -121,14 +125,27 @@ public class KitLang implements Kit
         return kitMain.getLang(lang);
     }
 
+    @NotNull
     @Override
     public Document toDocument()
     {
         return new Document()
-        .append("display_name", displayNameWithoutColor)
-        .append("description", Arrays.asList(descWithoutColor))
-        .append("lvl_description", Arrays.asList(lvlDescWithoutColor));
+                .append("display_name", displayNameWithoutColor)
+                .append("description", Arrays.asList(descWithoutColor))
+                .append("lvl_description", Arrays.asList(lvlDescWithoutColor));
 
+    }
+
+    @Override
+    public @NotNull KitType getType()
+    {
+        return kitMain.getType();
+    }
+
+    @Override
+    public @Nullable String getPermission()
+    {
+        return kitMain.getPermission();
     }
 
 }

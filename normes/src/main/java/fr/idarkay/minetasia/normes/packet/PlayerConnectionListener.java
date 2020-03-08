@@ -53,7 +53,8 @@ public class PlayerConnectionListener implements Listener
             {
                 final PlayerPacketComingEvent e = new PlayerPacketComingEvent(player, msg);
                 javaPlugin.getServer().getPluginManager().callEvent(e);
-                super.channelRead(ctx, msg);
+                if(!e.isCancelled())
+                    super.channelRead(ctx, msg);
             }
         };
         try
