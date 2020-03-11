@@ -30,7 +30,7 @@ public class AsyncPlayerChatListener implements Listener {
         chatChar = plugin.getConfig().getString("chat_char");
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent e)
     {
         Player p = e.getPlayer();

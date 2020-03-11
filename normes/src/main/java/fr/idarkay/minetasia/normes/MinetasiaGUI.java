@@ -63,15 +63,20 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
 
     public abstract void open(Player player);
 
-    public abstract void open(Player player, InventoryOpenEvent event);
+    public void open(Player player, InventoryOpenEvent event)
+    {}
 
-    public abstract void close(Player player, InventoryCloseEvent event);
+    public void close(Player player, InventoryCloseEvent event)
+    {}
 
-    public abstract void click(Player player, InventoryClickEvent event);
+    public void click(Player player, InventoryClickEvent event)
+    {}
 
-    public abstract void drag(Player player, InventoryDragEvent event);
+    public void drag(Player player, InventoryDragEvent event)
+    {}
 
-    public abstract void onOtherEvent(Player player, InventoryEvent event);
+    public void onOtherEvent(Player player, InventoryEvent event)
+    {}
 
     /**
      * like {@link MinetasiaGUI#createGUI(InventoryHolder, int, String, InventoryFileType, ItemStack)} but
