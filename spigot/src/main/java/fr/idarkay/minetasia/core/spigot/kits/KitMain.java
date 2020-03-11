@@ -53,7 +53,7 @@ public class KitMain implements MainKit
         else
             this.maxLvl = 1;
 
-        if(kitType != KitType.MONO_LVL_MINECOINS)
+        if(kitType != KitType.MONO_LVL_PERM)
         {
             this.priceList = d.getList("price", Integer.class);
             this.price = new int[priceList.size()];

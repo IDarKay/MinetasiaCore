@@ -255,6 +255,7 @@ public class Reflection
     private final static Method hasNbtTag = getDeclaredMethod(nMSItemStack, false, "hasTag");
     private final static Method getTag = getDeclaredMethod(nMSItemStack, false, "getTag");
     private final static Method setString = getDeclaredMethod(nBTTagCompound, false, "setString", String.class, String.class);
+    private final static Method remove = getDeclaredMethod(nBTTagCompound, false, "remove", String.class);
     private final static Method setTag = getDeclaredMethod(nMSItemStack, false, "setTag", nBTTagCompound);
     private final static Method hasKey = getDeclaredMethod(nBTTagCompound, false, "hasKey", String.class);
     private final static Method getString = getDeclaredMethod(nBTTagCompound, false, "getString", String.class);
@@ -283,6 +284,25 @@ public class Reflection
             throw new RuntimeException(e);
         }
     }
+
+    public static ItemStack removeNBTTag(final ItemStack itemStack, String key)
+    {
+        try
+        {
+            Object it = asNMSCopy.invoke(null, itemStack);
+            Object compound;
+            if((boolean) hasNbtTag.invoke(it)) compound = getTag.invoke(it);
+            else return itemStack;
+            remove.invoke(compound, key);
+            setTag.invoke(it, compound);
+            return (ItemStack) asBukkitCopy.invoke(null, it);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      * get the nbtTag of item from key
