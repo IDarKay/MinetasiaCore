@@ -26,13 +26,15 @@ public final class GUI {
 
 
 
-    private final LangGui langGui;
-    private final PartyGui partyGui;
+    public final LangGui langGui;
+    public final PartyGui partyGui;
+    public final FriendsGui friendsGui;
 
     public GUI(MinetasiaCore plugin)
     {
         this.langGui = new LangGui(plugin);
         this.partyGui = new PartyGui(plugin);
+        friendsGui = new FriendsGui(plugin);
     }
 
 
