@@ -97,18 +97,6 @@ public class PartyGui extends MinetasiaGUI<MinetasiaCore>
     }
 
     @Override
-    public void open(Player player, InventoryOpenEvent event)
-    {
-
-    }
-
-    @Override
-    public void close(Player player, InventoryCloseEvent event)
-    {
-
-    }
-
-    @Override
     public void click(Player player, InventoryClickEvent e)
     {
         if(BukkitUtils.isTopGui(e) && e.getCurrentItem() != null && !e.getCurrentItem().getType().isAir() && (e.getSlot() == 4 || e.getSlot() == 49 || (e.getSlot() > 8 && e.getSlot() < 45)))
@@ -282,18 +270,6 @@ public class PartyGui extends MinetasiaGUI<MinetasiaCore>
                 }
             });
         }
-    }
-
-    @Override
-    public void drag(Player player, InventoryDragEvent event)
-    {
-
-    }
-
-    @Override
-    public void onOtherEvent(Player player, InventoryEvent event)
-    {
-
     }
 
     /**

@@ -23,7 +23,20 @@ public enum Lang implements IMinetasiaLang {
 
     WELCOME                                     ( "&6Welcome" + Argument.PLAYER + "to the server :)"),
 
+    //help
+    USER_HELP(
+            "default msg"
+    ),
+    STAFF_HELP(
+            "oh you are a staff for get all permission you have use /help <pages>"
+    ),
+    STAFF_HELP_BORDER("&7----&8----&6---- &2Minetasia Help &c" + Argument.PAGE + " / " + Argument.MAX_PAGE + " &6----&8----&7----"),
+    STAFF_HELP_FORMAT(
+      "&6" + Argument.COMMAND + " &2- &7" + Argument.DESCRIPTION
+    ),
 
+    COMMAND_HELP_BORDER("&7----&8----&6---- &2" + Argument.COMMAND + " &6----&8----&7----"),
+    COMMAND_HELP_FORMAT("&6" + Argument.COMMAND + " &2- &7" + Argument.DESCRIPTION),
 
     // /lang
     SET_LANG                                    ( "&aYour new lang is English"),
@@ -37,8 +50,15 @@ public enum Lang implements IMinetasiaLang {
     NEW_FRIEND                                  ( "&aYou are now friend with " + Argument.PLAYER + " !"),
     REMOVE_FRIEND                               ( "&a" + Argument.PLAYER + " remove to your friend"),
     NOT_FRIEND                                  ( "&cYou are not friend with " + Argument.PLAYER + " !"),
+    MAX_FRIENDS_REACH                           ("&cYour have reach the maximum of friends that you can have !"),
+        //gui
+    FRIENDS_GUI_NAME("Your's friends"),
+    FRIENDS_GUI_FRIEND_LORE("&cLeft-Click &7Invite to party@@&cRight-Click &7Remove friends"),
+    ITEM_PREVIOUS_PAGE("&7Previous page"),
+    ITEM_NEXT_PAGE("&7Next page"),
 
     //misc
+
     PLAYER_NOT_ONLINE                           ( "&cSorry this player isn't only !"),
     PLAYER_NOT_EXIST                            ( "&cThe player don't exist"),
     ONLINE                                      ( "online"),
@@ -171,6 +191,9 @@ public enum Lang implements IMinetasiaLang {
     DESC_PERMISSION_USER_GROUP_ADD_VALUE_TEMP   ("add temp group to a user"),
     DESC_PERMISSION_USER_GROUP_REMOVE           ("<permission> / remove group to a user"),
     DESC_PERMISSION_USER_GROUP_REMOVE_VALUE     ("remove group to a user"),
+    DEC_BAN                                     ("<speudo> open gui"),
+    DEC_BAN_USERNAME                            ("<speudo> open gui"),
+
 
     DESC_MONEY                                  ("first step for all commands for edit money of user"),
     DESC_MONEY_TYPE                             ("type of money to edit"),
@@ -180,6 +203,14 @@ public enum Lang implements IMinetasiaLang {
     DESC_MONEY_REMOVE                           ("remove money to user"),
     DESC_MONEY_SET                              ("set money to user"),
     DESC_MONEY_GET                              ("get money og user"),
+
+    DESC_FRIENDS                                 ("all commands to manage your friends"),
+    DESC_FRIENDS_LIST                            ("view all your friends"),
+    DESC_FRIENDS_ADD                             ("<username> add friends "),
+    DESC_FRIENDS_ADD_SUB                         (" add friends "),
+    DESC_FRIENDS_REMOVE_SUB                      (" remove friends "),
+    DESC_FRIENDS_REMOVE                          ("<username> remove friends "),
+    DESC_FRIENDS_ACCEPT                          ("accept the last invitation"),
 
     DESC_MSG                                    ("&c/msg <player> <msg>"),
     DESC_R                                      ("&c/r <msg>"),
@@ -195,6 +226,7 @@ public enum Lang implements IMinetasiaLang {
     DESC_PARTY_LEAVE("leave your party or disband if you are leader"),
     DESC_PARTY_KICK("<player> kick a player from your party"),
     DESC_MAKER_LEADER("<player> set the new owner of the group"),
+    DESC_HELP("get information about access command "),
 
     LIST_PLAYER_HEADER("&3>>>&a&lMine&6&lTasia&r&3<<<@@" +
             "@@" +
@@ -257,7 +289,7 @@ public enum Lang implements IMinetasiaLang {
     public enum Argument implements Args
     {
         PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
-        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP,
+        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP, COMMAND, DESCRIPTION, PAGE, MAX_PAGE
         ;
 
         String node;

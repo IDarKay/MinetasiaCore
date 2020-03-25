@@ -8,21 +8,34 @@ load: STARTUP
 commands:
   friends:
     aliases: [friend, f, amis, freunde, amigos]
+    description: mange your friends use /friends help for more information
   lang:
     aliases: [langue, lengua, sprache]
+    description: change your lang
   permission:
-    aliases: [perm, perms, permissions, group, groups]
+    aliases: [perm, perms, permissions]
+    description: mange player permission and groups
   hub:
     aliases: []
+    description: go tu hub
   money:
     aliases: []
+    description: manage player money
   msg:
     aliases: [mp, tell]
+    description: send message to player connected in the network
   r:
     aliases: []
+    description: send message to the laste player who you talked
   socialspy:
     aliases: []
+    description: active the socialspy to see secreate message
   tp:
     aliases: []
+    description: tp to player / server or cordonated
   party:
     aliases: [p, partie, parties]
+    description: mange your party
+  help:
+    aliases: [aide, ayuda, hilfe]
+    description: get the hekp
