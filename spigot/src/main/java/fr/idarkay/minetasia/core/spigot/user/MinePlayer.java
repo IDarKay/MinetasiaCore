@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.spigot.user;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.core.api.Economy;
@@ -12,8 +13,11 @@ import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
 import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Utils.BukkitUtils;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +40,7 @@ public class MinePlayer implements MinetasiaPlayer
     private static final MinetasiaCore CORE = MinetasiaCore.getCoreInstance();
     private static final JsonParser PARSER = new JsonParser();
 
+
     @NotNull private final UUID uuid;
     private final boolean isCache;
 
@@ -48,7 +53,6 @@ public class MinePlayer implements MinetasiaPlayer
     private Stats stats;
 
     private Boost personalBoost = HashMap::new, partyBoost = HashMap::new;
-    private Party party;
 
     public MinePlayer(@NotNull UUID uuid, boolean isCache)
     {
@@ -56,7 +60,36 @@ public class MinePlayer implements MinetasiaPlayer
         this.uuid = uuid;
         this.isCache = isCache;
 
-        final Document doc = CORE.getMongoDbManager().getByKey(MongoCollections.USERS, uuid.toString());
+        final Document doc;
+        if(isCache)
+        {
+            doc = CORE.getMongoDbManager().getByKey(MongoCollections.USERS, uuid.toString());
+        }
+        else
+        {
+            final Document main = CORE.getMongoDbManager().getCollection(MongoCollections.ONLINE_USERS).aggregate(
+                    Arrays.asList(
+                            Aggregates.match(Filters.eq(uuid.toString())),
+                            Aggregates.lookup(MongoCollections.USERS.name, "_id", "_id", "users"),
+                            Aggregates.lookup(MongoCollections.PARTY.name, "party_id", "_id", "party")
+                    )
+            ).first();
+            if(main == null) throw new NullPointerException("player not in online user");
+
+            final List<Document> party = main.getList("party", Document.class);
+            if(party != null && party.size() > 0)
+                CORE.getPartyManager().load(party.get(0));
+
+            doc =  main.getList("users", Document.class).get(0);
+            if(!CORE.getThisServer().getName().equals(main.getString("server_id")))
+            {
+                CORE.getMongoDbManager().getCollection(MongoCollections.ONLINE_USERS).updateOne(
+                        Filters.eq(uuid.toString()),
+                        Updates.set("server_id", CORE.getThisServer().getName())
+                );
+            }
+        }
+
         username = doc.getString("username");
 
         this.moneys = new HashMap<>();
@@ -77,29 +110,20 @@ public class MinePlayer implements MinetasiaPlayer
         else
             this.stats = new Stats();
 
-        //todo: party
-        //temp value
-        party = new Party()
+        //head
+        if(!isCache)
         {
-            @Override
-            public UUID getOwner()
+            final Player p = Bukkit.getPlayer(uuid);
+            if(p != null)
             {
-                return uuid;
+                final String texture = BukkitUtils.getTextureFromPlayer(p);
+                final String actual = (String) data.get("head_texture");
+                if(!texture.equals(actual))
+                {
+                    putData("head_texture", texture);
+                }
             }
-
-            @Override
-            public List<UUID> getPlayers()
-            {
-                return Collections.singletonList(uuid);
-            }
-
-            @Override
-            public int limitSize()
-            {
-                return 10;
-            }
-        };
-
+        }
     }
 
     public void setUsername(@NotNull String username)
@@ -128,7 +152,7 @@ public class MinePlayer implements MinetasiaPlayer
         if(validateNotCache(PlayerMessage.ActionType.ADD_MONEY, economy, amount))
         {
             moneys.merge(economy, (long) (amount * 100), Long::sum);
-            increment("money." + economy.name, (long) (amount * 100));
+            increment("money." + economy.name(), (long) (amount * 100));
         }
     }
 
@@ -142,7 +166,7 @@ public class MinePlayer implements MinetasiaPlayer
                 if(oldV < newV) throw new IllegalArgumentException("cant remove "+ amount + " " + economy.displayName + " to " + username);
                 return oldV - newV;
             });
-            increment("money." + economy.name, (long) (amount * -100));
+            increment("money." + economy.name(), (long) (amount * -100));
         }
     }
 
@@ -153,7 +177,7 @@ public class MinePlayer implements MinetasiaPlayer
         if(validateNotCache(PlayerMessage.ActionType.SET_MONEY, economy, amount))
         {
             moneys.put(economy, (long) (amount * 100));
-            set("money." + economy.name, (long) (amount * 100));
+            set("money." + economy.name(), (long) (amount * 100));
         }
     }
 
@@ -277,15 +301,15 @@ public class MinePlayer implements MinetasiaPlayer
     }
 
     @Override
-    public int getStatus()
+    public long getStatus()
     {
-        return (int) data.getOrDefault("statue", 0);
+        return (long) data.getOrDefault("statue", 0L);
     }
 
     @Override
     public Party getParty()
     {
-        return party;
+        return CORE.getPartyManager().getByPlayer(uuid);
     }
 
     public Boost getPersonalBoost()
@@ -327,7 +351,7 @@ public class MinePlayer implements MinetasiaPlayer
 
     private synchronized void set(String key, Object value)
     {
-        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.addToSet(key, value));
+        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.set(key, value));
     }
 
 
@@ -348,11 +372,11 @@ public class MinePlayer implements MinetasiaPlayer
     {
         final Document money = new Document();
 
-        m.forEach((k,v ) -> money.append("money." + k.name, (long) (v * 100)));
+        m.forEach((k,v ) -> money.append("money." + k.name(), (long) (v * 100)));
 
         CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()),  new Document("$inc", money));
         final JsonObject json = new JsonObject();
-        m.forEach((k,v ) -> json.addProperty(k.name, (long) (v * 100)));
+        m.forEach((k,v ) -> json.addProperty(k.name(), (long) (v * 100)));
         if(validateNotCache(PlayerMessage.ActionType.ADD_MONEYS, json.toString()))
         {
             incrementMoney(json);

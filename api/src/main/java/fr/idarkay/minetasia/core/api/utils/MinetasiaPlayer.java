@@ -148,7 +148,7 @@ public interface MinetasiaPlayer
     /**
      * @return a core value
      */
-    int getStatus();
+    long getStatus();
 
     /**
      * @return the party of the player or null if player isn"t in party

@@ -68,9 +68,7 @@ public final class MinetasiaCoreBungee extends Plugin {
         messageServer = new MessageServer(publishPort);
 
         mongoDBManager = new MongoDBManager(Objects.requireNonNull(configuration.getString("dbm.host")),
-                Objects.requireNonNull(configuration.getString("dbm.dbname")),
-                Objects.requireNonNull(configuration.getString("dbm.login")),
-                Objects.requireNonNull(configuration.getString("dbm.password")));
+                Objects.requireNonNull(configuration.getString("dbm.dbname")));
 
     }
 
@@ -80,7 +78,6 @@ public final class MinetasiaCoreBungee extends Plugin {
             try
             {
                 final String msg = MessageClient.read(socket);
-                System.out.println(msg);
                 if(msg == null)
                 {
                     socket.close();
@@ -95,7 +92,6 @@ public final class MinetasiaCoreBungee extends Plugin {
                 }
 
                 socket.close();
-                System.out.println("good");
                 getProxy().getPluginManager().callEvent(new MessageEvent(split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]));
             } catch (IOException ex)
             {

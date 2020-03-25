@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.Executor;
+package fr.idarkay.minetasia.core.spigot.executor;
 
 import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;

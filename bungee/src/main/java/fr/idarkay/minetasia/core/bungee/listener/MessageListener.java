@@ -39,10 +39,8 @@ public class MessageListener implements Listener {
         plugin.getProxy().getScheduler().runAsync(plugin, () -> {
             try
             {
-                System.out.println(e.getChanel());
                 if(e.getChanel().equals("core-messaging"))
                 {
-                    System.out.println(e.getValue());
                     String[] msg = e.getValue().split(";", 3);
                     if (msg.length > 1 && msg[0].equals("core-server")) {
                         if(msg[1].equals("create"))

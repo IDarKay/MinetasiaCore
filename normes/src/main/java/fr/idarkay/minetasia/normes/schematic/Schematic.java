@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.normes;
+package fr.idarkay.minetasia.normes.schematic;
 
 import org.bukkit.Material;
 
@@ -21,15 +21,17 @@ public final class Schematic implements Serializable
 
     private final Material[] blocks;
     private final String[] data;
+    private final String[] metadata;
     private final short length, width, height;
 
-    public Schematic(Material[] blocks, String[] data, short length, short width, short height)
+    public Schematic(Material[] blocks, String[] data, String[] metadata, short length, short width, short height)
     {
         this.blocks = blocks;
         this.length = length;
         this.width = width;
         this.height = height;
         this.data = data;
+        this.metadata = metadata;
     }
 
 
@@ -51,5 +53,10 @@ public final class Schematic implements Serializable
 
     public String[] getData() {
         return data;
+    }
+
+    public String[] getMetadata()
+    {
+        return metadata;
     }
 }

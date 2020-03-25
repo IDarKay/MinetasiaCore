@@ -1,10 +1,12 @@
 package fr.idarkay.minetasia.core.spigot.kits;
 
+import fr.idarkay.minetasia.core.api.KitType;
 import fr.idarkay.minetasia.core.api.utils.Kit;
 import org.bson.Document;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -108,12 +110,14 @@ public class KitLang implements Kit
         return kitMain.getPrice();
     }
 
+    @NotNull
     @Override
     public Material getDisplayMet()
     {
         return kitMain.getDisplayMet();
     }
 
+    @NotNull
     @Override
     public Kit getLang(String lang)
     {
@@ -121,6 +125,7 @@ public class KitLang implements Kit
         return kitMain.getLang(lang);
     }
 
+    @NotNull
     @Override
     public Document toDocument()
     {
@@ -129,6 +134,18 @@ public class KitLang implements Kit
         .append("description", Arrays.asList(descWithoutColor))
         .append("lvl_description", Arrays.asList(lvlDescWithoutColor));
 
+    }
+
+    @Override
+    public @NotNull KitType getType()
+    {
+        return kitMain.getType();
+    }
+
+    @Override
+    public @Nullable String getPermission()
+    {
+        return kitMain.getPermission();
     }
 
 }

@@ -2,12 +2,12 @@ package fr.idarkay.minetasia.core.spigot.listener;
 
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.GeneralPermission;
+import fr.idarkay.minetasia.core.api.PlayerStatue;
 import fr.idarkay.minetasia.core.api.ServerPhase;
 import fr.idarkay.minetasia.core.api.event.PlayerPermissionLoadEndEvent;
 import fr.idarkay.minetasia.core.api.utils.Boost;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.core.spigot.utils.PlayerStatue;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -43,8 +43,8 @@ public class PlayerListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
             plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
-            int i = plugin.getPlayer(e.getPlayer().getUniqueId()).getStatus();
-
+            long i = plugin.getPlayer(e.getPlayer().getUniqueId()).getStatus();
+            plugin.getPlayerListRunnable().updatePlayer(e.getPlayer());
 
             if(plugin.isBollTrue(i, PlayerStatue.SOCIAL_SPY.by)) plugin.socialSpyPlayer.add(e.getPlayer());
 
@@ -76,6 +76,7 @@ public class PlayerListener implements Listener {
     public void onPlayerQuitEvent(PlayerQuitEvent e)
     {
         plugin.getPlayerManager().removePlayer(e.getPlayer().getUniqueId());
+        plugin.getPartyManager().disconnectPlayer(e.getPlayer().getUniqueId());
         plugin.getPermissionManager().removePlayer(e.getPlayer().getUniqueId());
         plugin.socialSpyPlayer.remove(e.getPlayer());
         e.setQuitMessage(null);
@@ -84,13 +85,14 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerPermissionLoadEndEvent(PlayerPermissionLoadEndEvent e)
     {
-        if(plugin.getServerPhase() == ServerPhase.GAME)
+        if(plugin.getServerPhase() == ServerPhase.GAME && !plugin.isHub())
         {
             if(Bukkit.getOnlinePlayers().size() > plugin.getMaxPlayerCount())
             {
                 if(!e.getPlayer().hasPermission(GeneralPermission.ADMIN_SPECTATOR.getPermission()))
                 {
                     plugin.movePlayerToHub(e.getPlayer());
+                    return;
                 }
             }
         }

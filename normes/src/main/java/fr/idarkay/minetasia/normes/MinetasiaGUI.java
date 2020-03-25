@@ -1,8 +1,13 @@
 package fr.idarkay.minetasia.normes;
 
-import com.google.common.collect.ForwardingMultimap;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
+import fr.idarkay.minetasia.normes.Utils.ReflectionVar;
+import net.minecraft.server.v1_15_R1.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
@@ -14,8 +19,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -58,15 +63,20 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
 
     public abstract void open(Player player);
 
-    public abstract void open(Player player, InventoryOpenEvent event);
+    public void open(Player player, InventoryOpenEvent event)
+    {}
 
-    public abstract void close(Player player, InventoryCloseEvent event);
+    public void close(Player player, InventoryCloseEvent event)
+    {}
 
-    public abstract void click(Player player, InventoryClickEvent event);
+    public void click(Player player, InventoryClickEvent event)
+    {}
 
-    public abstract void drag(Player player, InventoryDragEvent event);
+    public void drag(Player player, InventoryDragEvent event)
+    {}
 
-    public abstract void onOtherEvent(Player player, InventoryEvent event);
+    public void onOtherEvent(Player player, InventoryEvent event)
+    {}
 
     /**
      * like {@link MinetasiaGUI#createGUI(InventoryHolder, int, String, InventoryFileType, ItemStack)} but
@@ -220,10 +230,24 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      */
     public static ItemStack createHead(int amount, String name, String textures,  String... lore)
     {
+        return createHead(amount, name, textures, Arrays.asList(lore));
+    }
+
+    /**
+     * create a head with many argument
+     * @param amount of the head need ∈ [0 ; 64]
+     * @param name  of the head
+     * @param textures the texture
+     * @param lore of the head
+     * @return the head in {@link ItemStack}
+     * @since 1.0
+     */
+    public static ItemStack createHead(int amount, String name, String textures,  List<String> lore)
+    {
         ItemStack back = new ItemStack(Material.PLAYER_HEAD, amount);
         ItemMeta meta = Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         meta.setDisplayName(name);
-        meta.setLore(Arrays.asList(lore));
+        meta.setLore(lore);
         headFromTexturesRef(textures, meta);
         back.setItemMeta(meta);
         return back;
@@ -298,28 +322,40 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      */
     public static ItemMeta headFromTexturesRef(String textures, ItemMeta meta) {
         try {
-            Field profileField = meta.getClass().getDeclaredField("profile");
+            final Field profileField = meta.getClass().getDeclaredField("profile");
             profileField.setAccessible(true);
-
-            String[] data = textures.split("_");
-
-            Constructor<?> gameprofileConstructor = Class.forName("com.mojang.authlib.GameProfile").getConstructor(UUID.class, String.class);
-            Object gameprofileInstance = gameprofileConstructor.newInstance(UUID.randomUUID(), null);
-            Object propertiesMap = gameprofileInstance.getClass().getDeclaredMethod("getProperties").invoke(gameprofileInstance);
-
-            Constructor<?> propTexture = Class.forName("com.mojang.authlib.properties.Property").getConstructor(String.class, String.class);
-            Constructor<?> propTextureSignature = Class.forName("com.mojang.authlib.properties.Property").getConstructor(String.class, String.class, String.class);
-
-            Object property;
-            if(data.length > 1) property = propTextureSignature.newInstance("textures", data[0], data[1]);
-            else property = propTexture.newInstance("textures", textures);
-
-            ForwardingMultimap.class.getDeclaredMethod("put", Object.class, Object.class).invoke(propertiesMap, "textures", property);
-
-            profileField.set(meta, gameprofileInstance);
+            profileField.set(meta, getGameProfile(textures));
         }
         catch (Exception e) { e.printStackTrace(); }
         return meta;
+    }
+
+
+    public static void headFromTexturesRefToBlock(String textures, Skull skull) {
+        try
+        {
+            final Object world = ReflectionVar.GET_WORLD_HANDLE.invoke(skull.getWorld());
+            final Object tileSkull = ReflectionVar.GET_WORLD_TILE_ENTITY.invoke(world, ReflectionVar.BLOCK_POSITION_CONSTRUCTOR.newInstance(skull.getX(), skull.getY(), skull.getZ()));
+            ReflectionVar.SET_GAME_PROFILE.invoke(tileSkull, getGameProfile(textures));
+        }
+        catch (IllegalAccessException | InvocationTargetException | InstantiationException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static GameProfile getGameProfile(String textures)
+    {
+        final String[] data = textures.split("_");
+
+        final GameProfile gameProfile = new GameProfile(UUID.randomUUID(),null);
+        final PropertyMap propertyMap = gameProfile.getProperties();
+
+        final Property property;
+        if(data.length > 1) property = new Property("textures", data[0], data[1]);
+        else property = new Property("textures", textures);
+        propertyMap.put("textures", property);
+        return gameProfile;
     }
 
 }

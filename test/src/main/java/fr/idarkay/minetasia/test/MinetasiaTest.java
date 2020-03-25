@@ -1,7 +1,21 @@
 package fr.idarkay.minetasia.test;
 
-import fr.idarkay.minetasia.core.api.*;
-import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.core.api.Command;
+import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.core.api.GeneralPermission;
+import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.api.ServerPhase;
+import fr.idarkay.minetasia.core.api.utils.Boost;
+import fr.idarkay.minetasia.core.api.utils.Kit;
+import fr.idarkay.minetasia.core.api.utils.MainKit;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
+import fr.idarkay.minetasia.core.api.utils.MoneyUpdater;
+import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
+import fr.idarkay.minetasia.core.api.utils.Party;
+import fr.idarkay.minetasia.core.api.utils.PlayerStats;
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
+import fr.idarkay.minetasia.core.api.utils.Server;
+import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
@@ -399,6 +413,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public void setPlayerKitLvl(UUID uuid, String kitName, int lvl)
+    {
+
+    }
+
+    @Override
     public int getPlayerKitLvl(UUID uuid, String s)
     {
         return 1;
@@ -410,6 +430,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     public Kit getKitKit(String s, String s1)
     {
         return getMainKit(s).getLang(s1);
+    }
+
+    @Override
+    public List<MainKit> getMainKits(String prefix)
+    {
+        return kits.values().stream().filter(k -> k.getName().startsWith(prefix)).collect(Collectors.toList());
     }
 
     @Override
@@ -434,6 +460,18 @@ public class MinetasiaTest extends MinetasiaCoreApi
     public MainKit createKit(String isoLang, String name, String displayName, int maxLvl, int[] price, Material displayMat, String[] lvlDesc, String... desc)
     {
         return new KitMain(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
+    }
+
+    @Override
+    public MainKit createMonoLvlCoinsKit(String isoLang, String name, String displayName, Economy economy, int price, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, economy, price, displayMat, lvlDesc, desc);
+    }
+
+    @Override
+    public MainKit createMonoLvlPermsKit(String isoLang, String name, String displayName, String perm, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, perm, displayMat, lvlDesc, desc);
     }
 
     public class Stats implements PlayerStats
@@ -569,7 +607,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
         if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
         //add place for admin
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
-        System.out.println("Server Phase set to " + phase.name());
     }
 
     @Override
@@ -653,6 +690,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return null;
     }
 
+    @Override
+    public void openPartyGui(@NotNull Player player)
+    {
+        player.sendMessage("no gui with test core");
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
@@ -660,7 +703,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
         try
         {
             Object playerList = Reflection.getCraftBukkitClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
-            Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
+            Field maxPlayers =  Reflection.getDeclaredField(playerList.getClass().getSuperclass(), "maxPlayers", true);
             maxPlayers.set(playerList, maxPlayer);
         } catch (Exception e)
         {
@@ -670,7 +713,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
 
     public class MinePlayer implements MinetasiaPlayer
     {
-
+        private final UUID partyUUID = UUID.randomUUID();
         private final UUID uuid;
 
         public MinePlayer(UUID uuid)
@@ -789,9 +832,9 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
-        public int getStatus()
+        public long getStatus()
         {
-            return 0;
+            return 0L;
         }
 
         @Override
@@ -800,15 +843,27 @@ public class MinetasiaTest extends MinetasiaCoreApi
             return new Party()
             {
                 @Override
+                public UUID getId()
+                {
+                    return partyUUID;
+                }
+
+                @Override
                 public UUID getOwner()
                 {
                     return uuid;
                 }
 
                 @Override
-                public List<UUID> getPlayers()
+                public String getOwnerName()
                 {
-                    return Collections.singletonList(uuid);
+                    return getName();
+                }
+
+                @Override
+                public Map<UUID, String> getPlayers()
+                {
+                    return Collections.singletonMap(uuid, getName());
                 }
 
                 @Override

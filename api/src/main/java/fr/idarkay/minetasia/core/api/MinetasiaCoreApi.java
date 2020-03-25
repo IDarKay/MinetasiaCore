@@ -3,15 +3,14 @@ package fr.idarkay.minetasia.core.api;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
-import org.bson.Document;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * File <b>MinetasiaCoreApi</b> located on fr.idarkay.minetasia.core.api
@@ -286,6 +285,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract Map<String, Integer> getPlayerKitsLvl(UUID uuid, String gameFilter);
 
+    public abstract void setPlayerKitLvl(UUID uuid, String kitName, int lvl);
+
     /**
      * get the lvl of a kit of a user
      * @param uuid of teh player
@@ -302,6 +303,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @return Kit or null
      */
     public abstract Kit getKitKit(String name, String lang);
+
+    public abstract List<MainKit> getMainKits(String prefix);
 
     /**
      * get a kit from name no lang her
@@ -327,7 +330,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract void saveDefaultKit(MainKit kit);
 
     /**
-     *
+     * create a {@link KitType#BASIC} kit, this function is same as {@link MinetasiaCoreApi#createBasicKit(String, String, String, int, int[], Material, String[], String...)}
      * @param isoLang the lang of the default kit
      * @param name the name of the kit format : {game_name}_{kits_name}
      * @param displayName the display name in th iso lang
@@ -339,6 +342,50 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @return created kit
      */
     public abstract MainKit createKit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, Material displayMat, final String[] lvlDesc, final String... desc);
+
+    /**
+     * create a {@link KitType#BASIC} kit, this function is same as {@link MinetasiaCoreApi#createKit(String, String, String, int, int[], Material, String[], String...)}
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param maxLvl the max lvl of the kit
+     * @param price the price for each lvl 0 not count ; price.length = maxLvl
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for each lvl in lan iso lang ; lvlDesc.length = maxLvl
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public MainKit createBasicKit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, Material displayMat, final String[] lvlDesc, final String... desc)
+    {
+        return createKit(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
+    }
+
+    /**
+     * create a {@link KitType#MONO_LVL_MINECOINS} or {@link KitType#MONO_LVL_STARS}  kit, this function is same as {@link MinetasiaCoreApi#createKit(String, String, String, int, int[], Material, String[], String...)}
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param economy the economy for buy this need be {@link Economy#MINECOINS} or {@link Economy#STARS}
+     * @param price the price of the kit
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for lvl locked and unlock statue;
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public abstract MainKit createMonoLvlCoinsKit(final String isoLang, final String name, final String displayName, final Economy economy, final int price, Material displayMat, final String[] lvlDesc, final String... desc);
+
+    /**
+     * create a {@link KitType#MONO_LVL_PERM} kit, this function is same as {@link MinetasiaCoreApi#createKit(String, String, String, int, int[], Material, String[], String...)}
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param perm the permission of the kit not not need register
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for lvl locked and unlock statue;
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public abstract MainKit createMonoLvlPermsKit(final String isoLang, final String name, final String displayName, final String perm, Material displayMat, final String[] lvlDesc, final String... desc);
 
     /**
      * get Stats of a user
@@ -510,5 +557,11 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract MinetasiaPlayer getPlayer(UUID uuid);
 
     public abstract MongoDbManager getMongoDbManager();
+
+    /**
+     * open the party gui to a player
+     * @param player to open gui
+     */
+    public abstract void openPartyGui(@NotNull Player player);
 
 }

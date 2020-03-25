@@ -1,8 +1,10 @@
 package fr.idarkay.minetasia.core.api.utils;
 
+import fr.idarkay.minetasia.core.api.KitType;
 import org.bson.Document;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * File <b>MainKit</b> located on fr.idarkay.minetasia.core.api.utils
@@ -32,14 +34,17 @@ public interface MainKit
     /**
      * the element 0 is price for lvl 1
      * element 1 for lvl 2 etc <br>
-     *  table.length must be equal to {@link Kit#getMaxLevel()}
+     *  table.length must be equal to {@link Kit#getMaxLevel()} <br>
+     * return null if  type = {@link KitType#MONO_LVL_MINECOINS}
      * @return table of int
      */
+    @Nullable
     int[] getPrice();
 
     /**
      * @return material wil b show in gui
      */
+    @NotNull
     Material getDisplayMet();
 
     /**
@@ -47,8 +52,24 @@ public interface MainKit
      * @param lang isolang
      * @return teh kti or default kit in {@link fr.idarkay.minetasia.normes.MinetasiaLang#BASE_LANG}
      */
+    @NotNull
     Kit getLang(String lang);
 
+    @NotNull
     Document toDocument();
+
+    /**
+     * get the type of the document
+     * @return the {@link KitType}
+     */
+    @NotNull
+    KitType getType();
+
+    /**
+     * get the permission of the kit
+     * @return the permission or null if Type != {@link KitType#MONO_LVL_PERM}
+     */
+    @Nullable
+    String getPermission();
 
 }

@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.spigot.Executor;
+package fr.idarkay.minetasia.core.spigot.executor;
 
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * File <b>LangExecutor</b> located on fr.idarkay.minetasia.core.common.executor
@@ -51,7 +50,7 @@ public final class LangExecutor implements TabExecutor {
                 }
                 else if(sender instanceof Player)
                 {
-                   Bukkit.getScheduler().runTask(minetasiaCore, () -> minetasiaCore.getGui().openLangInventory((Player) sender));
+                   Bukkit.getScheduler().runTask(minetasiaCore, () -> minetasiaCore.getGui().getLangGui().open((Player) sender));
                 }
                 else sender.sendMessage(Lang.NEED_BE_PLAYER.get(MinetasiaLang.BASE_LANG));
             }

@@ -6,6 +6,8 @@ import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class PlayerManager {
 
     private final TreeMap<UUID, MinePlayer> userCache = new TreeMap<>();
+    private final TreeMap<UUID, CorePlayer> coreUser = new TreeMap<>();
     private final MinetasiaCore plugin;
 
     public PlayerManager(MinetasiaCore minetasiaCore)
@@ -31,20 +34,37 @@ public class PlayerManager {
 
     public @Nullable MinePlayer get(UUID uuid)
     {
-        return userCache.getOrDefault(uuid, new MinePlayer(uuid, true));
+        final MinePlayer p = userCache.get(uuid);
+        return p == null ? new MinePlayer(uuid, true) : p;
+    }
+
+    @NotNull
+    public CorePlayer getCorePlayer(UUID uuid)
+    {
+        return Objects.requireNonNull(coreUser.get(uuid), "player not only to this server");
     }
 
     public MinePlayer load(@NotNull UUID uuid)
     {
         Validate.notNull(uuid);
-
         final MinePlayer player = new MinePlayer(uuid, false);
+        coreUser.put(uuid, new CorePlayer(uuid, player.getName()));
         byte p = Byte.MIN_VALUE;
         Group g = null;
 
-        plugin.getPermissionManager().groups.forEach((k, v) -> System.out.println(k));
+        final List<String> groupsOfUser = plugin.getPermissionManager().getGroupsOfUser(player);
 
-        for (String gs : plugin.getPermissionManager().getGroupsOfUser(player))
+        //default group
+        for (fr.idarkay.minetasia.core.spigot.permission.Group defaultGroup : plugin.getPermissionManager().getDefaultGroups())
+        {
+            if(!groupsOfUser.contains(defaultGroup.getName()))
+            {
+                plugin.getPermissionManager().addGroupWithoutUpdate(player, defaultGroup.getName());
+                groupsOfUser.add(defaultGroup.getName());
+            }
+        }
+
+        for (String gs : groupsOfUser)
         {
             Group group = plugin.getPermissionManager().groups.get(gs);
             byte i = group.getPriority();
@@ -68,6 +88,7 @@ public class PlayerManager {
     {
         Validate.notNull(uuid);
         userCache.remove(uuid);
+        coreUser.remove(uuid);
     }
 
 
