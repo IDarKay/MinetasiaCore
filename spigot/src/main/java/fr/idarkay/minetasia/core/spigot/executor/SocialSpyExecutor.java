@@ -1,9 +1,9 @@
-package fr.idarkay.minetasia.core.spigot.Executor;
+package fr.idarkay.minetasia.core.spigot.executor;
 
+import fr.idarkay.minetasia.core.api.PlayerStatue;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.core.spigot.utils.PlayerStatue;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -41,17 +41,17 @@ public class SocialSpyExecutor implements CommandExecutor {
 
             final MinePlayer player = Objects.requireNonNull(plugin.getPlayerManager().get(u));
 
-            final int i = player.getStatus();
+            final long i = player.getStatus();
 
             try {
                 if(!plugin.isBollTrue(i, PlayerStatue.SOCIAL_SPY.by))
                 {
-                    player.putGeneralData("status", String.valueOf(plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, true)));
+                    player.putData("status", plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, true));
                     sender.sendMessage(Lang.SOCIAL_SPU_ON.get(lang));
                     plugin.socialSpyPlayer.add((Player) sender);
                 } else
                 {
-                    player.putGeneralData("status", String.valueOf(plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, false)));
+                    player.putData("status",plugin.setBoolIsValue(i, PlayerStatue.SOCIAL_SPY.by, false));
                     sender.sendMessage(Lang.SOCIAL_SPU_OFF.get(lang));
                     plugin.socialSpyPlayer.remove((Player) sender);
                 }

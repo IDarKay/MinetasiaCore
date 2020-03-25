@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.normes;
 
+import fr.idarkay.minetasia.normes.Utils.ReflectionVar;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -29,9 +30,8 @@ public class Reflection
      */
     public static void sendPacket(Player player, Object packet) {
         try {
-            Object handle = player.getClass().getMethod("getHandle").invoke(player);
-            Object playerConnection = handle.getClass().getField("playerConnection").get(handle);
-            playerConnection.getClass().getMethod("sendPacket", getNMSClass("Packet")).invoke(playerConnection, packet);
+            final Object playerConnection = ReflectionVar.ENTITY_PLAYER_CONFECTION_FIELD.get(ReflectionVar.CRAFT_PLAYER_GET_HANDLE.invoke(player));
+            ReflectionVar.SEND_PACKET_METHOD.invoke(playerConnection, packet);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -109,8 +109,8 @@ public class Reflection
     private final static Constructor<?> packetPlayOutWorldBorderConstructor = getConstructor(packetPlayOutWorldBorderClass, false);
     private final static Constructor<?> worldBorderConstructor = getConstructor(worldBorderClass, false);
 
-    private final static Method worldBorderSetCenter = getMethod(worldBorderClass, false, "setCenter", double.class, double.class);
-    private final static Method worldBorderSetSize = getMethod(worldBorderClass, false, "setSize", double.class);
+    private final static Method worldBorderSetCenter = getDeclaredMethod(worldBorderClass, false, "setCenter", double.class, double.class);
+    private final static Method worldBorderSetSize = getDeclaredMethod(worldBorderClass, false, "setSize", double.class);
 
 //    private final Constructor<?> packetPlayOutWorldBorderConstructor = packetPlayOutWorldBorderClass.getConstructor(worldBorderClass, packetPlayOutWorldBorderEnumWorldBorderActionClass);
 
@@ -119,17 +119,17 @@ public class Reflection
     // redefined auu private field for work
 
 
-    private final static Field worldBorderFieldI = getField(worldBorderClass, "i", true);
+    private final static Field worldBorderFieldI = getDeclaredField(worldBorderClass, "i", true);
 
-    private final static Field packetFieldAEnum = getField(packetPlayOutWorldBorderClass, "a", true);;
-    private final static Field packetFieldCCenterX = getField(packetPlayOutWorldBorderClass, "c", true);
-    private final static Field packetFieldDCenterZ = getField(packetPlayOutWorldBorderClass, "d", true);
-    private final static Field packetFieldFSize = getField(packetPlayOutWorldBorderClass, "f", true);
-    private final static Field packetFieldE  = getField(packetPlayOutWorldBorderClass, "e", true);
-    private final static Field packetFieldG  = getField(packetPlayOutWorldBorderClass, "g", true);
-    private final static Field packetFieldB  = getField(packetPlayOutWorldBorderClass, "b", true);
-    private final static Field packetFieldIWarningDistance = getField(packetPlayOutWorldBorderClass, "i", true);
-    private final static Field packetFieldHWarningTime = getField(packetPlayOutWorldBorderClass, "h", true);
+    private final static Field packetFieldAEnum = getDeclaredField(packetPlayOutWorldBorderClass, "a", true);;
+    private final static Field packetFieldCCenterX = getDeclaredField(packetPlayOutWorldBorderClass, "c", true);
+    private final static Field packetFieldDCenterZ = getDeclaredField(packetPlayOutWorldBorderClass, "d", true);
+    private final static Field packetFieldFSize = getDeclaredField(packetPlayOutWorldBorderClass, "f", true);
+    private final static Field packetFieldE  = getDeclaredField(packetPlayOutWorldBorderClass, "e", true);
+    private final static Field packetFieldG  = getDeclaredField(packetPlayOutWorldBorderClass, "g", true);
+    private final static Field packetFieldB  = getDeclaredField(packetPlayOutWorldBorderClass, "b", true);
+    private final static Field packetFieldIWarningDistance = getDeclaredField(packetPlayOutWorldBorderClass, "i", true);
+    private final static Field packetFieldHWarningTime = getDeclaredField(packetPlayOutWorldBorderClass, "h", true);
 
     /**
      * get the packet WorldBorder from {@link BossBar}
@@ -191,12 +191,12 @@ public class Reflection
     private static final Constructor<?> packetPlayOutBossCo = getConstructor(getNMSClass("PacketPlayOutBoss"), false, action, bossBattleCl0);
     private static final Constructor<?> bossBattleCo = getConstructor(bossBattleCl, false, getNMSClass("IChatBaseComponent"), color, division);
 
-    private static final Field bossUUIDField = getField(bossBattleCl0, "h", true);
+    private static final Field bossUUIDField = getDeclaredField(bossBattleCl0, "h", true);
 
-    private static final Method setHeal = getMethod(bossBattleCl0, false, "a", float.class);
-    private static final Method setCF = getMethod(bossBattleCl0, false, "a", boolean.class);
-    private static final Method setDK = getMethod(bossBattleCl0, false, "b", boolean.class);
-    private static final Method setPBM = getMethod(bossBattleCl0, false, "c", boolean.class);
+    private static final Method setHeal = getDeclaredMethod(bossBattleCl0, false, "a", float.class);
+    private static final Method setCF = getDeclaredMethod(bossBattleCl0, false, "a", boolean.class);
+    private static final Method setDK = getDeclaredMethod(bossBattleCl0, false, "b", boolean.class);
+    private static final Method setPBM = getDeclaredMethod(bossBattleCl0, false, "c", boolean.class);
 
     /**
      * get the packet bossabr from {@link BossBar}
@@ -250,14 +250,15 @@ public class Reflection
 
     private final static Constructor<?> nBTTagCompoundCon = getConstructor(nBTTagCompound, false);
 
-    private final static Method asNMSCopy = getMethod(craftItemStack, false, "asNMSCopy", ItemStack.class);
-    private final static Method asBukkitCopy = getMethod(craftItemStack, false, "asBukkitCopy", nMSItemStack);
-    private final static Method hasNbtTag = getMethod(nMSItemStack, false, "hasTag");
-    private final static Method getTag = getMethod(nMSItemStack, false, "getTag");
-    private final static Method setString = getMethod(nBTTagCompound, false, "setString", String.class, String.class);
-    private final static Method setTag = getMethod(nMSItemStack, false, "setTag", nBTTagCompound);
-    private final static Method hasKey = getMethod(nBTTagCompound, false, "hasKey", String.class);
-    private final static Method getString = getMethod(nBTTagCompound, false, "getString", String.class);
+    private final static Method asNMSCopy = getDeclaredMethod(craftItemStack, false, "asNMSCopy", ItemStack.class);
+    private final static Method asBukkitCopy = getDeclaredMethod(craftItemStack, false, "asBukkitCopy", nMSItemStack);
+    private final static Method hasNbtTag = getDeclaredMethod(nMSItemStack, false, "hasTag");
+    private final static Method getTag = getDeclaredMethod(nMSItemStack, false, "getTag");
+    private final static Method setString = getDeclaredMethod(nBTTagCompound, false, "setString", String.class, String.class);
+    private final static Method remove = getDeclaredMethod(nBTTagCompound, false, "remove", String.class);
+    private final static Method setTag = getDeclaredMethod(nMSItemStack, false, "setTag", nBTTagCompound);
+    private final static Method hasKey = getDeclaredMethod(nBTTagCompound, false, "hasKey", String.class);
+    private final static Method getString = getDeclaredMethod(nBTTagCompound, false, "getString", String.class);
 
     /**
      * add new NBTTag to item
@@ -283,6 +284,25 @@ public class Reflection
             throw new RuntimeException(e);
         }
     }
+
+    public static ItemStack removeNBTTag(final ItemStack itemStack, String key)
+    {
+        try
+        {
+            Object it = asNMSCopy.invoke(null, itemStack);
+            Object compound;
+            if((boolean) hasNbtTag.invoke(it)) compound = getTag.invoke(it);
+            else return itemStack;
+            remove.invoke(compound, key);
+            setTag.invoke(it, compound);
+            return (ItemStack) asBukkitCopy.invoke(null, it);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      * get the nbtTag of item from key
@@ -347,7 +367,7 @@ public class Reflection
         }
     }
 
-    public static Method getMethod(Class<?> clazz, boolean setAccessible, String name, Class... args)
+    public static Method getDeclaredMethod(Class<?> clazz, boolean setAccessible, String name, Class... args)
     {
         try {
             Method m = clazz.getDeclaredMethod(name, args);
@@ -359,10 +379,34 @@ public class Reflection
         }
     }
 
-    public static Field getField(Class<?> clazz, String name, boolean setAccessible)
+    public static Method getMethod(Class<?> clazz, boolean setAccessible, String name, Class... args)
+    {
+        try {
+            Method m = clazz.getMethod(name, args);
+            if(setAccessible) m.setAccessible(true);
+            return m;
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Field getDeclaredField(Class<?> clazz, String name, boolean setAccessible)
     {
         try {
             Field f = clazz.getDeclaredField(name);
+            if(setAccessible) f.setAccessible(true);
+            return f;
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Field getField(Class<?> clazz, String name, boolean setAccessible)
+    {
+        try {
+            Field f = clazz.getField(name);
             if(setAccessible) f.setAccessible(true);
             return f;
         } catch (NoSuchFieldException e) {

@@ -7,6 +7,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonParser;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
 import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.core.api.*;
@@ -15,7 +16,7 @@ import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.*;
-import fr.idarkay.minetasia.core.spigot.Executor.*;
+import fr.idarkay.minetasia.core.spigot.executor.*;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.kits.KitMain;
@@ -27,9 +28,11 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
+import fr.idarkay.minetasia.core.spigot.runnable.PlayerListRunnable;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
+import fr.idarkay.minetasia.core.spigot.user.PartyManager;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
 import fr.idarkay.minetasia.core.spigot.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
@@ -136,11 +139,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private PermissionManager permissionManager;
     private CommandManager commandManager;
     private KitsManager kitsManager;
+    private PartyManager partyManager;
+    private PlayerListRunnable playerListRunnable;
     private GUI gui;
 
     private FriendsExecutor friendsExecutor;
 
-    private String serverType, prefix = "", serverConfig = "";
+    private String serverType, prefix = "", serverConfig = "", ip = "";
     private boolean isHub;
 
     private int commands = 0, maxPlayerCountAddAdmin;
@@ -161,6 +166,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Lang.api = this;
 
         serverType = getConfig().getString("server_type");
+        ip = getConfig().getString("ip");
         isHub = serverType.startsWith(HUB_NAME);
 
         maxPlayerCountAddAdmin = getConfig().getInt("max-player-count-add-admin");
@@ -172,9 +178,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load mongo");
         mongoDBManager = new MongoDBManager(Objects.requireNonNull(this.getConfig().getString("dbm.host")),
-                                            Objects.requireNonNull(this.getConfig().getString("dbm.dbname")),
-                                            Objects.requireNonNull(this.getConfig().getString("dbm.login")),
-                                            Objects.requireNonNull(this.getConfig().getString("dbm.password")));
+                                            Objects.requireNonNull(this.getConfig().getString("dbm.dbname")));
     }
 
     public void initClientReceiver()
@@ -229,7 +233,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         try {
             PluginManager pm = getServer().getPluginManager();
-            PermissionDefault permDefault = getConfig().getBoolean("commands-allow-op") ? PermissionDefault.OP : PermissionDefault.FALSE;
+            PermissionDefault permDefault = PermissionDefault.OP;
 
             // register command permissions (core)
             console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Register core permission");
@@ -263,6 +267,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         commandManager = new CommandManager(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init kits manager");
         kitsManager = new KitsManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init party manager");
+        partyManager = new PartyManager(this);
         gui = new GUI(this);
 
         // register command
@@ -298,7 +304,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         setCommandsIsEnable(Command.LANG.by, getConfig().getBoolean("commands.lang", true));
         if(isCommandEnable(Command.LANG))
         {
-            gui.createLangInventory();
             Objects.requireNonNull(getCommand("lang")).setExecutor(new LangExecutor(this));
         }
 
@@ -307,6 +312,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         if(isCommandEnable(Command.HUB))
         {
             Objects.requireNonNull(getCommand("hub")).setExecutor(new HubExecutor(this));
+        }
+
+        setCommandsIsEnable(Command.PARTY.by, getConfig().getBoolean("commands.party", true));
+        if(isCommandEnable(Command.PARTY))
+        {
+            Objects.requireNonNull(getCommand("party")).setExecutor(customCommandExecutor);
         }
 
         setCommandsIsEnable(Command.MSG.by, getConfig().getBoolean("commands.hub", true));
@@ -334,6 +345,16 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             this.setServerPhase(ServerPhase.STARTUP);
         }
 
+        //for sign
+        registerPlayerPacketComingEvent();
+        playerListRunnable = new PlayerListRunnable(this);
+        playerListRunnable.runTaskTimerAsynchronously(this, 20L, 10L);
+
+        setCommandsIsEnable(Command.TAB_RANK.by, getConfig().getBoolean("commands.rank_in_tab", true));
+        if(isCommandEnable(Command.TAB_RANK))
+        {
+           Bukkit.getScheduler().runTaskLater(this, this.permissionManager::loadTabGroup, 1L);
+        }
     }
 
     private void registerListener()
@@ -591,6 +612,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         else run.run();
     }
 
+    public void publishHub(@NotNull String chanel, String message, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            mongoDBManager.getSimpleFilter(MongoCollections.SERVERS, "type", "hub").forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
+        };
+
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
+    }
 
     @Override
     public void publishServerType(@NotNull String chanel, String message, String serverType, boolean sync)
@@ -600,8 +634,15 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
             final String fullMsg = chanel + ";" + (message == null ? "" : message);
 
-            getServers(serverType).values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort)).forEach((ip, port) -> MessageClient.send(ip, port, fullMsg, false));
+            List<String> pas = new ArrayList<>();
+            getServers(serverType).forEach((name, server) -> {
+                if(!pas.contains(server.getIp() + ";" + server.getPort()))
+                {
+                    pas.add(server.getIp() + ";" + server.getPort());
+                    MessageClient.send(server.getIp(), server.getPort(), fullMsg, false);
+                }
 
+            });
         };
 
         if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
@@ -725,9 +766,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         );
     }
 
+    private final static Document EMPTY_DOC = new Document();
+
+    @NotNull
     public Document getPlayerKitDocument(UUID uuid)
     {
-        return getPlayerData(uuid, "kits", Document.class);
+        final Document doc = getPlayerData(uuid, "kits", Document.class);
+        return doc == null ? EMPTY_DOC : doc;
     }
 
     @Override
@@ -741,6 +786,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public void setPlayerKitLvl(UUID uuid, String kitName, int lvl)
+    {
+        setPlayerData(uuid, "kits", getPlayerKitDocument(uuid).append(kitName, lvl));
+    }
+
+    @Override
     public int getPlayerKitLvl(UUID uuid, String kitName) {
         return getPlayerKitDocument(uuid).getInteger(kitName, 0);
     }
@@ -748,6 +799,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public Kit getKitKit(String name, String lang) {
         return getKitLang(name, lang);
+    }
+
+    @Override
+    public List<MainKit> getMainKits(String prefix)
+    {
+        return kitsManager.getKits().values().stream().filter(k -> k.getName().startsWith(prefix)).collect(Collectors.toList());
     }
 
     @Override
@@ -778,6 +835,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return new KitMain(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
     }
 
+    @Override
+    public MainKit createMonoLvlCoinsKit(String isoLang, String name, String displayName, Economy economy, int price, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, economy, price, displayMat, lvlDesc, desc);
+    }
+
+    @Override
+    public MainKit createMonoLvlPermsKit(String isoLang, String name, String displayName, String perm, Material displayMat, String[] lvlDesc, String... desc)
+    {
+        return new KitMain(isoLang, name, displayName, perm, displayMat, lvlDesc, desc);
+    }
+
 
     @Override
     public PlayerStats getPlayerStats(@NotNull UUID uuid)
@@ -792,7 +861,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         Validate.notNull(uuid, "uuid can't be null");
         Validate.notNull(statsUpdater, "statsUpdater can't be null");
-
+        if(statsUpdater.getUpdate().isEmpty()) return;
         final Consumer<BukkitTask> c = bukkitTask -> {
             try
             {
@@ -835,6 +904,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void addGameWonMoneyToPlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
     {
+        if(moneyUpdater.getUpdateMoney().isEmpty()) return;
+        if(Bukkit.getPlayer(uuid) == null)
+        {
+            addGameWonMoneyToOfflinePlayer(uuid, moneyUpdater, boost, async);
+            return;
+        }
         if(isCommandEnable(Command.PARTY_XP_BOOST))
         {
             Consumer<BukkitTask> bukkitTaskConsumer = bukkitTask -> {
@@ -842,9 +917,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 StringBuilder money = new StringBuilder();
 
                 Map<Economy, Float> newMap = new HashMap<>();
-                moneyUpdater.getUpdate().forEach((k,v) ->{
+                moneyUpdater.getUpdateMoney().forEach((k,v) ->{
+                    if(k == Economy.SHOPEX) return;
                     final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
-                    System.out.println(b);
                     newMap.put(k, v * b);
                     if(v * b > 0)
                     {
@@ -853,12 +928,44 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                     }
                 });
 
-                addPlayerMoneys(uuid, newMap, false);
+
 
                 String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), Lang.Argument.SERVER_TYPE.match(serverType), Lang.Argument.REWARDS.match(money.toString())).split("\n");
                 org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
                 if(p != null)
                     for(String s : toSend) p.sendMessage(s);
+
+
+                addPlayerMoneys(uuid, newMap, false);
+            };
+
+            if(async)
+                Bukkit.getScheduler().runTaskAsynchronously(this, bukkitTaskConsumer);
+            else
+                bukkitTaskConsumer.accept(null);
+        }
+        else
+            Bukkit.getLogger().warning("plugin :" + getName() + " want give party won money but server have PARTY_XP_BOOST = false");
+    }
+
+    private void addGameWonMoneyToOfflinePlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
+    {
+        if(moneyUpdater.getUpdateMoney().isEmpty()) return;
+        if(isCommandEnable(Command.PARTY_XP_BOOST))
+        {
+            Consumer<BukkitTask> bukkitTaskConsumer = bukkitTask -> {
+                final MinePlayer mp = playerManager.get(uuid);
+                if(mp == null) return;
+
+                Boost playerBoost = mp.getPersonalBoost();
+
+                Map<Economy, Float> newMap = new HashMap<>();
+                moneyUpdater.getUpdateMoney().forEach((k,v) ->{
+                    if(k == Economy.SHOPEX) return;
+                    final float b =  1 + playerBoost.getBoost().getOrDefault(k.boostType, 0f) / 100f + partyServerBoost.getBoost(k.boostType) / 100f;
+                    newMap.put(k, v * b);
+                });
+                addPlayerMoneys(uuid, newMap, false);
             };
 
             if(async)
@@ -934,6 +1041,14 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @NotNull
     public String getGroupDisplay(UUID player) {
 
+        final Group g = getPlayerMasterGroup(player);
+        if(g == null) return "";
+        else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
+    }
+
+    @Nullable
+    public Group getPlayerMasterGroup(UUID player)
+    {
         byte p = Byte.MIN_VALUE;
         Group g = null;
 
@@ -948,8 +1063,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             }
         }
 
-        if(g == null) return "";
-        else return ChatColor.translateAlternateColorCodes('&', g.getDisplayName());
+        return g;
     }
 
     @Override
@@ -972,7 +1086,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 setMaxPlayerCount( getThisServer().getMaxPlayerCount() + maxPlayerCountAddAdmin, false);
             }
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-                mongoDBManager.getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(getThisServer().getName()), new Document("phase", phase.ordinal()));
+                mongoDBManager.getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(getThisServer().getName()), Updates.set("phase", phase.ordinal()));
             });
         }
     }
@@ -993,7 +1107,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public int getMaxPlayerCount()
     {
-        return getThisServer().getServerPhase() == ServerPhase.GAME || getThisServer().getServerPhase() == ServerPhase.END ? getThisServer().getMaxPlayerCount() - maxPlayerCountAddAdmin : getThisServer().getMaxPlayerCount();
+        return getThisServer().getMaxPlayerCount();
     }
 
     @Override
@@ -1061,13 +1175,20 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return mongoDBManager;
     }
 
+    @Override
+    public void openPartyGui(@NotNull Player player)
+    {
+        Validate.notNull(player);
+        gui.getPartyGui().open(player);
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         if(startup && getThisServer().getServerPhase() != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
         try
         {
             Object playerList = Reflection.getCraftBukkitClass("CraftServer").getDeclaredMethod("getHandle").invoke(Bukkit.getServer());
-            Field maxPlayers =  Reflection.getField(playerList.getClass().getSuperclass(), "maxPlayers", true);
+            Field maxPlayers =  Reflection.getDeclaredField(playerList.getClass().getSuperclass(), "maxPlayers", true);
             maxPlayers.set(playerList, maxPlayer);
         } catch (Exception e)
         {
@@ -1083,7 +1204,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             commands &= ~(1 << b);
     }
 
-    public int setBoolIsValue(int bool, byte b, boolean value)
+    public long setBoolIsValue(long bool, byte b, boolean value)
     {
         if(value)
             bool |= 1 << b;
@@ -1092,7 +1213,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return bool;
     }
 
-    public boolean isBollTrue(int bool, byte b)
+    public boolean isBollTrue(long bool, byte b)
     {
         return ((bool >> b) & 0x1) == 1;
     }
@@ -1156,5 +1277,20 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public MessageServer getMessageServer()
     {
         return messageServer;
+    }
+
+    public PartyManager getPartyManager()
+    {
+        return partyManager;
+    }
+
+    public String getIp()
+    {
+        return ip;
+    }
+
+    public PlayerListRunnable getPlayerListRunnable()
+    {
+        return playerListRunnable;
     }
 }

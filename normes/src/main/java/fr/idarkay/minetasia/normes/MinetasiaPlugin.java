@@ -1,9 +1,17 @@
 package fr.idarkay.minetasia.normes;
 
+import fr.idarkay.minetasia.normes.Utils.VoidConsumer;
+import fr.idarkay.minetasia.normes.packet.PlayerConnectionListener;
+import fr.idarkay.minetasia.normes.schematic.LoadSchematicStatement;
+import fr.idarkay.minetasia.normes.schematic.Schematic;
+import fr.idarkay.minetasia.normes.schematic.SchematicUtils;
+import fr.idarkay.minetasia.normes.sign.PlayerPacketListener;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Directional;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,8 +19,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * @author AloIs B. (IDarKay),
@@ -27,6 +35,18 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
 
 
     private MinetasiaLang minetasiaLang;
+
+    private boolean playerPacketComingEventRegister = false;
+
+    public void registerPlayerPacketComingEvent()
+    {
+        if(!playerPacketComingEventRegister)
+        {
+            playerPacketComingEventRegister = true;
+            new PlayerConnectionListener(this);
+            new PlayerPacketListener(this);
+        }
+    }
 
     /**
      * @see MinetasiaLang
@@ -88,43 +108,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      */
     public Schematic createSchematic(Location min, Location max) throws IllegalArgumentException
     {
-        World w0 = min.getWorld();
-        World w1 = max.getWorld();
-
-        if(w1 == null || w0 != w1)
-        {
-            throw new IllegalArgumentException("min location haven't same world of max location");
-        }
-
-        int x0 = min.getBlockX(), x1 = max.getBlockX();
-        int y0 = min.getBlockY(), y1 = max.getBlockY();
-        int z0 = min.getBlockZ(), z1 = max.getBlockZ();
-
-        if(x0 > x1 || y0 > y1 || z0 > z1)
-        {
-            throw new IllegalArgumentException("min location is superior of max location");
-        }
-
-        short height = (short) (y1 - y0 + 1), length = (short) (x1 - x0 + 1), width = (short) (z1 - z0 + 1);
-
-        Material[] blocks = new Material[height * length * width];
-        String[] data = new String[height * length * width];
-        for (int x = x0; x <= x1 ; x++)
-        {
-            for(int z = z0; z <= z1; z++)
-            {
-                for(int y = y0; y <= y1; y++)
-                {
-                    Block block = w0.getBlockAt(x, y, z);
-                    int i = ((y - y0) * length * width) + ((z - z0) * length) + (x - x0);
-                    String d = block.getBlockData().getAsString(true);
-                    data[i] = d.indexOf('[') == -1 ? null : d;
-                    blocks[i] = w0.getBlockAt(x, y, z).getType();
-                }
-            }
-        }
-
-        return new Schematic(blocks, data, length, width, height);
+        return SchematicUtils.createSchematic(min, max);
     }
 
     private static final Material[] AIR = new Material[]{Material.AIR, Material.VOID_AIR, Material.CAVE_AIR};
@@ -139,7 +123,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      */
     public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location)
     {
-        loadSchematic(schematic, location, true, Direction.NORTH, null);
+        SchematicUtils.loadSchematic(this, schematic, location, true, Direction.NORTH, null);
     }
 
     /**
@@ -152,53 +136,19 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      */
     public void loadSchematic(@NotNull Schematic schematic, @NotNull Location location, boolean ignoreAir, @NotNull Direction d, @Nullable Consumer<? super Block> blockConsumer)
     {
-        Material[] blocks = schematic.getBlocks();
-        String[] data = schematic.getData();
-        World w = location.getWorld();
-        boolean haveConsumer = blockConsumer != null;
-        boolean isNorth = d == Direction.NORTH;
-
-        if(w == null) throw new NullPointerException("location haven't world");
-
-        int x0 = location.getBlockX(), y0 = location.getBlockY(), z0 = location.getBlockZ();
-        int length = schematic.getLength(), width = schematic.getWidth(), height = schematic.getHeight();
-
-        for (int x = 0; x < length ; x++)
-        {
-            for(int z = 0; z < width; z++)
-            {
-                for(int y = 0; y < height; y++)
-                {
-                    int i = y * length * width + z * length + x;
-                    Material m = blocks[i];
-                    if(!ignoreAir || !isAir(m))
-                    {
-                        Block block = w.getBlockAt(d.x(x, z, length, width) + x0, y + y0, d.z(x, z, length , width) + z0);
-                        block.setType(m, true);
-                        if(data[i] != null)
-                        {
-                            if(!isNorth &&  block.getBlockData() instanceof Directional)
-                                block.setBlockData(Bukkit.createBlockData(d.rotateData(data[i])));
-                            else
-                                block.setBlockData(Bukkit.createBlockData(data[i]));
-                        }
-                        if(haveConsumer) blockConsumer.accept(block);
-                    }
-                }
-            }
-        }
+        SchematicUtils.loadSchematic(this, schematic, location, ignoreAir, d, blockConsumer);
     }
 
-    private static boolean isAir(Material material)
+    public void asyncLoadSchematic(@NotNull Schematic schematic, @NotNull Location location,
+                                   boolean ignoreAir, @NotNull Direction d, int cut, int interval,
+                                   @Nullable Consumer<? super Block> blockConsumer,
+                                   @NotNull VoidConsumer endConsumer)
     {
-        for(Material m : AIR)
-        {
-            if (m == material) return true;
-        }
-        return false;
+      SchematicUtils.asyncLoadSchematic(this, schematic, location, ignoreAir, d, cut, interval, blockConsumer, endConsumer);
+
     }
 
-    private static final byte ENTER_CHAR = (byte) 10;
+
 
     /**
      * save schematic in plugin/{@code <plugin name>}/schematic/{@code <schematic_name>}.minetasiaschem
@@ -208,81 +158,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      */
     public void saveSchematic(@NotNull Schematic schematic, @NotNull String name) throws IOException
     {
-        Validate.notNull(schematic);
-        Validate.notNull(name);
-        File directory = new File(getDataFolder(), "schematic");
-        if(!directory.exists()) directory.mkdirs();
-
-        File file = new File(directory, name + ".minetasiaschem");
-        if(!file.exists())  if(!file.createNewFile()) throw new NullPointerException("file can't create");
-
-        try(FileOutputStream fos = new FileOutputStream(file))
-        {
-            short max = (short) getMaxLen(schematic.getData());
-            FileChannel fc = fos.getChannel();
-            ByteBuffer buf = ByteBuffer.allocate(max);
-            buf.putShort(schematic.getLength());
-            drainBuffer(buf, fc);
-            buf.putShort(schematic.getWidth());
-            drainBuffer(buf, fc);
-            buf.putShort(schematic.getHeight());
-            drainBuffer(buf, fc);
-            buf.putInt(schematic.getBlocks().length);
-            drainBuffer(buf, fc);
-            buf.putInt(max);
-            drainBuffer(buf, fc);
-            for(Material s : schematic.getBlocks())
-            {
-                buf.putShort(MaterialID.valueOf(s.name()).id);
-                drainBuffer(buf, fc);
-            }
-            int i = 0;
-            for(String s : schematic.getData())
-            {
-                if(s != null)
-                {
-                    String[] split = splitInTow(s,'[');
-                    if(split[1] != null)
-                    {
-                        buf.put((i + ";[" + split[1]).getBytes());
-                        buf.put(ENTER_CHAR);
-                        drainBuffer(buf, fc);
-                    }
-                }
-                i++;
-            }
-        }
-    }
-
-    private static String[] splitInTow(String s, char spliter)
-    {
-        String[] back = new String[2];
-        int i = s.indexOf(spliter);
-        if(i == -1)
-        {
-            back[0] = s;
-            back[1] = null;
-        }
-        else
-        {
-            back[0] = s.substring(0, i);
-            back[1] = s.substring(i + 1);
-        }
-        return back;
-    }
-
-    private static void drainBuffer (ByteBuffer buffer, FileChannel fc) throws IOException {
-        buffer.flip();
-        fc.write(buffer);
-        buffer.clear();
-    }
-
-
-    public int getMaxLen(String[] data)
-    {
-        int max = 64;
-        for(String s : data) if(s.length() > max) max = s.length();
-        return max;
+        SchematicUtils.saveSchematic(schematic, name, getDataFolder());
     }
 
     /**
@@ -293,68 +169,18 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
      */
     public Schematic readSchematic(String name) throws IOException
     {
-        File file = new File(getDataFolder(), "schematic/" + name + ".minetasiaschem");
-        if(!file.exists()) throw new IOException("file not exist");
+        return SchematicUtils.readSchematic(name, getDataFolder());
+    }
 
-        try(FileInputStream fis = new FileInputStream(file))
-        {
-            MaterialID[] value = MaterialID.values();
-            FileChannel fc = fis.getChannel();
-            int size = (int)fc.size();
-            ByteBuffer buf = ByteBuffer.allocate(size);
-            fc.read(buf);
-            buf.flip();
-            short length =  buf.getShort();
-            short width = buf.getShort();
-            short height = buf.getShort();
-            int sizeD = buf.getInt();
-            int max = buf.getInt();
-
-            String[] data = new String[sizeD];
-            Material[] block = new Material[sizeD];
-
-            byte[] buffer = new byte[max];
-            int r = 0;
-            int c = 0;
-
-            for(int i = 0; i < sizeD; i++)
-            {
-                block[i] = value[buf.getShort()].material;
-            }
-
-            while (buf.hasRemaining()){
-                byte b = buf.get();
-                if(b != ENTER_CHAR)
-                {
-                    buffer[r++] = b;
-                }
-                else
-                {
-                    int len = 0;
-                    for(int i = 0; i < buffer.length; i++)
-                    {
-                        if(buffer[i] == (char) 0)
-                        {
-                            len = i;
-                            break;
-                        }
-                    }
-
-                    byte[] result = new byte[len];
-
-                    System.arraycopy(buffer, 0, result, 0, len);
-
-                    String[] split = new String(result).split(";", 2);
-
-                    data[Integer.parseInt(split[0])] = "minecraft:" + block[Integer.parseInt(split[0])].name().toLowerCase() + split[1];
-                    c++;
-
-                    r = 0;
-                    buffer = new byte[max];
-                }
-            }
-            return new Schematic(block, data, length, width, height);
-        }
+    /**
+     * read schematic from  plugin/{@code <plugin schemFile>}/schematic/{@code <schematic_name>}.minetasiaschem
+     * @param schemFile file  of the schematic
+     * @return create schematic from data
+     * @throws IOException if error on read data
+     */
+    public Schematic readSchematic(File schemFile) throws IOException
+    {
+       return SchematicUtils.readSchematic(schemFile);
     }
 
     /**
@@ -401,6 +227,12 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static void drainBuffer (ByteBuffer buffer, FileChannel fc) throws IOException {
+        buffer.flip();
+        fc.write(buffer);
+        buffer.clear();
     }
 
     /**

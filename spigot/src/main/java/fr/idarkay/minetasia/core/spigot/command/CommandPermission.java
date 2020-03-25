@@ -58,6 +58,8 @@ public enum CommandPermission {
     PERMISSION_GROUP_INFO("permission.group.info", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_BOOST("permission.group.boost", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_SAVE("permission.group.save", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_DEFAULT("permission.group.default", ALL_PERMISSION_GROUP),
+
 
     UTILS_CHAT_COLOR("utils.chat.color", ALL),
     UTILS_CHAT_MAGIC("utils.chat.magic", ALL),
@@ -67,6 +69,8 @@ public enum CommandPermission {
 
     TP("tp", ALL),
     HUB("hub", ALL),
+    PARTY("party", ALL),
+    PARTY_SIZE("party.size"),
 
     ;
 

@@ -1,10 +1,10 @@
 package fr.idarkay.minetasia.core.spigot.messages;
 
-import com.google.common.collect.ImmutableMap;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -17,17 +17,20 @@ import java.util.Map;
  * @author Alois. B. (IDarKay),
  * Created the 01/02/2020 at 13:41
  */
-public interface CoreMessage
+public abstract class CoreMessage
 {
 
-   Map<String, CoreMessage> MESSAGE = new ImmutableMap.Builder<String, CoreMessage>()
-            .put(ServerMessage.getIdentifier(), new ServerMessage())
-            .put(PlayerMessage.getIdentifier(), new PlayerMessage())
-            .build();
+   public static final Map<String, CoreMessage> MESSAGE = new HashMap<>();
+   public static final String CHANNEL = "core-messaging";
 
-    String CHANNEL = "core-messaging";
 
-    void actionOnGet(MinetasiaCore plugin, String... args);
+
+   CoreMessage(String identifier)
+   {
+       MESSAGE.put(identifier, this);
+   }
+
+    public abstract void actionOnGet(MinetasiaCore plugin, String... args);
 
     static @NotNull String getMessage(String identifier, Object... args)
     {

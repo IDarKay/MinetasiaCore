@@ -8,6 +8,7 @@ import fr.idarkay.minetasia.core.spigot.command.abstraction.FixCommand;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.FlexibleCommand;
 import fr.idarkay.minetasia.core.spigot.commands.NoPermissionCommand;
 import fr.idarkay.minetasia.core.spigot.commands.money.MoneyCommand;
+import fr.idarkay.minetasia.core.spigot.commands.party.PartyCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.PermissionCommand;
 import fr.idarkay.minetasia.core.spigot.commands.tp.TpCommand;
 import org.bukkit.command.CommandSender;
@@ -34,8 +35,9 @@ public class CommandManager {
                 .add(new PermissionCommand(plugin))
                 .add(new MoneyCommand(plugin))
                 .add(new TpCommand(plugin))
+                .add(new PartyCommand(plugin))
                 .build();
-        np = new NoPermissionCommand(plugin);;
+        np = new NoPermissionCommand(plugin);
     }
 
     public Command getCommand(String label, String[] args, boolean forTab, CommandSender sender)

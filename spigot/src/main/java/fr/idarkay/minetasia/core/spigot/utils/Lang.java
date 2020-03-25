@@ -58,6 +58,38 @@ public enum Lang implements IMinetasiaLang {
                                                             "&6End game of : &a" + Argument.SERVER_TYPE +
                                                             "\n&6Rewards: " + Argument.REWARDS +
                                                             "&c=========================================="),
+    //party
+    PARTY_NOT_IN_PARTY("&cSorry you're not in party"),
+    PARTY_NOT_OWNER("&cSorry you're not the party owner"),
+    PARTY_DELETE("&cSorry this party was disband"),
+    PARTY_FULL("&cThis party is full"),
+    PARTY_NOT_REQUEST("&cSorry you haven't join party request"),
+    PARTY_MAX_SIZE("&cSorry you reach max party size"),
+    PARTY_REQUEST_COMING("&aYou received party join request from &6" + Argument.PLAYER),
+    PARTY_LEAVE("&aYou leave the party"),
+    PARTY_DISBAND("&aYou disband your's party"),
+    PARTY_JOIN("&aYou join party of &6" + Argument.PLAYER),
+    PARTY_ALREADY_INVITE("&cYou have already invite this player"),
+    WAIT_BETWEEN_USE("&cYou must wait &e" + Argument.TIME + "s&c between uses!"),
+    YOUR_PARTY("&aYou're in &6" + Argument.PLAYER + "'s&a party@@&aMembers : &6" + Argument.MEMBERS),
+    PARTY_INVITE_SEND("&aYou send invitation to &6" + Argument.PLAYER),
+    PARTY_INVITE_SELF("&cSorry you can't invite your self"),
+    PARTY_ALREADY_IN_PARTY("&cSorry, this player is on your's party"),
+    PARTY_PLAYER_NOT_IN_PARTY("&cSorry this player isn't in your's party"),
+    PARTY_PLAYER_KICK("&aYou have kick &6" + Argument.PLAYER),
+    PARTY_MAKE_LEADER("&aNew Leaders is &6" + Argument.PLAYER),
+    PARTY_YOU_ARE_LEADER("&cYou're the leaders"),
+    PARTY_GUI_NAME("Your's party"),
+    PARTY_GUI_INVITE_NAME("&aInvite player"),
+    PARTY_GUI_INVITE_LORE("&7Click for invite player to your's party"),
+    PARTY_GUI_DISBAND_NAME("&cDisband party"),
+    PARTY_GUI_DISBAND_LORE("&7Click for disband your's party"),
+    PARTY_GUI_LEAVE_NAME("&cLeave party"),
+    PARTY_GUI_LEAVE_LORE("&7Click for leave the party"),
+    PARTY_GUI_OWNER_VIEW_MEMBER_LORE("&aMember@@&cLeft-Click &7Promote to Owner@@&cRight-Click &7Kick player"),
+    PARTY_GUI_MEMBER_VIEW_MEMBER_LORE("&aMember"),
+    PARTY_GUI_OWNER_LORE("&cOwner"),
+
 
     //money
     MONEY_WRONG_TYPE                            ("&cInvalid money type"),
@@ -108,6 +140,7 @@ public enum Lang implements IMinetasiaLang {
     DESC_PERMISSION_GROUP_PRIORITY              ("<priority> / for change the priority of the group"),
     DESC_PERMISSION_GROUP_PRIORITY_VALUE        ("for change the priority of the group"),
     DESC_PERMISSION_GROUP_SAVE                  ("Save and update the group for all server use when you finish all modification"),
+    DESC_PERMISSION_GROUP_DEFAULT               ("change if the group is a default group or not"),
     DESC_PERMISSION_GROUP_INFO                  ("get all information of a group"),
     DESC_PERMISSION_GROUP_PERMISSION            ("edit permissions of the group"),
     DESC_PERMISSION_GROUP_PERMISSION_ADD        ("<permission> / add permission of the group"),
@@ -155,6 +188,25 @@ public enum Lang implements IMinetasiaLang {
     DESC_TP_USER                                ("if no second argument tp the executor to the player, else tp player to second argument"),
     DESC_TP_A                                   ("tp all player of the server (no all proxy) to second argument"),
 
+    DESC_PARTY(""),
+    DESC_PARTY_LIST("show all player in your team"),
+    DESC_PARTY_JOIN("join the last party invitation"),
+    DESC_PARTY_INVITE("<player> invite a given player to your party"),
+    DESC_PARTY_LEAVE("leave your party or disband if you are leader"),
+    DESC_PARTY_KICK("<player> kick a player from your party"),
+    DESC_MAKER_LEADER("<player> set the new owner of the group"),
+
+    LIST_PLAYER_HEADER("&3>>>&a&lMine&6&lTasia&r&3<<<@@" +
+            "@@" +
+            "&7Welcome " + Argument.PLAYER  + " on &a&lMine&6&lTasia&r &7 enjoy !@@" +
+            "&7&lPING :&a " + Argument.MS + " &r&7&l| Connected on : &a" + Argument.SERVER_TYPE +
+            "@@@@"),
+    LIST_PLAYER_FOOTER("@@" +
+            "&7&lDiscord: &r&3https://discord.minetasia.com@@" +
+            "&7&lSites: &r&3https://www.minetasia.com@@" +
+            "@@" +
+            Argument.IP)
+
     ;
 
     public static String prefix;
@@ -194,11 +246,18 @@ public enum Lang implements IMinetasiaLang {
         sender.sendMessage(get(sender instanceof Player ? api.getPlayerLang(((Player) sender).getUniqueId()) : MinetasiaLang.BASE_LANG, args));
     }
 
+    public static final String newlineRegex = "@@";
+
+    @SafeVarargs
+    public final <T> String[] getWithSplit(String lang, Tuple<? extends Args, T>... args)
+    {
+        return getWithoutPrefix(lang, args).split(newlineRegex);
+    }
 
     public enum Argument implements Args
     {
         PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
-        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE
+        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP,
         ;
 
         String node;

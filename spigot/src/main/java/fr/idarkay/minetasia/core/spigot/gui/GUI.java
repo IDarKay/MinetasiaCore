@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.spigot.gui;
 
+import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.normes.InventoryFileType;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import org.bukkit.ChatColor;
@@ -23,39 +24,25 @@ import java.util.UUID;
  */
 public final class GUI {
 
-    public final static HashMap<Integer, String> SLOT_LANG = new HashMap<>();
-    public final static UUID uuid = UUID.randomUUID();
 
-    private final Plugin plugin;
 
-    private Inventory lang;
+    private final LangGui langGui;
+    private final PartyGui partyGui;
 
-    public GUI(Plugin plugin)
+    public GUI(MinetasiaCore plugin)
     {
-        this.plugin = plugin;
+        this.langGui = new LangGui(plugin);
+        this.partyGui = new PartyGui(plugin);
     }
 
-    public void createLangInventory()
-    {
-        //lang
-        lang = MinetasiaGUI.createGUI(uuid, plugin.getConfig().getInt("gui.lang.size")
-                , ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("gui.lang.name"))
-                , InventoryFileType.SQUARE, MinetasiaGUI.createItemStack(Material.valueOf(plugin.getConfig().getString("gui.lang.fileMaterial"))
-                        , 1, " "));
 
-        for(String sec : plugin.getConfig().getConfigurationSection("gui.lang.lang").getKeys(false))
-        {
-            int slot = plugin.getConfig().getInt("gui.lang.lang." + sec + ".slot");
-            lang.setItem(slot, MinetasiaGUI.createHead(1
-                    , ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("gui.lang.lang." + sec + ".name"))
-                    , plugin.getConfig().getString("gui.lang.lang." + sec + ".texture")));
-            SLOT_LANG.put(slot, plugin.getConfig().getString("gui.lang.lang." + sec + ".iso"));
-        }
+    public LangGui getLangGui()
+    {
+        return langGui;
     }
 
-    public void openLangInventory(Player player)
+    public PartyGui getPartyGui()
     {
-        player.openInventory(lang);
+        return partyGui;
     }
-
 }

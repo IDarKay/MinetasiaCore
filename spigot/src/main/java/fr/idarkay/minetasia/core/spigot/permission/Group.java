@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.BoostType;
 import fr.idarkay.minetasia.core.api.utils.Boost;
 import org.bson.Document;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -33,6 +34,8 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
     private String displayName;
     private byte priority = 0;
     private Boost personalBoost, partyBoost;
+    private boolean defaultt;
+    private Team team;
 
     public Group(PermissionManager pm, String name)
     {
@@ -43,6 +46,7 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         this.partyBoost = HashMap::new;
         this.permissions = new ArrayList<>();
         this.parents = new ArrayList<>();
+        this.defaultt = false;
     }
 
     public Group(Document d, PermissionManager pm)
@@ -53,6 +57,7 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         priority = (byte) d.getInteger("priority", 0);
         permissions = d.getList("permission", String.class);
         parents = d.getList("parents", String.class);
+        defaultt = d.getBoolean("default");
 
         final Map<BoostType, Float> personalBoosts = new HashMap<>();
         d.get("personal_boosts", Document.class).forEach((k, v) -> personalBoosts.put(BoostType.valueOf(k), ((Double) v).floatValue()));
@@ -70,6 +75,7 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         name = json.get("_id").getAsString();
         displayName = json.get("displayName").getAsString();
         priority = json.get("priority").getAsByte();
+        defaultt = json.get("default").getAsBoolean();
 
         permissions = new ArrayList<>();
         JsonArray a = json.getAsJsonArray("permission");
@@ -125,6 +131,16 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         }
 
         return pe;
+    }
+
+    public void setDefault(boolean defaultt)
+    {
+        this.defaultt = defaultt;
+    }
+
+    public boolean isDefault()
+    {
+        return defaultt;
     }
 
     @Override
@@ -208,6 +224,16 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         this.priority = priority;
     }
 
+    public void setTeam(Team team)
+    {
+        this.team = team;
+    }
+
+    public Team getTeam()
+    {
+        return team;
+    }
+
     public Document toDocument()
     {
         final Document d = new Document("_id", name);
@@ -215,6 +241,7 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         d.append("priority", priority);
         d.append("permission", permissions);
         d.append("parents", parents);
+        d.append("default", defaultt);
 
         final Document partyBoost = new Document();
         this.partyBoost.getBoost().forEach((k, v) -> partyBoost.append(k.name(), v));
@@ -232,6 +259,7 @@ public class Group implements fr.idarkay.minetasia.core.api.utils.Group {
         p.addProperty("_id", name);
         p.addProperty("displayName", displayName);
         p.addProperty("priority", priority);
+        p.addProperty("default", defaultt);
 
         JsonArray a = new JsonArray();
         permissions.forEach(a::add);

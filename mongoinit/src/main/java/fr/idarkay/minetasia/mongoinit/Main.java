@@ -40,8 +40,8 @@ public class Main
         final String dbname = getOrDefault(args, "dbname", "minetasia");
         final int port = Integer.parseInt(getOrDefault(args, "port", "27017"));
         final String collectionToCreate = getOrDefault(args, "create", null);
-//        if(collectionToCreate == null) throw new IllegalArgumentException("no create args specified");
-//        final String[] collectionToCreateList = collectionToCreate.split(",");
+        if(collectionToCreate == null) throw new IllegalArgumentException("no create args specified");
+        final String[] collectionToCreateList = collectionToCreate.split(",");
 
         final MongoCredential credential = MongoCredential.createCredential(user, dbname, pass.toCharArray());
         final ConnectionString connectionString = new ConnectionString(host);
@@ -53,14 +53,14 @@ public class Main
                         builder.hosts(Collections.singletonList(new ServerAddress(host, port))))
                 .build();
 
-        final MongoClient mongoClient = MongoClients.create(host);
+        final MongoClient mongoClient = MongoClients.create(connectionString);
 
         final MongoDatabase database = mongoClient.getDatabase(dbname);
 
-//        for(String s : collectionToCreateList)
-//        {
-//            database.createCollection(s);
-//        }
+        for(String s : collectionToCreateList)
+        {
+            database.createCollection(s);
+        }
 
 //        Document k = database.getCollection("kits").find(eq("skyblockbattle_more_life")).first();
 //        k.getList("price", Integer.class);

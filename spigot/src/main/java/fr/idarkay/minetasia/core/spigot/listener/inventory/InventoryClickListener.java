@@ -61,29 +61,5 @@ public final class InventoryClickListener implements Listener {
                     gui.click(player, e);
             }
         }
-
-        //todo: chnage for new gui system
-        Inventory inventory = e.getInventory();
-        if(inventory.getHolder() instanceof MinetasiaGuiHolder)
-        {
-            UUID id = ((MinetasiaGuiHolder) inventory.getHolder()).getUuid();
-            if(id.equals(GUI.uuid))
-            {
-                e.setCancelled(true);
-                Player p = (Player) e.getWhoClicked();
-                p.updateInventory();
-
-                String lang = GUI.SLOT_LANG.get(e.getSlot());
-
-                if(lang != null)
-                {
-                    Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->{
-                        plugin.setPlayerData(p.getUniqueId(), "lang", lang);
-                        p.sendMessage(Lang.SET_LANG.get(lang));
-                    });
-                    p.closeInventory();
-                }
-            }
-        }
     }
 }

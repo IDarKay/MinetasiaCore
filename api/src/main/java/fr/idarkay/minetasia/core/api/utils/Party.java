@@ -1,6 +1,6 @@
 package fr.idarkay.minetasia.core.api.utils;
 
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -15,9 +15,14 @@ import java.util.UUID;
  */
 public interface Party
 {
+
+    UUID getId();
+
     UUID getOwner();
 
-    List<UUID> getPlayers();
+    String getOwnerName();
+
+   Map<UUID, String> getPlayers();
 
     int limitSize();
 }
