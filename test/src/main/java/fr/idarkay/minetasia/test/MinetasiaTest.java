@@ -19,6 +19,7 @@ import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
+import fr.idarkay.minetasia.normes.Tuple;
 import fr.idarkay.minetasia.normes.anontation.MinetasiaGuiNoCallEvent;
 import fr.idarkay.minetasia.test.listener.inventory.InventoryClickListener;
 import fr.idarkay.minetasia.test.listener.inventory.InventoryCloseListener;
@@ -250,7 +251,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
-    public @NotNull HashMap<UUID, String> getFriends(@NotNull UUID uuid)
+    public @NotNull HashMap<UUID, Tuple<String, String>> getFriends(@NotNull UUID uuid)
     {
         return new HashMap<>();
     }
@@ -696,6 +697,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         player.sendMessage("no gui with test core");
     }
 
+    @Override
+    public void openFriendGui(@NotNull Player player)
+    {
+        player.sendMessage("no gui with test core");
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
@@ -764,7 +771,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
-        public @NotNull Map<UUID, String> getFriends()
+        public @NotNull HashMap<UUID, Tuple<String, String>> getFriends()
         {
             return new HashMap<>();
         }

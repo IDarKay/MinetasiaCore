@@ -16,27 +16,33 @@ import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.*;
-import fr.idarkay.minetasia.core.spigot.executor.*;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
+import fr.idarkay.minetasia.core.spigot.executor.*;
+import fr.idarkay.minetasia.core.spigot.gui.GUI;
 import fr.idarkay.minetasia.core.spigot.kits.KitMain;
 import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
-import fr.idarkay.minetasia.core.spigot.listener.*;
+import fr.idarkay.minetasia.core.spigot.listener.AsyncPlayerChatListener;
+import fr.idarkay.minetasia.core.spigot.listener.MessageListener;
+import fr.idarkay.minetasia.core.spigot.listener.PlayerListener;
+import fr.idarkay.minetasia.core.spigot.listener.PluginMessageReceivedListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryClickListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryCloseListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
-import fr.idarkay.minetasia.core.spigot.gui.GUI;
 import fr.idarkay.minetasia.core.spigot.runnable.PlayerListRunnable;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PartyManager;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
-import fr.idarkay.minetasia.core.spigot.utils.*;
+import fr.idarkay.minetasia.core.spigot.utils.Lang;
+import fr.idarkay.minetasia.core.spigot.utils.MongoDBManager;
+import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.Reflection;
+import fr.idarkay.minetasia.normes.Tuple;
 import fr.idarkay.minetasia.normes.anontation.MinetasiaGuiNoCallEvent;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
@@ -142,8 +148,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private PartyManager partyManager;
     private PlayerListRunnable playerListRunnable;
     private GUI gui;
-
-    private FriendsExecutor friendsExecutor;
 
     private String serverType, prefix = "", serverConfig = "", ip = "";
     private boolean isHub;
@@ -279,8 +283,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         setCommandsIsEnable(Command.FRIEND.by, getConfig().getBoolean("commands.friends", true));
         if(isCommandEnable(Command.FRIEND))
         {
-            friendsExecutor = new FriendsExecutor(this);
-            Objects.requireNonNull(getCommand("friends")).setExecutor(friendsExecutor);
+            Objects.requireNonNull(getCommand("friends")).setExecutor(customCommandExecutor);
         }
 
         setCommandsIsEnable(Command.PERMISSION.by, getConfig().getBoolean("commands.permission", true));
@@ -327,6 +330,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             Objects.requireNonNull(getCommand("r")).setExecutor(new RExecutor(this));
             Objects.requireNonNull(getCommand("socialspy")).setExecutor(new SocialSpyExecutor(this));
         }
+
+        Objects.requireNonNull(getCommand("help")).setExecutor(customCommandExecutor);
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "register events");
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -514,7 +519,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    public @NotNull Map<UUID, String> getFriends(@NotNull UUID uuid) {
+    public @NotNull Map<UUID, Tuple<String, String>> getFriends(@NotNull UUID uuid) {
         MinePlayer p = playerManager.get(uuid);
         if (p != null) return p.getFriends();
         return new HashMap<>();
@@ -533,7 +538,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             final MinePlayer p = playerManager.get(uuid);
             if(p != null)
             {
-                p.removeFriends(uuid);
+                p.removeFriends(uuid2);
             }
         });
     }
@@ -1182,6 +1187,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         gui.getPartyGui().open(player);
     }
 
+    @Override
+    public void openFriendGui(@NotNull Player player)
+    {
+        Validate.notNull(player);
+        gui.friendsGui.open(player, 0);
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         if(startup && getThisServer().getServerPhase() != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
@@ -1236,10 +1248,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     public ServerManager getServerManager() {
         return serverManager;
-    }
-
-    public FriendsExecutor getFriendsExecutor() {
-        return friendsExecutor;
     }
 
     public GUI getGui() {

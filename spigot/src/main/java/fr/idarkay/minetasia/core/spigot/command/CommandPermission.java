@@ -29,8 +29,6 @@ public enum CommandPermission {
     MONEY_REMOVE("money.remove", ALL_MONEY),
     MONEY_GET("money.get", ALL_MONEY),
 
-    FRIEND("friend", ALL),
-
     LANG("lang", ALL),
     LANG_ADMIN("lang.admin", ALL),
 
@@ -60,6 +58,10 @@ public enum CommandPermission {
     PERMISSION_GROUP_SAVE("permission.group.save", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_DEFAULT("permission.group.default", ALL_PERMISSION_GROUP),
 
+    ALL_MODERATION("moderation", ALL),
+
+    BAN("moderation.ban", ALL_MODERATION),
+    MUTE("moderation.mute", ALL_MODERATION),
 
     UTILS_CHAT_COLOR("utils.chat.color", ALL),
     UTILS_CHAT_MAGIC("utils.chat.magic", ALL),
@@ -71,6 +73,10 @@ public enum CommandPermission {
     HUB("hub", ALL),
     PARTY("party", ALL),
     PARTY_SIZE("party.size"),
+    FRIEND("friend", ALL),
+    MAX_FRIEND("friend.max_size"),
+    HELP("help", ALL),
+    HELP_STAFF("help.staff", HELP)
 
     ;
 

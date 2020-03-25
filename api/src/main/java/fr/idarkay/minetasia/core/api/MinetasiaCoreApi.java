@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.api;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
+import fr.idarkay.minetasia.normes.Tuple;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -147,7 +148,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      */
     @NotNull
-    public abstract Map<UUID, String> getFriends(@NotNull UUID uuid);
+    public abstract Map<UUID, Tuple<String, String>> getFriends(@NotNull UUID uuid);
 
     /**
      * check if 2 player is friend
@@ -563,5 +564,11 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param player to open gui
      */
     public abstract void openPartyGui(@NotNull Player player);
+
+    /**
+     * open the friend gui to a player
+     * @param player to open gui
+     */
+    public abstract void openFriendGui(@NotNull Player player);
 
 }
