@@ -1,6 +1,7 @@
 package fr.idarkay.minetasia.core.api.utils;
 
 import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.normes.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,7 +74,7 @@ public interface MinetasiaPlayer
      * @return map uuid - username
      */
     @NotNull
-    Map<UUID, String> getFriends();
+    Map<UUID, Tuple<String, String>> getFriends();
 
     /**
      * return the lang of the player in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>

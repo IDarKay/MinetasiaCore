@@ -11,8 +11,11 @@ import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
+import fr.idarkay.minetasia.core.spigot.moderation.Sanction;
+import fr.idarkay.minetasia.core.spigot.moderation.SanctionType;
 import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import fr.idarkay.minetasia.normes.Tuple;
 import fr.idarkay.minetasia.normes.Utils.BukkitUtils;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
@@ -45,7 +48,7 @@ public class MinePlayer implements MinetasiaPlayer
     private final boolean isCache;
 
     private final Map<String, Object> data;
-    private final Map<UUID, String> friends;
+    private final Map<UUID, Tuple<String, String>> friends; // map uuid of the friend ; tuple< name of friend ; head texture >
     @NotNull private final Map<Economy, Long> moneys;
 
     @NotNull private String username;
@@ -99,7 +102,7 @@ public class MinePlayer implements MinetasiaPlayer
 
         this.friends = new HashMap<>();
         if(doc.containsKey("friends"))
-            doc.get("friends", Document.class).forEach((k, v) -> friends.put(UUID.fromString(k), v.toString()));
+            doc.get("friends", ArrayList.class).forEach( v -> friends.put(UUID.fromString(((Document)v).getString("uuid")), new Tuple<>( ((Document)v).getString("name"), null)));
 
         this.data = new HashMap<>();
         if(doc.containsKey("data"))
@@ -124,6 +127,54 @@ public class MinePlayer implements MinetasiaPlayer
                 }
             }
         }
+    }
+
+    public void unsetSanction(@NotNull Sanction sanction, boolean removeHistory)
+    {
+        Validate.notNull(sanction);
+        if(removeHistory)
+        {
+            data.remove(sanction.getType().name());
+            CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()),
+                    Updates.combine(
+                            Updates.unset("data." + sanction.getType().name()),
+                            Updates.pull("data.history." + sanction.getType().name(), Filters.eq("start", sanction.startTime))
+                    )
+            );
+        }
+        else
+            putData(sanction.getType().name(), null);
+    }
+
+    public void setSanction(@NotNull Sanction sanction)
+    {
+        Validate.notNull(sanction);
+        data.put(sanction.getType().name(), sanction.toDocument());
+        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()),
+                Updates.combine(
+                        Updates.push("data.history." + sanction.getType().name(), sanction.toDocument()),
+                        Updates.set("data." + sanction.getType().name(), sanction.toDocument())
+                )
+        );
+    }
+
+    @Nullable
+    public Sanction getSanction(@NotNull SanctionType type)
+    {
+        Validate.notNull(type);
+        final Document document = (Document) getData(type.toString());
+        if(document == null)
+        {
+            return null;
+        }
+        final Sanction sanction = Sanction.fromDocument(type, document);
+        if(sanction.isEnd())
+        {
+            //remove the sanction
+            putData(type.toString(), null);
+            return null;
+        }
+        return sanction;
     }
 
     public void setUsername(@NotNull String username)
@@ -194,7 +245,7 @@ public class MinePlayer implements MinetasiaPlayer
     }
 
     @Override
-    public @NotNull Map<UUID, String> getFriends()
+    public @NotNull Map<UUID, Tuple<String, String>> getFriends()
     {
         return friends;
     }
@@ -218,7 +269,7 @@ public class MinePlayer implements MinetasiaPlayer
         Validate.notNull(uuid);
         if(validateNotCache(PlayerMessage.ActionType.ADD_FRIENDS, uuid))
         {
-            if(friends.put(uuid, CORE.getPlayerName(uuid)) == null)
+            if(friends.put(uuid, new Tuple<>(CORE.getPlayerName(uuid), null)) == null)
             {
                 saveFriends();
             }
@@ -398,7 +449,7 @@ public class MinePlayer implements MinetasiaPlayer
     private void saveFriends()
     {
         final List<Document> all = new ArrayList<>();
-        friends.forEach((k, v) -> all.add(new Document("uuid", k.toString()).append("name", v)));
+        friends.forEach((k, v) -> all.add(new Document("uuid", k.toString()).append("name", v.a())));
         set("friends", all);
     }
 

@@ -4,6 +4,7 @@ import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.commands.friends.FriendCommand;
 import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
 import fr.idarkay.minetasia.core.spigot.messages.PartyMessage;
 import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
@@ -86,7 +87,7 @@ public final class MessageListener implements Listener {
                             if ("friends".equals(msg[0]))
                             {
                                 if (plugin.isCommandEnable(Command.FRIEND))
-                                    plugin.getFriendsExecutor().newRequest(u, UUID.fromString(msg[1]), p);
+                                    FriendCommand.newRequest(plugin, u, UUID.fromString(msg[1]), p);
                             }
                             else if("permission".equals(msg[0]))
                             {

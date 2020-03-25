@@ -7,6 +7,8 @@ import fr.idarkay.minetasia.core.spigot.command.abstraction.Command;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.FixCommand;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.FlexibleCommand;
 import fr.idarkay.minetasia.core.spigot.commands.NoPermissionCommand;
+import fr.idarkay.minetasia.core.spigot.commands.friends.FriendCommand;
+import fr.idarkay.minetasia.core.spigot.commands.miscellaneous.Help;
 import fr.idarkay.minetasia.core.spigot.commands.money.MoneyCommand;
 import fr.idarkay.minetasia.core.spigot.commands.party.PartyCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.PermissionCommand;
@@ -36,6 +38,8 @@ public class CommandManager {
                 .add(new MoneyCommand(plugin))
                 .add(new TpCommand(plugin))
                 .add(new PartyCommand(plugin))
+                .add(new Help(plugin))
+                .add(new FriendCommand(plugin))
                 .build();
         np = new NoPermissionCommand(plugin);
     }
