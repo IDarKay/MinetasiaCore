@@ -1,10 +1,14 @@
 package fr.idarkay.minetasia.core.api;
 
+import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
+import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
+import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import fr.idarkay.minetasia.normes.Tuple;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * File <b>MinetasiaCoreApi</b> located on fr.idarkay.minetasia.core.api
@@ -570,5 +575,54 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param player to open gui
      */
     public abstract void openFriendGui(@NotNull Player player);
+
+    /**
+     * validate a custom advancement to a player (auto give rewards)
+     * @param player to valid advancement
+     * @param namespacedKey the name of the advancement
+     */
+    public abstract void validateAdvancement( @NotNull UUID player, @NotNull NamespacedKey namespacedKey);
+
+    /**
+     * create an advancement
+     * @param namespacedKey the name of the advancement
+     * @param icon the icon
+     * @param frame the frame
+     * @param title the title in lang
+     * @param description the description in lang
+     * @param lang the lang
+     * @return the created advancement
+     */
+    public abstract MinetasiaBaseAdvancement createAdvancement(@NotNull NamespacedKey namespacedKey, @NotNull AdvancementIcon icon, @NotNull AdvancementFrame frame, @NotNull String title, @NotNull String description, @NotNull String lang);
+
+    /**
+     * register an advancement (add to bdd if not exist)
+     * @param advancement the advancement
+     */
+    public abstract void registerAdvancement(@NotNull MinetasiaBaseAdvancement advancement);
+
+    /**
+     * get the settings
+     * @param key the key of the settings
+     * @param <T> the type of the settings
+     * @return the settings
+     */
+    @NotNull
+    public abstract <T> MinetasiaSettings<T> getSettings(@NotNull SettingsKey<T> key);
+
+    /**
+     * get the display ip to show to players
+     * @return ip
+     */
+    public abstract String getIp();
+
+    /**
+     * this function add the consumer in the ip runnable
+     * th runnable it's just for hud (tab or score board) this make a beautiful animation on the ip common in all servers !
+     * just add a consumer that the String input is the ip with de good color !
+     * link this on your scoreboard and it's good :) !
+     * @param ipConsumer the consumer
+     */
+    public abstract void registerIpConsumer(Consumer<String> ipConsumer);
 
 }

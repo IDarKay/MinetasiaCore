@@ -1,13 +1,10 @@
-package fr.idarkay.minetasia.core.spigot.runnable;
+package fr.idarkay.minetasia.core.spigot.utils;
 
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.Reflection;
-import fr.idarkay.minetasia.normes.Utils.ReflectionVar;
+import fr.idarkay.minetasia.normes.utils.ReflectionVar;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -26,72 +23,23 @@ import java.util.List;
  * @author Alois. B. (IDarKay),
  * Created the 06/03/2020 at 17:53
  */
-public class PlayerListRunnable extends BukkitRunnable
+public class PlayerListManager
 {
 
     private final MinetasiaCore core;
-    private final String ip;
-    private final int ipLength;
-    private final StringBuilder msg = new StringBuilder();
 
-    public PlayerListRunnable(MinetasiaCore core)
+    public PlayerListManager(MinetasiaCore core)
     {
         this.core = core;
-        this.ip = core.getIp();
-        ipLength = ip.length();
-    }
-
-    private volatile String fullIp = "";
-    private int c = 0;
-    private IPPhase phase = IPPhase.WRITE;
-
-    @Override
-    public void run()
-    {
-        if(phase == IPPhase.WRITE)
-        {
-            if(ipLength > c)
-            {
-                msg.append(ip.charAt(c));
-                fullIp = ChatColor.GOLD + msg.toString() + "_";
-                c++;
-            }
-            else
-            {
-                c = 0;
-                phase = IPPhase.LIGHT;
-            }
-        }
-        else if(phase == IPPhase.LIGHT)
-        {
-            if(c < 8)
-            {
-                fullIp = (c%2 == 0 ? ChatColor.RED : ChatColor.GOLD) + msg.toString();
-                c++;
-            }
-            else
-            {
-                c = 0;
-                phase = IPPhase.DELETE;
-            }
-        }
-        else if (phase == IPPhase.DELETE)
-        {
-            final int l = msg.length();
-            if(l > 0)
-            {
-                msg.deleteCharAt(l -1);
-                fullIp = ChatColor.GOLD  + msg.toString() + "_";
-            }
-            else
-            {
-                phase = IPPhase.WRITE;
-            }
-        }
-        Bukkit.getOnlinePlayers().forEach(this::updatePlayer);
+        core.registerIpConsumer(ip -> Bukkit.getOnlinePlayers().forEach(player -> updatePlayer(player, ip)));
     }
 
     public void updatePlayer(Player player)
+    {
+        updatePlayer(player, " ");
+    }
+
+    public void updatePlayer(Player player, String fullIp)
     {
         final String lang = core.getPlayerLang(player.getUniqueId());
         final int ping = getPlayerPing(player);

@@ -1,11 +1,12 @@
-package fr.idarkay.minetasia.normes.packet;
+package fr.idarkay.minetasia.normes.event;
 
 import org.apache.commons.lang.Validate;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 /**
  * File <b>PacketComingEvent</b> located on fr.idarkay.minetasia.normes.packet
@@ -22,10 +23,10 @@ public class PlayerPacketComingEvent extends Event implements Cancellable
     private static HandlerList handlerList = new HandlerList();
 
     private final Object packet;
-    private final Player player;
+    private final UUID player;
     private boolean cancelled = false;
 
-    public PlayerPacketComingEvent(@NotNull  final Player player, @NotNull final Object packet)
+    public PlayerPacketComingEvent(@NotNull  final UUID player, @NotNull final Object packet)
     {
         super(true);
         Validate.notNull(player);
@@ -34,7 +35,7 @@ public class PlayerPacketComingEvent extends Event implements Cancellable
         this.packet = packet;
     }
 
-    public Player getPlayer()
+    public UUID getPlayer()
     {
         return player;
     }

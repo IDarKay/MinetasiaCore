@@ -15,4 +15,6 @@ public enum BoostType
     MINECOINS(),
     SHOPEX(),
     STARS(),
+    BATTLE_XP(),
+    SKYBLOCK(),
 }

@@ -1,25 +1,29 @@
 package fr.idarkay.minetasia.normes;
 
-import fr.idarkay.minetasia.normes.Utils.VoidConsumer;
+import fr.idarkay.minetasia.normes.utils.VoidConsumer;
+import fr.idarkay.minetasia.normes.npc.MinetasiaNpc;
+import fr.idarkay.minetasia.normes.npc.PlayerQuitListener;
 import fr.idarkay.minetasia.normes.packet.PlayerConnectionListener;
-import fr.idarkay.minetasia.normes.schematic.LoadSchematicStatement;
 import fr.idarkay.minetasia.normes.schematic.Schematic;
 import fr.idarkay.minetasia.normes.schematic.SchematicUtils;
-import fr.idarkay.minetasia.normes.sign.PlayerPacketListener;
+import fr.idarkay.minetasia.normes.Listener.PlayerPacketListener;
 import org.apache.commons.lang.Validate;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.Directional;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -37,6 +41,18 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
     private MinetasiaLang minetasiaLang;
 
     private boolean playerPacketComingEventRegister = false;
+    private static boolean isEnable;
+
+    @Override
+    public void onEnable()
+    {
+        if(!isEnable)
+        {
+            MinetasiaNpc.setPlugin(this);
+            getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
+            isEnable = true;
+        }
+    }
 
     public void registerPlayerPacketComingEvent()
     {
@@ -112,6 +128,11 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
     }
 
     private static final Material[] AIR = new Material[]{Material.AIR, Material.VOID_AIR, Material.CAVE_AIR};
+
+    public void loadSchematicInChunk(@NotNull Schematic schematic, @NotNull ChunkGenerator.ChunkData chunkData, int height)
+    {
+        SchematicUtils.loadSchematicInOneChunk(schematic, chunkData, height);
+    }
 
     /**
      * load a schematic in the world

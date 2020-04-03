@@ -1,20 +1,17 @@
 package fr.idarkay.minetasia.normes.packet;
 
-import fr.idarkay.minetasia.normes.Reflection;
-import fr.idarkay.minetasia.normes.Utils.ReflectionVar;
+import fr.idarkay.minetasia.normes.event.PlayerPacketComingEvent;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import org.bukkit.entity.Player;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
+import java.util.UUID;
 
 /**
  * File <b>PlayerConnectionListener</b> located on fr.idarkay.minetasia.normes.packet
@@ -37,15 +34,10 @@ public class PlayerConnectionListener implements Listener
         javaPlugin.getServer().getPluginManager().registerEvents(this, javaPlugin);
     }
 
-    private static final Class<?> ENTITY_PLAYER_CLASS = Objects.requireNonNull(Reflection.getNMSClass("EntityPlayer"));
-    private static final Field PLAYER_CONNECTION = Reflection.getDeclaredField(ENTITY_PLAYER_CLASS, "playerConnection", false);
-    private static final Field NETWORK_MANAGER = Reflection.getDeclaredField(PLAYER_CONNECTION.getType(), "networkManager", false);
-    private static final Field CHANNEL = Reflection.getDeclaredField(NETWORK_MANAGER.getType(), "channel", false);
-
     @EventHandler
     private void onPlayerJoin(PlayerJoinEvent e)
     {
-        final Player player = e.getPlayer();
+        final UUID player = e.getPlayer().getUniqueId();
         final ChannelDuplexHandler channelDuplexHandler =  new ChannelDuplexHandler()
         {
             @Override
@@ -57,29 +49,15 @@ public class PlayerConnectionListener implements Listener
                     super.channelRead(ctx, msg);
             }
         };
-        try
-        {
-            ((Channel) CHANNEL.get(NETWORK_MANAGER.get(PLAYER_CONNECTION.get(ReflectionVar.CRAFT_PLAYER_GET_HANDLE.invoke(player))))).pipeline()
-                    .addBefore("packet_handler", player.getName(), channelDuplexHandler);
-        }
-        catch (IllegalAccessException | InvocationTargetException ex)
-        {
-            ex.printStackTrace();
-        }
+        ((CraftPlayer) e.getPlayer()).getHandle().playerConnection.networkManager.channel.pipeline()
+                .addBefore("packet_handler", e.getPlayer().getName(), channelDuplexHandler);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e)
     {
-        try
-        {
-            final Channel channel = ((Channel) CHANNEL.get(NETWORK_MANAGER.get(PLAYER_CONNECTION.get(ReflectionVar.CRAFT_PLAYER_GET_HANDLE.invoke(e.getPlayer())))));
-            channel.eventLoop().submit(() -> channel.pipeline().remove(e.getPlayer().getName()));
-        }
-        catch (IllegalAccessException | InvocationTargetException ex)
-        {
-            ex.printStackTrace();
-        }
+        final Channel channel = ((CraftPlayer) e.getPlayer()).getHandle().playerConnection.networkManager.channel;
+        channel.eventLoop().submit(() -> channel.pipeline().remove(e.getPlayer().getName()));
     }
 
 }

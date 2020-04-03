@@ -8,6 +8,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.core.api.MongoCollections;
+import fr.idarkay.minetasia.core.api.event.PlayerMoneyChangeEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
@@ -16,10 +17,11 @@ import fr.idarkay.minetasia.core.spigot.moderation.SanctionType;
 import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Tuple;
-import fr.idarkay.minetasia.normes.Utils.BukkitUtils;
+import fr.idarkay.minetasia.normes.utils.BukkitUtils;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,6 +52,7 @@ public class MinePlayer implements MinetasiaPlayer
     private final Map<String, Object> data;
     private final Map<UUID, Tuple<String, String>> friends; // map uuid of the friend ; tuple< name of friend ; head texture >
     @NotNull private final Map<Economy, Long> moneys;
+    @NotNull private final List<NamespacedKey> validateAdvancement;
 
     @NotNull private String username;
 
@@ -102,7 +105,7 @@ public class MinePlayer implements MinetasiaPlayer
 
         this.friends = new HashMap<>();
         if(doc.containsKey("friends"))
-            doc.get("friends", ArrayList.class).forEach( v -> friends.put(UUID.fromString(((Document)v).getString("uuid")), new Tuple<>( ((Document)v).getString("name"), null)));
+            doc.getList("friends", Document.class).forEach( v -> friends.put(UUID.fromString((v).getString("uuid")), new Tuple<>( (v).getString("name"), null)));
 
         this.data = new HashMap<>();
         if(doc.containsKey("data"))
@@ -112,6 +115,11 @@ public class MinePlayer implements MinetasiaPlayer
             this.stats = new Stats(doc.get("stats", Document.class));
         else
             this.stats = new Stats();
+        this.validateAdvancement = new ArrayList<>();
+        if(doc.containsKey("advancement"))
+        {
+            doc.getList("advancement", String.class).forEach(n -> validateAdvancement.add(BukkitUtils.namespaceKeyFromSting((String) n)));
+        }
 
         //head
         if(!isCache)
@@ -127,6 +135,29 @@ public class MinePlayer implements MinetasiaPlayer
                 }
             }
         }
+    }
+
+    @Override
+    public boolean hasCompleteAdvancement(@NotNull NamespacedKey advancementName)
+    {
+        return validateAdvancement.contains(advancementName);
+    }
+
+
+    public void completeAdvancement(@NotNull NamespacedKey advancementName)
+    {
+        Validate.notNull(advancementName);
+        if(!validateAdvancement.contains(advancementName))
+        {
+            validateAdvancement.add(advancementName);
+            CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.push("advancement", advancementName.toString()));
+        }
+    }
+
+    @NotNull
+    public List<NamespacedKey> getValidateAdvancement()
+    {
+        return validateAdvancement;
     }
 
     public void unsetSanction(@NotNull Sanction sanction, boolean removeHistory)
@@ -203,6 +234,7 @@ public class MinePlayer implements MinetasiaPlayer
         if(validateNotCache(PlayerMessage.ActionType.ADD_MONEY, economy, amount))
         {
             moneys.merge(economy, (long) (amount * 100), Long::sum);
+            callMoneyChange(economy, (float) getMoney(economy));
             increment("money." + economy.name(), (long) (amount * 100));
         }
     }
@@ -217,6 +249,7 @@ public class MinePlayer implements MinetasiaPlayer
                 if(oldV < newV) throw new IllegalArgumentException("cant remove "+ amount + " " + economy.displayName + " to " + username);
                 return oldV - newV;
             });
+            callMoneyChange(economy, (float) getMoney(economy));
             increment("money." + economy.name(), (long) (amount * -100));
         }
     }
@@ -227,8 +260,18 @@ public class MinePlayer implements MinetasiaPlayer
         if(amount < 0) throw new IllegalArgumentException("negative amount");
         if(validateNotCache(PlayerMessage.ActionType.SET_MONEY, economy, amount))
         {
+            callMoneyChange(economy, amount);
             moneys.put(economy, (long) (amount * 100));
             set("money." + economy.name(), (long) (amount * 100));
+        }
+    }
+
+    private void callMoneyChange(@NotNull Economy economy, float amount)
+    {
+        final Player player = Bukkit.getPlayer(uuid);
+        if(player != null)
+        {
+            Bukkit.getPluginManager().callEvent(new PlayerMoneyChangeEvent(player, economy, amount));
         }
     }
 
@@ -343,7 +386,7 @@ public class MinePlayer implements MinetasiaPlayer
         stats.update(updater);
         if(validateNotCache(PlayerMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString()))
         {
-
+            CORE.getAdvancementManager().playerStatsUpdate(updater, this);
             final Document doc =  new Document();
             updater.getUpdate().forEach(doc::append);
 

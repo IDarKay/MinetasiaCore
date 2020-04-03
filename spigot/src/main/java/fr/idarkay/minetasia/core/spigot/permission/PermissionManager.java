@@ -96,7 +96,6 @@ public class PermissionManager
                 }
             }
         }
-        System.out.println("no found");
         return ChatColor.RESET;
     }
 

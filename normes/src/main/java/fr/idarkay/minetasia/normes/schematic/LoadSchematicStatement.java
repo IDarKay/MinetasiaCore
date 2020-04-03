@@ -1,7 +1,7 @@
 package fr.idarkay.minetasia.normes.schematic;
 
 import fr.idarkay.minetasia.normes.Direction;
-import fr.idarkay.minetasia.normes.Utils.VoidConsumer;
+import fr.idarkay.minetasia.normes.utils.VoidConsumer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;

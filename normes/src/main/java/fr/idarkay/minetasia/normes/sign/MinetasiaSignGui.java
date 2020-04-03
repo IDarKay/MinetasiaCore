@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
-import static fr.idarkay.minetasia.normes.Utils.ReflectionVar.*;
+import static fr.idarkay.minetasia.normes.utils.ReflectionVar.*;
 
 /**
  * File <b>MinetasiaSignGui</b> located on fr.idarkay.minetasia.normes.sign

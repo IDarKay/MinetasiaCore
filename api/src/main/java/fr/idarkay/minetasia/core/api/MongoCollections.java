@@ -1,7 +1,5 @@
 package fr.idarkay.minetasia.core.api;
 
-import com.mongodb.client.MongoCollection;
-
 /**
  * File <b>MongoCollections</b> located on fr.idarkay.minetasia.core.spigot.utils
  * MongoCollections is a part of MinetasiaCore.
@@ -21,6 +19,8 @@ public enum MongoCollections
     KITS("kits"),
     PROXY("proxy"),
     PARTY("party"),
+    ADVANCEMENT("advancement"),
+    SETTINGS("settings")
 
     ;
     public final String name;

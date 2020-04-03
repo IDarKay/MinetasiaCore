@@ -5,6 +5,7 @@ import fr.idarkay.minetasia.normes.Args;
 import fr.idarkay.minetasia.normes.IMinetasiaLang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Tuple;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -66,6 +67,7 @@ public enum Lang implements IMinetasiaLang {
     NEED_BE_PLAYER                              ( "&cYour not player"),
     NO_PERMISSION                               ( "&cYou don't have permission"),
     ILLEGAL_NUMBER_VALUE                        ("&cPlease set valid number"),
+    ILLEGAL_BOOLEAN_VALUE                       ("&cPlease set valid boolean (true or false)"),
     MSG_FORMAT                                  ("&6" + Argument.PLAYER_SENDER + " &c-> " + Argument.PLAYER_RECEIVER  + " : " + Argument.MESSAGE),
     MSG_FORMAT_SOCIAL_SPY                       ("&c[SS] &6" + Argument.PLAYER_SENDER + " &c-> " + Argument.PLAYER_RECEIVER  + " : " + Argument.MESSAGE ),
     SOCIAL_SPU_ON                               ("&6SocialSpy &2on"),
@@ -74,10 +76,14 @@ public enum Lang implements IMinetasiaLang {
     WORLD_NOT_FOUND                             ("&cWorld not found"),
     INCOMPATIBLE_CMD_TP                         ("&cYou can't tp @a to another server"),
     PLAYER_BOOST                                ("&6 " + Argument.PLAYER + " &aboost " + Argument.MONEY_TYPE + " &afor the party (" + Argument.ACTUAL_BOOST + " /" + Argument.MAX_BOOST + "%)"),
-    GAME_REWARDS                                ("&c==========================================\n" +
+    GAME_REWARDS                                ("&c==========================================@@" +
                                                             "&6End game of : &a" + Argument.SERVER_TYPE +
-                                                            "\n&6Rewards: " + Argument.REWARDS +
+                                                            "@@&6Rewards: " + Argument.REWARDS +
                                                             "&c=========================================="),
+    SETTINGS_COMMANDS_FORMAT                    (ChatColor.RED + "/settingseditor <key> <value>"),
+    SETTINGS_COMMANDS_INVALID_KEY               (ChatColor.RED + "invalid key"),
+    SETTINGS_COMMANDS_END                       (ChatColor.GREEN + "" + Argument.SETTINGS + " set to " + Argument.VALUE ),
+
     //party
     PARTY_NOT_IN_PARTY("&cSorry you're not in party"),
     PARTY_NOT_OWNER("&cSorry you're not the party owner"),
@@ -243,6 +249,7 @@ public enum Lang implements IMinetasiaLang {
 
     public static String prefix;
     public static MinetasiaCoreApi api;
+    public static MinetasiaLang minetasiaLang;
 
     final String path;
     final String defaultMsg;
@@ -262,14 +269,14 @@ public enum Lang implements IMinetasiaLang {
     @SafeVarargs
     public final <T> String getWithoutPrefix(String lang, Tuple<? extends Args, T>... args)
     {
-        return MinetasiaLang.get(path, defaultMsg, lang, args);
+        return minetasiaLang.get(path, defaultMsg, lang, args);
     }
 
     @SafeVarargs
     @Override
     public final <T> String get(String lang, Tuple<? extends Args, T>... args)
     {
-        return prefix + " " + MinetasiaLang.get(path, defaultMsg, lang, args);
+        return prefix + " " + minetasiaLang.get(path, defaultMsg, lang, args);
     }
 
     @SafeVarargs
@@ -289,7 +296,7 @@ public enum Lang implements IMinetasiaLang {
     public enum Argument implements Args
     {
         PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
-        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP, COMMAND, DESCRIPTION, PAGE, MAX_PAGE
+        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP, COMMAND, DESCRIPTION, PAGE, MAX_PAGE, SETTINGS
         ;
 
         String node;
