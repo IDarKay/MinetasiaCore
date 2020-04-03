@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.normes.Utils;
+package fr.idarkay.minetasia.normes.utils;
 
 import com.mojang.authlib.GameProfile;
 import fr.idarkay.minetasia.normes.Reflection;
@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * File <b>ReflectionVar</b> located on fr.idarkay.minetasia.normes.Utils
+ * File <b>ReflectionVar</b> located on fr.idarkay.minetasia.normes.utils
  * ReflectionVar is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
@@ -29,6 +29,8 @@ public abstract class ReflectionVar
     public static final Method CRAFT_MAGIC_NUMBERS_GET_BLOCK = Reflection.getDeclaredMethod(Objects.requireNonNull(Reflection.getCraftBukkitClass("util.CraftMagicNumbers")), false, "getBlock", Material.class, byte.class);
     public static final Field BLOCK_FIELD = Reflection.getDeclaredField(PACKET_PLAYER_OUT_BLOCK_CHANGE, "block", false);
     public static final Method CRAFT_SIGN_SAINTLINESS = Reflection.getDeclaredMethod(Objects.requireNonNull(Reflection.getCraftBukkitClass("block.CraftSign")), false, "sanitizeLines", String[].class);
+
+    public static final Method GET_NMS_SERVER = Reflection.getDeclaredMethod(Objects.requireNonNull(Reflection.getCraftBukkitClass("CraftServer")), false,"getServer");
 
     public static final Class<?> TITLE_ENTITY_SIGN =  Objects.requireNonNull(Reflection.getNMSClass("TileEntitySign"));
     public static final Constructor<?> TITLE_ENTITY_SIGN_CONSTRUCTOR = Reflection.getConstructor(TITLE_ENTITY_SIGN, false);
@@ -51,5 +53,7 @@ public abstract class ReflectionVar
 
     public final static Class<?> PACKET_CLASS = Reflection.getNMSClass("Packet");
     public final static Method SEND_PACKET_METHOD = Reflection.getMethod(ENTITY_PLAYER_CONFECTION_FIELD.getType(), false, "sendPacket", ReflectionVar.PACKET_CLASS);
+
+    public final static Class<?> I_CHAT_BASE_COMPONENT = Objects.requireNonNull(Reflection.getNMSClass("IChatBaseComponent"));
 
 }

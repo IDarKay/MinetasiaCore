@@ -78,6 +78,13 @@ ip: "play.minetasia.com"
 kits_load:
   - '*'
 
+# advancement to load (regex) : set .* for all for sbb and minekarttour set ((sbb.*)|(minekarttour.*))
+advancement_load: ".*"
+world_folder_regex: "(world|world_nether|world_the_end)"
+advancement_lang:
+  - "fr"
+  - "en"
+
 
 # in phase Game and end add  maxPlayerCount by next number only for admin spectator
 max-player-count-add-admin: 5

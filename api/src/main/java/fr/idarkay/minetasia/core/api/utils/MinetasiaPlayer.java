@@ -2,6 +2,7 @@ package fr.idarkay.minetasia.core.api.utils;
 
 import fr.idarkay.minetasia.core.api.Economy;
 import fr.idarkay.minetasia.normes.Tuple;
+import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -155,5 +156,12 @@ public interface MinetasiaPlayer
      * @return the party of the player or null if player isn"t in party
      */
     Party getParty();
+
+    /**
+     * check if a player have complete an advancement
+     * @param advancementName the name of the advancement
+     * @return true if complete else false
+     */
+    boolean hasCompleteAdvancement(@NotNull NamespacedKey advancementName);
 
 }

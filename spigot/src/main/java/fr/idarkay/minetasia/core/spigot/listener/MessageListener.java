@@ -5,10 +5,7 @@ import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.commands.friends.FriendCommand;
-import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
-import fr.idarkay.minetasia.core.spigot.messages.PartyMessage;
-import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
-import fr.idarkay.minetasia.core.spigot.messages.ServerMessage;
+import fr.idarkay.minetasia.core.spigot.messages.*;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.Args;
@@ -41,6 +38,7 @@ public final class MessageListener implements Listener {
         new PartyMessage();
         new PlayerMessage();
         new ServerMessage();
+        new SettingsUpdate();
     }
 
     @EventHandler

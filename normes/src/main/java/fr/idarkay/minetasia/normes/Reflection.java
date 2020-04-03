@@ -1,6 +1,6 @@
 package fr.idarkay.minetasia.normes;
 
-import fr.idarkay.minetasia.normes.Utils.ReflectionVar;
+import fr.idarkay.minetasia.normes.utils.ReflectionVar;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -47,6 +47,18 @@ public class Reflection
         {
             return Class.forName("net.minecraft.server."
                     + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + "." + name);
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Class<?> getArrayNMSClass(String name) {
+        try
+        {
+            return Class.forName("[Lnet.minecraft.server."
+                    + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + "." + name + ";");
         }
         catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -367,6 +379,18 @@ public class Reflection
         }
     }
 
+    public static Constructor getNoneDeclaredConstructor(Class<?> clazz, boolean setAccessible, Class... args)
+    {
+        try {
+            Constructor c = clazz.getConstructor(args);
+            if(setAccessible) c.setAccessible(true);
+            return c;
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
     public static Method getDeclaredMethod(Class<?> clazz, boolean setAccessible, String name, Class... args)
     {
         try {
@@ -410,6 +434,19 @@ public class Reflection
             if(setAccessible) f.setAccessible(true);
             return f;
         } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Object getEnumField(Class<?> clazz, String name)
+    {
+        Field f = getField(clazz, name, false);
+        try
+        {
+            return f.get(null);
+        } catch (IllegalAccessException e)
+        {
             e.printStackTrace();
             throw new RuntimeException(e);
         }

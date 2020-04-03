@@ -1,6 +1,5 @@
 package fr.idarkay.minetasia.core.spigot.gui;
 
-import fr.idarkay.minetasia.core.api.utils.Party;
 import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
@@ -13,7 +12,7 @@ import fr.idarkay.minetasia.normes.GUIFlags;
 import fr.idarkay.minetasia.normes.InventoryFileType;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.Reflection;
-import fr.idarkay.minetasia.normes.Utils.BukkitUtils;
+import fr.idarkay.minetasia.normes.utils.BukkitUtils;
 import fr.idarkay.minetasia.normes.sign.MinetasiaSignGui;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 

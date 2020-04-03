@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.normes.Utils;
+package fr.idarkay.minetasia.normes.utils;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -6,6 +6,7 @@ import fr.idarkay.minetasia.normes.Reflection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -17,11 +18,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * File <b>BukkitUtils</b> located on fr.idarkay.minetasia.hub.Utils
+ * File <b>BukkitUtils</b> located on fr.idarkay.minetasia.hub.utils
  * BukkitUtils is a part of minetasiahub.
  * <p>
  * Copyright (c) 2020 minetasiahub.
@@ -125,6 +125,14 @@ public class BukkitUtils
             e.printStackTrace();
         }
         throw new NullPointerException("no texture found");
+    }
+
+    public static NamespacedKey namespaceKeyFromSting(String string)
+    {
+        final String[] split = string.split(":");
+        Validate.isTrue(split.length == 2, "string have invalid format");
+        //noinspection deprecation ignore for use all plugin
+        return new NamespacedKey(split[0], split[1]);
     }
 
 }

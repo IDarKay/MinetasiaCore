@@ -23,6 +23,10 @@ public enum GeneralPermission
      * a player with this permission can join full server in {@link ServerPhase#GAME} phase
      */
     ADMIN_SPECTATOR("admin.spectator", ADMIN_ALL, "a player with this permission can join full server in GAME phase"),
+    /**
+     * a player with this permission can force start a game !
+     */
+    GAME_MASTER("gamemaste", ALL, "a player with this permission can force start a game")
 
     ;
     public static final String ROOT = "general.";

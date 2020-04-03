@@ -1,7 +1,7 @@
-package fr.idarkay.minetasia.normes.Utils;
+package fr.idarkay.minetasia.normes.utils;
 
 /**
- * File <b>VoidConsumer</b> located on fr.idarkay.minetasia.normes.Utils
+ * File <b>VoidConsumer</b> located on fr.idarkay.minetasia.normes.utils
  * VoidConsumer is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
