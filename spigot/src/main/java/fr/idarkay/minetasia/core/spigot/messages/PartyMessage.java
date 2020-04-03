@@ -5,7 +5,7 @@ import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.CorePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PlayerParty;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.normes.Utils.GeneralUtils;
+import fr.idarkay.minetasia.normes.utils.GeneralUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bson.Document;

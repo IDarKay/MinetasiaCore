@@ -3,7 +3,7 @@ package fr.idarkay.minetasia.core.spigot.gui;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.*;
-import fr.idarkay.minetasia.normes.Utils.BukkitUtils;
+import fr.idarkay.minetasia.normes.utils.BukkitUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

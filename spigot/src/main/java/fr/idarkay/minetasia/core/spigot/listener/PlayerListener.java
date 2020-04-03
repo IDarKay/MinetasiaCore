@@ -44,7 +44,7 @@ public class PlayerListener implements Listener {
             plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
             plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
             long i = plugin.getPlayer(e.getPlayer().getUniqueId()).getStatus();
-            plugin.getPlayerListRunnable().updatePlayer(e.getPlayer());
+            plugin.getPlayerListManager().updatePlayer(e.getPlayer());
 
             if(plugin.isBollTrue(i, PlayerStatue.SOCIAL_SPY.by)) plugin.socialSpyPlayer.add(e.getPlayer());
 

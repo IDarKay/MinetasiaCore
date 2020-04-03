@@ -3,6 +3,7 @@ package fr.idarkay.minetasia.core.spigot.user;
 import fr.idarkay.minetasia.core.api.utils.Group;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,6 +80,13 @@ public class PlayerManager {
         {
             player.setPartyBoost(g.getPartyBoost());
             player.setPersonalBoost(g.getPersonalBoost());
+        }
+        try
+        {
+            plugin.getAdvancementManager().loadUsers(player, Objects.requireNonNull(Bukkit.getPlayer(player.getUUID())));
+        } catch (NullPointerException ignore)
+        {
+            //player leave
         }
         userCache.put(uuid, player);
         return player;

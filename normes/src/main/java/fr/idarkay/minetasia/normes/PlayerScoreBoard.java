@@ -23,7 +23,7 @@ import java.util.UUID;
 public class PlayerScoreBoard
 {
 
-    private final UUID player;
+    protected final UUID player;
     private HashMap<Integer, String> lines = new HashMap<>();
 
     public PlayerScoreBoard(Player player, String display)

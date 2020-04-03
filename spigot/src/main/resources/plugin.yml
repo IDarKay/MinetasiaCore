@@ -39,3 +39,5 @@ commands:
   help:
     aliases: [aide, ayuda, hilfe]
     description: get the hekp
+  settingseditor:
+    description: change general settings of the network
