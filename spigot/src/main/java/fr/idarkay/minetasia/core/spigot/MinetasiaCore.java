@@ -11,11 +11,16 @@ import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
 import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.core.api.*;
+import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
+import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
+import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
 import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.core.spigot.advancement.AdvancementManager;
+import fr.idarkay.minetasia.core.spigot.advancement.MinetasiaAdvancement;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.executor.*;
@@ -31,14 +36,16 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryCloseListene
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
-import fr.idarkay.minetasia.core.spigot.runnable.PlayerListRunnable;
+import fr.idarkay.minetasia.core.spigot.runnable.IpRunnable;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
+import fr.idarkay.minetasia.core.spigot.settings.SettingsManager;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PartyManager;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.core.spigot.utils.MongoDBManager;
+import fr.idarkay.minetasia.core.spigot.utils.PlayerListManager;
 import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.Reflection;
@@ -49,6 +56,7 @@ import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -146,8 +154,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private CommandManager commandManager;
     private KitsManager kitsManager;
     private PartyManager partyManager;
-    private PlayerListRunnable playerListRunnable;
+    private AdvancementManager advancementManager;
+    private PlayerListManager playerListManager;
+    private SettingsManager settingsManager;
     private GUI gui;
+
+    private IpRunnable ipRunnable;
 
     private String serverType, prefix = "", serverConfig = "", ip = "";
     private boolean isHub;
@@ -164,11 +176,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         // init lang file
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "Load lang file");
         getMinetasiaLang().init();
+        Lang.minetasiaLang = getMinetasiaLang();
         prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));
         serverConfig = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("config_name")));
         Lang.prefix = prefix;
         Lang.api = this;
-
         serverType = getConfig().getString("server_type");
         ip = getConfig().getString("ip");
         isHub = serverType.startsWith(HUB_NAME);
@@ -234,7 +246,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public void onEnable() {
-
+        super.onEnable();
         try {
             PluginManager pm = getServer().getPluginManager();
             PermissionDefault permDefault = PermissionDefault.OP;
@@ -273,6 +285,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         kitsManager = new KitsManager(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init party manager");
         partyManager = new PartyManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init advancement manager");
+        MinetasiaAdvancement.initLangToLoad(getConfig());
+        advancementManager = new AdvancementManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init settings manager");
+        settingsManager = new SettingsManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init gui");
         gui = new GUI(this);
 
         // register command
@@ -332,6 +350,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         }
 
         Objects.requireNonNull(getCommand("help")).setExecutor(customCommandExecutor);
+        Objects.requireNonNull(getCommand("settingseditor")).setExecutor(new SettingsEditorExecutor(this));
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "register events");
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -352,15 +371,22 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         //for sign
         registerPlayerPacketComingEvent();
-        playerListRunnable = new PlayerListRunnable(this);
-        playerListRunnable.runTaskTimerAsynchronously(this, 20L, 10L);
+
+        this.ipRunnable = new IpRunnable(this);
+        this.ipRunnable.runTaskTimerAsynchronously(this, 20L, 8L);
+        this.playerListManager = new PlayerListManager(this);
+
+
+
 
         setCommandsIsEnable(Command.TAB_RANK.by, getConfig().getBoolean("commands.rank_in_tab", true));
         if(isCommandEnable(Command.TAB_RANK))
         {
            Bukkit.getScheduler().runTaskLater(this, this.permissionManager::loadTabGroup, 1L);
         }
+
     }
+
 
     private void registerListener()
     {
@@ -935,7 +961,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
 
 
-                String[] toSend = Lang.GAME_REWARDS.getWithoutPrefix(getPlayerLang(uuid), Lang.Argument.SERVER_TYPE.match(serverType), Lang.Argument.REWARDS.match(money.toString())).split("\n");
+                String[] toSend = Lang.GAME_REWARDS.getWithSplit(getPlayerLang(uuid), Lang.Argument.SERVER_TYPE.match(serverType), Lang.Argument.REWARDS.match(money.toString()));
                 org.bukkit.entity.Player p = Bukkit.getPlayer(uuid);
                 if(p != null)
                     for(String s : toSend) p.sendMessage(s);
@@ -1194,6 +1220,45 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         gui.friendsGui.open(player, 0);
     }
 
+    @Override
+    public void validateAdvancement(@NotNull UUID player, @NotNull NamespacedKey namespacedKey)
+    {
+        advancementManager.validate(namespacedKey, Objects.requireNonNull(getPlayerManager().get(player)));
+    }
+
+    @Override
+    public MinetasiaBaseAdvancement createAdvancement(@NotNull NamespacedKey namespacedKey, @NotNull AdvancementIcon icon, @NotNull AdvancementFrame frame, @NotNull String title, @NotNull String description, @NotNull String lang)
+    {
+        return new MinetasiaAdvancement(namespacedKey, icon, frame, title, description, lang);
+    }
+
+    @Override
+    public void registerAdvancement(@NotNull MinetasiaBaseAdvancement advancement)
+    {
+        if(advancement instanceof MinetasiaAdvancement)
+            advancementManager.registerAndSave((MinetasiaAdvancement) advancement);
+        else throw new IllegalArgumentException("advancement is'nt instanceof of fr.idarkay.minetasia.core.spigot.advancement.MinetasiaAdvancement");
+    }
+
+    @NotNull
+    @Override
+    public <T> MinetasiaSettings<T> getSettings(@NotNull SettingsKey<T> key)
+    {
+        return settingsManager.getSettings(key);
+    }
+
+    @Override
+    public String getIp()
+    {
+        return ip;
+    }
+
+    @Override
+    public void registerIpConsumer(Consumer<String> ipConsumer)
+    {
+        this.ipRunnable.addConsumer(ipConsumer);
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         if(startup && getThisServer().getServerPhase() != ServerPhase.LOAD) throw new IllegalArgumentException("can set maxPlayerCount only in Load Phase !");
@@ -1292,13 +1357,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return partyManager;
     }
 
-    public String getIp()
+    public PlayerListManager getPlayerListManager()
     {
-        return ip;
+        return playerListManager;
     }
 
-    public PlayerListRunnable getPlayerListRunnable()
+    public AdvancementManager getAdvancementManager()
     {
-        return playerListRunnable;
+        return advancementManager;
+    }
+
+    public SettingsManager getSettingsManager()
+    {
+        return settingsManager;
     }
 }

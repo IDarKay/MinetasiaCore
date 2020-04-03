@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.normes.Utils;
+package fr.idarkay.minetasia.normes.utils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -7,9 +7,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
- * File <b>GeneralUtils</b> located on fr.idarkay.minetasia.hub.Utils
+ * File <b>GeneralUtils</b> located on fr.idarkay.minetasia.hub.utils
  * GeneralUtils is a part of minetasiahub.
  * <p>
  * Copyright (c) 2020 minetasiahub.
@@ -55,6 +56,23 @@ public class GeneralUtils
                 arrays.add(s.toString());
         });
         return arrays;
+    }
+
+    /**
+     * * get first element in map
+     * @param map the mpa
+     * @param <T> type of value
+     * @return the value
+     * @throws IllegalArgumentException if map is empty
+     */
+    @NotNull
+    public static <T> T getFirstInMap(Map<?, T> map)
+    {
+        for (T value : map.values())
+        {
+            return value;
+        }
+        throw new IllegalArgumentException("map is empty");
     }
 
 }

@@ -21,9 +21,9 @@ import java.util.Objects;
 @SuppressWarnings({"unused"})
 public class MinetasiaLang {
 
-    public final static HashMap<String, FileConfiguration> LANG_CONFIG = new HashMap<>();
     public final static String BASE_LANG = "fr";
 
+    public final HashMap<String, FileConfiguration> LANG_CONFIG = new HashMap<>();
     private final File dataFolder;
     private static boolean isInit = false;
 
@@ -56,14 +56,14 @@ public class MinetasiaLang {
             }
         }
 
-        File f2 = new File(f, "en.yml");
-        if(!f2.exists()) {
-            try {
-                if(!f2.createNewFile()) Bukkit.getLogger().warning("[ERROR] can't create " + f2.getAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+//        File f2 = new File(f, "en.yml");
+//        if(!f2.exists()) {
+//            try {
+//                if(!f2.createNewFile()) Bukkit.getLogger().warning("[ERROR] can't create " + f2.getAbsolutePath());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
 
         if(f.exists())
@@ -116,7 +116,7 @@ public class MinetasiaLang {
      * @since 1.0
      */
     @SafeVarargs
-    public static <T> String get(@NotNull String path, @NotNull String defaultMsg, @NotNull String lang, Tuple<? extends Args, T>... args){
+    public final <T> String get(@NotNull String path, @NotNull String defaultMsg, @NotNull String lang, Tuple<? extends Args, T>... args){
 
         if(!isInit)
         {

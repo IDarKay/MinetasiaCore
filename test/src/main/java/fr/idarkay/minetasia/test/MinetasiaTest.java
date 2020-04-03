@@ -1,21 +1,9 @@
 package fr.idarkay.minetasia.test;
 
-import fr.idarkay.minetasia.core.api.Command;
-import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.GeneralPermission;
-import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
-import fr.idarkay.minetasia.core.api.ServerPhase;
-import fr.idarkay.minetasia.core.api.utils.Boost;
-import fr.idarkay.minetasia.core.api.utils.Kit;
-import fr.idarkay.minetasia.core.api.utils.MainKit;
-import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
-import fr.idarkay.minetasia.core.api.utils.MoneyUpdater;
-import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
-import fr.idarkay.minetasia.core.api.utils.Party;
-import fr.idarkay.minetasia.core.api.utils.PlayerStats;
-import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
-import fr.idarkay.minetasia.core.api.utils.Server;
-import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
+import com.google.gson.JsonObject;
+import fr.idarkay.minetasia.core.api.*;
+import fr.idarkay.minetasia.core.api.advancement.*;
+import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Reflection;
@@ -26,9 +14,11 @@ import fr.idarkay.minetasia.test.listener.inventory.InventoryCloseListener;
 import fr.idarkay.minetasia.test.listener.inventory.InventoryDragListener;
 import fr.idarkay.minetasia.test.listener.inventory.InventoryOpenListener;
 import org.apache.commons.lang.Validate;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -42,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -158,6 +149,8 @@ public class MinetasiaTest extends MinetasiaCoreApi
     private final static String LOG_PREFIX = "[Minetasia-Core-test]";
     @NotNull private String prefix = "", serverConfig = "";
 
+    private final List<Consumer<String>> ipConsumers = new ArrayList<>();
+
     @Override
     public void onEnable() {
         Bukkit.getLogger().info("Fake Plugin start");
@@ -179,12 +172,14 @@ public class MinetasiaTest extends MinetasiaCoreApi
 
 
         prefix = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("prefix")));;
-        serverConfig = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("config_name")));
+        serverConfig = Objects.requireNonNull(getConfig().getString("config_name"));
 
         getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryDragListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryOpenListener(), this);
+
+        Bukkit.getScheduler().runTaskTimer(this, () -> ipConsumers.forEach(c -> c.accept(ChatColor.GOLD + getIp())), 10L, 10 * 10L);
 
     }
 
@@ -703,6 +698,104 @@ public class MinetasiaTest extends MinetasiaCoreApi
         player.sendMessage("no gui with test core");
     }
 
+    @Override
+    public void validateAdvancement(@NotNull UUID player, @NotNull NamespacedKey namespacedKey)
+    {
+
+    }
+
+    @Override
+    public MinetasiaBaseAdvancement createAdvancement(@NotNull NamespacedKey namespacedKey, @NotNull AdvancementIcon icon, @NotNull AdvancementFrame frame, @NotNull String title, @NotNull String description, @NotNull String lang)
+    {
+        return new MinetasiaBaseAdvancement()
+        {
+            @Override
+            public @NotNull MinetasiaLangAdvancement getLang(@NotNull String lang)
+            {
+                return null;
+            }
+
+            @Override
+            public void withCriteria(@NotNull Criteria... criteria)
+            {
+
+            }
+
+            @Override
+            public void setRewards(@NotNull Tuple<Economy, Double> rewards)
+            {
+
+            }
+
+            @Override
+            public void setParent(@Nullable NamespacedKey parent)
+            {
+
+            }
+
+            @Override
+            public void setBackGround(@Nullable String texturePatch)
+            {
+
+            }
+
+            @Override
+            public void setStatsCriteria(@Nullable Tuple<String, Integer> statsCriteria)
+            {
+
+            }
+
+            @Override
+            public void setDefault()
+            {
+
+            }
+
+            @Override
+            public @NotNull NamespacedKey getNamespacedKey()
+            {
+                return null;
+            }
+
+            @Override
+            public @NotNull JsonObject toJson(@NotNull String lang)
+            {
+                return null;
+            }
+
+            @Override
+            public @NotNull Document toDocument()
+            {
+                return null;
+            }
+        };
+    }
+
+    @Override
+    public void registerAdvancement(@NotNull MinetasiaBaseAdvancement advancement)
+    {
+
+    }
+
+    @NotNull
+    @Override
+    public <T> MinetasiaSettings<T> getSettings(@NotNull SettingsKey<T> key)
+    {
+        return null;
+    }
+
+    @Override
+    public String getIp()
+    {
+        return "play.minetasia.com";
+    }
+
+    @Override
+    public void registerIpConsumer(Consumer<String> ipConsumer)
+    {
+        ipConsumers.add(ipConsumer);
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
@@ -879,6 +972,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
                     return 10;
                 }
             };
+        }
+
+        @Override
+        public boolean hasCompleteAdvancement(@NotNull NamespacedKey advancementName)
+        {
+            return false;
         }
     }
 

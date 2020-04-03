@@ -76,7 +76,9 @@ public enum CommandPermission {
     FRIEND("friend", ALL),
     MAX_FRIEND("friend.max_size"),
     HELP("help", ALL),
-    HELP_STAFF("help.staff", HELP)
+    HELP_STAFF("help.staff", HELP),
+    ADMIN("admin", ALL),
+    SETTINGS_EDITOR("admin.settingseditor", ADMIN),
 
     ;
 

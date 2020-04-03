@@ -36,6 +36,7 @@ public final class ServerManager {
         int port = Bukkit.getPort();
 
         this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(), plugin.getServerConfig());
+        servers.put(server.getName(), server);
 
         plugin.getMongoDbManager().getAll(MongoCollections.SERVERS).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
 

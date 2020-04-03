@@ -2,7 +2,7 @@ package fr.idarkay.minetasia.normes.schematic;
 
 import fr.idarkay.minetasia.normes.Direction;
 import fr.idarkay.minetasia.normes.MaterialID;
-import fr.idarkay.minetasia.normes.Utils.VoidConsumer;
+import fr.idarkay.minetasia.normes.utils.VoidConsumer;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Directional;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -91,6 +92,7 @@ public class SchematicUtils
 
     /**
      * load a schematic in the world
+     * @param plugin the java plugin
      * @param schematic schematic to load
      * @param location location of the minimum location fo the build
      *  ignoreAir = {@code true} <br>
@@ -104,6 +106,7 @@ public class SchematicUtils
 
     /**
      * load a schematic in the world
+     * @param plugin the java plugin
      * @param schematic schematic to load
      * @param location location of the minimum location fo the build
      * @param ignoreAir if true air block will be not place
@@ -235,6 +238,7 @@ public class SchematicUtils
      * save schematic in plugin/{@code <plugin name>}/schematic/{@code <schematic_name>}.minetasiaschem
      * @param schematic the schematic to save
      * @param name name of teh file
+     * @param dataFolder plugin data folder
      * @throws IOException if error when write data
      */
     public static void saveSchematic(@NotNull Schematic schematic, @NotNull String name, File dataFolder) throws IOException
@@ -333,6 +337,7 @@ public class SchematicUtils
     /**
      * read schematic from  plugin/{@code <plugin name>}/schematic/{@code <schematic_name>}.minetasiaschem
      * @param name nam of schematic
+     * @param dataFolder plugin data folder
      * @return create schematic from data
      * @throws IOException if error on read data
      */
@@ -440,6 +445,29 @@ public class SchematicUtils
                 }
             }
             return new Schematic(block, data, metadata, length, width, height);
+        }
+    }
+
+    public static void loadSchematicInOneChunk(@NotNull Schematic schematic, @NotNull ChunkGenerator.ChunkData chunkData, int height)
+    {
+        if(schematic.getLength() > 16 || schematic.getWidth() > 16 || schematic.getHeight() + height > 256) throw new IllegalArgumentException("schematic is to big max 16 * 16");
+
+        final short length = schematic.getLength(), width = schematic.getWidth(), sHeight = schematic.getHeight();
+
+        for(int x = 0 ; x < length ; x++)
+        {
+            for(int z = 0 ; z < width  ; z++)
+            {
+                for(int y = height ; y < sHeight + height ; y++)
+                {
+                    final int i = (y - height) * length * sHeight + z * length + x;
+                    final Material mat = schematic.getBlocks()[i];
+                    final String data = schematic.getData()[i];
+                    chunkData.setBlock(x, y, z, mat);
+                    if(data != null)
+                      chunkData.setBlock(x, y, z, Bukkit.createBlockData(data));
+                }
+            }
         }
     }
 }
