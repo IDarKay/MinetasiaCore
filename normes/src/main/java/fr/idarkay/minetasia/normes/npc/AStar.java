@@ -10,9 +10,9 @@ import java.util.ArrayList;
 /**
  * File <b>AStar</b> located on fr.idarkay.minetasia.normes.npc
  * AStar is a part of MinetasiaCore.
- * <p>
- * Copyright (c) 2019 MinetasiaCore.
- * <p>
+ *
+ * Copyright (c) 2020 MinetasiaCore.
+ *
  */
 public class AStar
 {

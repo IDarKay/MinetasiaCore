@@ -45,7 +45,7 @@ public final class InventoryClickListener implements Listener {
                 final Player player = (Player) e.getWhoClicked();
                 final MinetasiaGUI gui = holder.getMinetasiaGUI();
                 if(gui != null && !blackListClazz.contains(gui.getClass()))
-                    gui.click(player, e);
+                    gui.click(player, e, holder);
                 player.updateInventory();
             }
         }

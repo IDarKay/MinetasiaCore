@@ -34,7 +34,7 @@ public class InventoryOpenListener implements Listener
             final Player player = (Player) e.getPlayer();
             final MinetasiaGUI gui = holder.getMinetasiaGUI();
             if(gui != null  && !blackListClazz.contains(gui.getClass()))
-                gui.open(player, e);
+                gui.open(player, e, holder);
 
             player.updateInventory();
         }

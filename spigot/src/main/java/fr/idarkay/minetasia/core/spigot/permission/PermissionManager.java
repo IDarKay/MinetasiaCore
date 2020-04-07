@@ -573,8 +573,11 @@ public class PermissionManager
             if(tabGroup)
             {
                 Group playerMasterGroup = (Group) plugin.getPlayerMasterGroup(uuid);
-                playerMasterGroup.getTeam().addEntry(p.getName());
-                p.setPlayerListName(ChatColor.translateAlternateColorCodes('&', playerMasterGroup.getDisplayName()) + p.getName());
+                if(playerMasterGroup != null)
+                {
+                    playerMasterGroup.getTeam().addEntry(p.getName());
+                    p.setPlayerListName(ChatColor.translateAlternateColorCodes('&', playerMasterGroup.getDisplayName()) + p.getName());
+                }
             }
             Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(new PlayerPermissionLoadEndEvent(p)));
         }

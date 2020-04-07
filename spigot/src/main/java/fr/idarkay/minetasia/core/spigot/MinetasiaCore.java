@@ -363,9 +363,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Objects.requireNonNull(getCommand("help")).setExecutor(customCommandExecutor);
         Objects.requireNonNull(getCommand("settingseditor")).setExecutor(new SettingsEditorExecutor(this));
         Objects.requireNonNull(getCommand("sanction")).setExecutor(new SanctionCommand(this));
+
         Objects.requireNonNull(getCommand("ban")).setExecutor(new AdminSanctionCommand(this, CommandPermission.BAN, SanctionType.BAN));
         Objects.requireNonNull(getCommand("mute")).setExecutor(new AdminSanctionCommand(this, CommandPermission.MUTE, SanctionType.MUTE));
         Objects.requireNonNull(getCommand("warn")).setExecutor(new AdminSanctionCommand(this, CommandPermission.WARN, SanctionType.WARN));
+
         Objects.requireNonNull(getCommand("unban")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_BAN, SanctionType.BAN));
         Objects.requireNonNull(getCommand("unmute")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_MUTE, SanctionType.MUTE));
         Objects.requireNonNull(getCommand("unwarn")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_WARN, SanctionType.WARN));
@@ -1427,10 +1429,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         if(sanction.sanctionType == SanctionType.BAN)
         {
-            player.kickPlayer(Lang.BAN_FORMAT.getWithoutPrefix(getPlayerLang(player.getUniqueId()), Lang.Argument.PLAYER.match(sanction.authorName)
+            Bukkit.getScheduler().runTask(this, () -> player.kickPlayer(Lang.BAN_FORMAT.getWithoutPrefix(getPlayerLang(player.getUniqueId()), Lang.Argument.PLAYER.match(sanction.authorName)
                     , Lang.Argument.REASON.match(sanction.reason)
                     , Lang.Argument.TIME.match(sanction.baseTimeUnit.convert(sanction.during, TimeUnit.MILLISECONDS) + " " + sanction.baseTimeUnit.name().toLowerCase()))
-                    .replace("@@", "\n"));
+                    .replace("@@", "\n")));
         }
         else
         {

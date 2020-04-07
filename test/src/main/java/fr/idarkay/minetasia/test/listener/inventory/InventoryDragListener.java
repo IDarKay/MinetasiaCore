@@ -43,7 +43,7 @@ public class InventoryDragListener implements Listener
             final Player player = (Player) e.getWhoClicked();
             final MinetasiaGUI gui = holder.getMinetasiaGUI();
             if(gui != null  && !blackListClazz.contains(gui.getClass()))
-                gui.drag(player, e);
+                gui.drag(player, e, holder);
             player.updateInventory();
         }
     }
