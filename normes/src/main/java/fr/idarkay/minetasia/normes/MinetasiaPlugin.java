@@ -40,8 +40,8 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
 
     private MinetasiaLang minetasiaLang;
 
-    private boolean playerPacketComingEventRegister = false;
-    private static boolean isEnable;
+    private volatile static boolean playerPacketComingEventRegister = false;
+    private volatile static boolean isEnable;
 
     @Override
     public void onEnable()

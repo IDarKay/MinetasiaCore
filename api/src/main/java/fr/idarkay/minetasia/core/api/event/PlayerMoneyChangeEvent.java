@@ -26,6 +26,7 @@ public class PlayerMoneyChangeEvent extends Event
 
     public PlayerMoneyChangeEvent(Player player, Economy economy, float newAmount)
     {
+        super(true);
         this.player = player;
         this.economy = economy;
         this.newAmount = newAmount;

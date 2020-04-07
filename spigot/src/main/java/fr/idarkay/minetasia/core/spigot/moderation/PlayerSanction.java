@@ -72,8 +72,8 @@ public class PlayerSanction
         Validate.notNull(document);
         return new PlayerSanction(
                 Objects.requireNonNull(sanctionType),
-                document.getLong("start"),
-                document.getLong("during"),
+                getLongOrIntFromDocument(document, "start"),
+                getLongOrIntFromDocument(document, "during"),
                 UUID.fromString(document.getString("author")),
                 document.getString("author_username"),
                 document.getString("reason"), document.getString("generic_name"), TimeUnit.valueOf(document.getString("base_time_unite"))
@@ -85,12 +85,27 @@ public class PlayerSanction
         Validate.notNull(document);
         return new PlayerSanction(
                 SanctionType.valueOf(document.getString("type")),
-                document.getLong("start"),
-                document.getLong("during"),
+                getLongOrIntFromDocument(document, "start"),
+                getLongOrIntFromDocument(document, "during"),
                 UUID.fromString(document.getString("author")),
                 document.getString("author_username"),
                 document.getString("reason"),document.getString("generic_name"), TimeUnit.valueOf(document.getString("base_time_unite"))
         );
+    }
+
+    private static Long getLongOrIntFromDocument(Document document, String key)
+    {
+        final Object value = document.get(key);
+        if(value instanceof Long)
+        {
+            return (Long) value;
+        }
+        else if(value instanceof Integer)
+        {
+            return ((Integer) value).longValue();
+        }
+        else
+            throw new IllegalArgumentException(value.getClass() + " isn't a Long or Integer");
     }
 
     private Document document;

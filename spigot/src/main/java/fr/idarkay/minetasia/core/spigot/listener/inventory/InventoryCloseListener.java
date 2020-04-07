@@ -1,6 +1,5 @@
 package fr.idarkay.minetasia.core.spigot.listener.inventory;
 
-import fr.idarkay.minetasia.normes.GUIFlags;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaGuiHolder;
 import org.bukkit.entity.Player;
@@ -35,7 +34,7 @@ public class InventoryCloseListener implements Listener
             final Player player = (Player) e.getPlayer();
             final MinetasiaGUI gui = holder.getMinetasiaGUI();
             if(gui != null  && !blackListClazz.contains(gui.getClass()))
-                gui.close(player, e);
+                gui.close(player, e, holder);
 
         }
     }
