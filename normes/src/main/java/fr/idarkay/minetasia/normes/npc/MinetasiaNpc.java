@@ -161,6 +161,8 @@ public class MinetasiaNpc
         final PlayerInteractManager interactManager = new PlayerInteractManager(world);
 
         this.npc = new EntityPlayer(server, world, gameProfile, interactManager);
+        npc.getDataWatcher().set(new DataWatcherObject<>(16, DataWatcherRegistry.a), (byte) 127);
+//        npc.getDataWatcher().register();
         this.packetInfoAdd = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc);
         this.currentLocation = location;
         updateSpawnPacket();
@@ -187,6 +189,7 @@ public class MinetasiaNpc
         updateSpawnPacket();
         Reflection.sendPacket(player, packetInfoAdd);
         Reflection.sendPacket(player, spawnPacket);
+        Reflection.sendPacket(player, new PacketPlayOutEntityMetadata(npc.getId(), npc.getDataWatcher(), true));
         Bukkit.getScheduler().runTaskLater(plugin, () ->  Reflection.sendPacket(player, packetInfoRemove), 5L);
     }
 

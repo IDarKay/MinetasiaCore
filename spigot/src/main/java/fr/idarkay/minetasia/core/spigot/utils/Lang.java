@@ -231,7 +231,7 @@ public enum Lang implements IMinetasiaLang {
 
     REASON_FORMAT( "&c" + Argument.REASON + "&c for the " + Argument.REPETITION + "&c times"),
 
-    SANCTION_COMMAND_END("&aYou have &6" + Argument.SANCTION_TYPE + " &b" + Argument.PLAYER + "&a for " + Argument.TIME + "&a for reason" + Argument.REASON),
+    SANCTION_COMMAND_END("&aYou have &6" + Argument.SANCTION_TYPE + " &b" + Argument.PLAYER + "&a for " + Argument.TIME + "&a for reason " + Argument.REASON),
     UN_SANCTION_NOT_SANCTION("&cThis player isn't " + Argument.SANCTION_TYPE),
     UN_SANCTION_END("&aYou have &6un" + Argument.SANCTION_TYPE + " &b" + Argument.PLAYER),
 

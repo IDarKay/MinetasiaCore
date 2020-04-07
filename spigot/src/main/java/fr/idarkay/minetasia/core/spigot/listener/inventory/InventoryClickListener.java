@@ -1,21 +1,16 @@
 package fr.idarkay.minetasia.core.spigot.listener.inventory;
 
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
-import fr.idarkay.minetasia.core.spigot.gui.GUI;
-import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.GUIFlags;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaGuiHolder;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * File <b>InventoryClickListener</b> located on fr.idarkay.minetasia.core.common.listener
@@ -58,7 +53,7 @@ public final class InventoryClickListener implements Listener {
                 final Player player = (Player) e.getWhoClicked();
                 final MinetasiaGUI gui = holder.getMinetasiaGUI();
                 if(gui != null && !blackListClazz.contains(gui.getClass()))
-                    gui.click(player, e);
+                    gui.click(player, e, holder);
             }
         }
     }

@@ -1,13 +1,20 @@
 package fr.idarkay.minetasia.normes.utils;
 
+import com.google.gson.JsonArray;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fr.idarkay.minetasia.normes.Reflection;
+import fr.idarkay.minetasia.normes.component.BaseComponent;
+import net.minecraft.server.v1_15_R1.IChatBaseComponent;
+import net.minecraft.server.v1_15_R1.MojangsonParser;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -16,6 +23,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
@@ -135,4 +143,98 @@ public class BukkitUtils
         return new NamespacedKey(split[0], split[1]);
     }
 
+    /**
+     * add new NBTTag to item
+     * @param itemStack ItemStack to add nbt will be not edit !
+     * @param key key of the nbt
+     * @param values value of the nbt
+     * @return new ItemStack with nbtTag
+     */
+    @NotNull
+    public static ItemStack addNBTTag(final ItemStack itemStack, String key, String values)
+    {
+        final net.minecraft.server.v1_15_R1.ItemStack it = CraftItemStack.asNMSCopy(itemStack);
+        final NBTTagCompound nbtTagCompound = it.hasTag() ? it.getTag() : new NBTTagCompound();
+        nbtTagCompound.setString(key, values);
+        it.setTag(nbtTagCompound);
+        return CraftItemStack.asBukkitCopy(it);
+    }
+
+    @NotNull
+    public static ItemStack removeNBTTag(final ItemStack itemStack, String key)
+    {
+
+        final net.minecraft.server.v1_15_R1.ItemStack it = CraftItemStack.asNMSCopy(itemStack);
+        if(it.hasTag()) {
+            NBTTagCompound nbtTagCompound = it.getTag();
+            nbtTagCompound.remove(key);
+            it.setTag(nbtTagCompound);
+            return CraftItemStack.asBukkitCopy(it);
+         }
+        else return itemStack;
+    }
+
+
+    /**
+     * get the nbtTag of item from key
+     * @param itemStack nbTag of item
+     * @param key of the value
+     * @param clazz the clazz of nbt
+     * @param <T> type of the nbt
+     * @return value or null if not found
+     */
+    @Nullable
+    public static <T> T getNBTTag(ItemStack itemStack, String key, Class<T> clazz)
+    {
+
+        final net.minecraft.server.v1_15_R1.ItemStack it = CraftItemStack.asNMSCopy(itemStack);
+        if(it.hasTag())
+        {
+            return clazz.cast(it.getTag().get(key));
+        }
+        else return null;
+
+    }
+
+    /**
+     * set all nbt from json in item
+     * @param itemStack the item stack (will't be edit)
+     * @param nbtJson json
+     * @return the itemStack
+     * throws CommandSyntaxException if invalid json
+     */
+    @NotNull
+    public static ItemStack setNbt(@NotNull ItemStack itemStack, @NotNull String nbtJson)
+    {
+        final net.minecraft.server.v1_15_R1.ItemStack it = CraftItemStack.asNMSCopy(itemStack);
+        try
+        {
+            final NBTTagCompound parse = MojangsonParser.parse(nbtJson);
+            it.setTag(parse);
+            return CraftItemStack.asBukkitCopy(it);
+        } catch (CommandSyntaxException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * set name with base component for translation
+     * @param itemStack the item will not edit
+     * @param components all components in the good order
+     * @return the new ItemStack
+     */
+    @NotNull
+    public static ItemStack setComponentDisplayName(@NotNull ItemStack itemStack, BaseComponent... components)
+    {
+        final net.minecraft.server.v1_15_R1.ItemStack it = CraftItemStack.asNMSCopy(itemStack);
+        final JsonArray array = new JsonArray();
+        for (BaseComponent component : components)
+        {
+            array.add(component.toJsonElement());
+        }
+        it.a(IChatBaseComponent.ChatSerializer.a(array));
+        return CraftItemStack.asBukkitCopy(it);
+    }
 }

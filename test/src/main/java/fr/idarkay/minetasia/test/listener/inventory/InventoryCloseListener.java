@@ -34,7 +34,7 @@ public class InventoryCloseListener implements Listener
             final Player player = (Player) e.getPlayer();
             final MinetasiaGUI gui = holder.getMinetasiaGUI();
             if(gui != null  && !blackListClazz.contains(gui.getClass()))
-                gui.close(player, e);
+                gui.close(player, e, holder);
 
             player.updateInventory();
         }
