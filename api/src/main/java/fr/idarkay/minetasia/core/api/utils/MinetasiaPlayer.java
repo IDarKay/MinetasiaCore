@@ -6,8 +6,8 @@ import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -120,12 +120,32 @@ public interface MinetasiaPlayer
     void putGeneralData(@NotNull String key, @Nullable Object value);
 
     /**
-     * get a data of teh user
+     * get a data of the user
      * @param key of the data
      * @return value or null if not found
      */
     @Nullable
     Object getData(@NotNull String key);
+
+    /**
+     * get a data of the user and cast
+     * @param key the key of the data
+     * @param clazz the class to cast the value
+     * @param <T> the type of the clazz
+     * @return the data or null if not exist
+     * @throws ClassCastException if the value isn't instance of clazz
+     */
+    @Nullable <T> T getData(@NotNull String key, @NotNull Class<T> clazz);
+
+    /**
+     * get a list from data of a player
+     * @param key the key of the data
+     * @param clazz the class of element in the list
+     * @param <T> the type of the clazz
+     * @return the List
+     * @throws ClassCastException if the value isn't list or element not all instance of clazz
+     */
+    @NotNull <T> List<T> getDataList(@NotNull String key, @NotNull Class<T> clazz);
 
     /**
      * put a data of the player

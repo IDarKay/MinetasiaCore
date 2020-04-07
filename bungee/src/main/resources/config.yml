@@ -25,3 +25,9 @@ cache:
 # =========================================================================================================== #
 player_count_update: 30
 
+# lang
+lang:
+  en:
+    BAN_FORMAT: "&c&lYou are banned by {player}@@&c for the reason : {reason}@@&c for {time}",
+  fr:
+    BAN_FORMAT: "&c&lTu as était bannit par {player}@@&c pour la raison: {reason}@@&c pour {time}",

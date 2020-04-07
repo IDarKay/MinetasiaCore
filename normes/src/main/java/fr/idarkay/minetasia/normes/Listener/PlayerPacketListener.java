@@ -1,6 +1,7 @@
 package fr.idarkay.minetasia.normes.Listener;
 
 import fr.idarkay.minetasia.normes.Reflection;
+import fr.idarkay.minetasia.normes.event.PlayerNpcHitEvent;
 import fr.idarkay.minetasia.normes.event.PlayerNpcInteractEvent;
 import fr.idarkay.minetasia.normes.event.PlayerPacketComingEvent;
 import fr.idarkay.minetasia.normes.npc.MinetasiaNpc;
@@ -60,7 +61,14 @@ public class PlayerPacketListener implements Listener
                 final MinetasiaNpc npc = MinetasiaNpc.getNpcFromId((Integer) PACKET_PLAY_IN_USE_ENTITY_ID.get(packet));
                 if(npc != null)
                 {
-                    Bukkit.getPluginManager().callEvent(new PlayerNpcInteractEvent(e.getPlayer(), npc.getUuid(), getBukkitHand(packet.c())));
+                    if(packet.c() == null)
+                    {
+                        Bukkit.getPluginManager().callEvent(new PlayerNpcHitEvent(e.getPlayer(), npc.getUuid()));
+                    }
+                    else
+                    {
+                        Bukkit.getPluginManager().callEvent(new PlayerNpcInteractEvent(e.getPlayer(), npc.getUuid(), getBukkitHand(packet.c())));
+                    }
                 }
             } catch (IllegalAccessException ex)
             {
@@ -72,7 +80,7 @@ public class PlayerPacketListener implements Listener
     @NotNull
     private EquipmentSlot getBukkitHand(EnumHand nmsHand)
     {
-        if(nmsHand == null || nmsHand == EnumHand.MAIN_HAND) return EquipmentSlot.HAND;
+        if(nmsHand == EnumHand.MAIN_HAND) return EquipmentSlot.HAND;
         else return EquipmentSlot.OFF_HAND;
     }
 
