@@ -24,6 +24,7 @@ import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +44,7 @@ import java.util.stream.Collectors;
 public class MinePlayer implements MinetasiaPlayer
 {
 
-    private static final MinetasiaCore CORE = MinetasiaCore.getCoreInstance();
+    private static final MinetasiaCore CORE = JavaPlugin.getPlugin(MinetasiaCore.class);
     private static final JsonParser PARSER = new JsonParser();
 
 
@@ -180,7 +181,7 @@ public class MinePlayer implements MinetasiaPlayer
         {
             final Document remove = (Document) data.remove(playerSanction.getType().name());
             if(remove == null) return;
-            data.merge("history", Collections.emptyList(), (old, newValue) ->  ((List<Document>) old).removeIf(d -> d.getInteger("start", -1) == remove.getInteger("start", -1)));
+            data.merge("history", Collections.emptyList(), (old, newValue) ->  ((List<Document>) old).removeIf(d -> Objects.equals(d.getLong("start"), remove.getLong("start"))));
             CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()),
                     Updates.combine(
                             Updates.unset("data." + playerSanction.getType().name()),
@@ -301,7 +302,11 @@ public class MinePlayer implements MinetasiaPlayer
         final Player player = Bukkit.getPlayer(uuid);
         if(player != null)
         {
-            Bukkit.getPluginManager().callEvent(new PlayerMoneyChangeEvent(player, economy, amount));
+            if(Bukkit.isPrimaryThread())
+
+                Bukkit.getScheduler().runTaskAsynchronously(CORE, () -> Bukkit.getPluginManager().callEvent(new PlayerMoneyChangeEvent(player, economy, amount)));
+            else
+                Bukkit.getPluginManager().callEvent(new PlayerMoneyChangeEvent(player, economy, amount));
         }
     }
 
