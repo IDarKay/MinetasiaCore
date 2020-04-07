@@ -18,7 +18,10 @@ public enum MongoCollections
     GROUPS("groups"),
     KITS("kits"),
     PROXY("proxy"),
-    PARTY("party")
+    PARTY("party"),
+
+    SKYBLOCK_SHOP_ITEM("skyblock_shop_item"),
+    SKYBLOCK_HDV("skyblock_hdv")
 
     ;
     public final String name;

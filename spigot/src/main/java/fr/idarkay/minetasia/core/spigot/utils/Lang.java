@@ -5,7 +5,6 @@ import fr.idarkay.minetasia.normes.Args;
 import fr.idarkay.minetasia.normes.IMinetasiaLang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Tuple;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -67,6 +66,7 @@ public enum Lang implements IMinetasiaLang {
     NEED_BE_PLAYER                              ( "&cYour not player"),
     NO_PERMISSION                               ( "&cYou don't have permission"),
     ILLEGAL_NUMBER_VALUE                        ("&cPlease set valid number"),
+    ILLEGAL_TIME_UNITS                          ("&cPlease set valid time units"),
     ILLEGAL_BOOLEAN_VALUE                       ("&cPlease set valid boolean (true or false)"),
     MSG_FORMAT                                  ("&6" + Argument.PLAYER_SENDER + " &c-> " + Argument.PLAYER_RECEIVER  + " : " + Argument.MESSAGE),
     MSG_FORMAT_SOCIAL_SPY                       ("&c[SS] &6" + Argument.PLAYER_SENDER + " &c-> " + Argument.PLAYER_RECEIVER  + " : " + Argument.MESSAGE ),
@@ -80,9 +80,9 @@ public enum Lang implements IMinetasiaLang {
                                                             "&6End game of : &a" + Argument.SERVER_TYPE +
                                                             "@@&6Rewards: " + Argument.REWARDS +
                                                             "&c=========================================="),
-    SETTINGS_COMMANDS_FORMAT                    (ChatColor.RED + "/settingseditor <key> <value>"),
-    SETTINGS_COMMANDS_INVALID_KEY               (ChatColor.RED + "invalid key"),
-    SETTINGS_COMMANDS_END                       (ChatColor.GREEN + "" + Argument.SETTINGS + " set to " + Argument.VALUE ),
+    SETTINGS_COMMANDS_FORMAT                    ("&c/settingseditor <key> <value>"),
+    SETTINGS_COMMANDS_INVALID_KEY               ("&cinvalid key"),
+    SETTINGS_COMMANDS_END                       ("&a" + Argument.SETTINGS + " set to " + Argument.VALUE ),
 
     //party
     PARTY_NOT_IN_PARTY("&cSorry you're not in party"),
@@ -225,6 +225,16 @@ public enum Lang implements IMinetasiaLang {
     DESC_TP_USER                                ("if no second argument tp the executor to the player, else tp player to second argument"),
     DESC_TP_A                                   ("tp all player of the server (no all proxy) to second argument"),
 
+    BAN_FORMAT("&c&lYou are banned by " + Argument.PLAYER + "@@&c for the reason : " + Argument.REASON + "@@&c for " + Argument.TIME),
+    MUTE_FORMAT("&c&lYou are muted by " + Argument.PLAYER + "&c for the reason : " + Argument.REASON + "&c for " + Argument.TIME),
+    WARN_FORMAT("&c&lYou are warned by " + Argument.PLAYER + "&c for the reason : " + Argument.REASON + "&c for " + Argument.TIME),
+
+    REASON_FORMAT( "&c" + Argument.REASON + "&c for the " + Argument.REPETITION + "&c times"),
+
+    SANCTION_COMMAND_END("&aYou have &6" + Argument.SANCTION_TYPE + " &b" + Argument.PLAYER + "&a for " + Argument.TIME + "&a for reason" + Argument.REASON),
+    UN_SANCTION_NOT_SANCTION("&cThis player isn't " + Argument.SANCTION_TYPE),
+    UN_SANCTION_END("&aYou have &6un" + Argument.SANCTION_TYPE + " &b" + Argument.PLAYER),
+
     DESC_PARTY(""),
     DESC_PARTY_LIST("show all player in your team"),
     DESC_PARTY_JOIN("join the last party invitation"),
@@ -243,7 +253,10 @@ public enum Lang implements IMinetasiaLang {
             "&7&lDiscord: &r&3https://discord.minetasia.com@@" +
             "&7&lSites: &r&3https://www.minetasia.com@@" +
             "@@" +
-            Argument.IP)
+            Argument.IP),
+
+    //moderation
+    WRONG_SANCTION("&cInvalid sanction !")
 
     ;
 
@@ -296,7 +309,8 @@ public enum Lang implements IMinetasiaLang {
     public enum Argument implements Args
     {
         PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
-        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP, COMMAND, DESCRIPTION, PAGE, MAX_PAGE, SETTINGS
+        DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP, COMMAND, DESCRIPTION, PAGE, MAX_PAGE, SETTINGS, REASON, REPETITION,
+        SANCTION_TYPE
         ;
 
         String node;

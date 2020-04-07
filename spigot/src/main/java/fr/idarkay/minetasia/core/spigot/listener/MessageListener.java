@@ -39,6 +39,7 @@ public final class MessageListener implements Listener {
         new PlayerMessage();
         new ServerMessage();
         new SettingsUpdate();
+        new SanctionMessage();
     }
 
     @EventHandler

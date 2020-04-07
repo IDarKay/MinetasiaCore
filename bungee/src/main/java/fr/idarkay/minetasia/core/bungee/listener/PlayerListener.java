@@ -7,7 +7,9 @@ import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.MongoCollections;
+import fr.idarkay.minetasia.core.bungee.utils.Lang;
 import fr.idarkay.minetasia.core.bungee.utils.user.MinePlayer;
+import fr.idarkay.minetasia.core.bungee.utils.user.PlayerSanction;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
@@ -21,7 +23,10 @@ import org.bson.Document;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * File <b>PlayerListener</b> located on fr.idarkay.minetasia.core.bungee.listener
@@ -81,8 +86,25 @@ public final class PlayerListener implements Listener {
                     String name;
                     if (!player.getName().equals(name = proxiedPlayer.getName()))
                     {
-
                         player.setUsername(name);
+                    }
+                    final Document document = (Document) player.getData("BAN");
+                    if(document != null)
+                    {
+                        final PlayerSanction playerSanction = PlayerSanction.fromDocument(document);
+                        if(!playerSanction.isEnd())
+                        {
+                            final long reaming = playerSanction.getReamingTime();
+                            final TimeUnit timeUnit = getBiggerTimeUnit(reaming);
+                            final String msg = Lang.BAN_FORMAT.getMessage(player.getLang())
+                                    .replace("{player}", playerSanction.authorName)
+                                    .replace("{reason}", playerSanction.reason)
+                                    .replace("{time}", timeUnit.convert(reaming, TimeUnit.MILLISECONDS) + " " + timeUnit.name().toLowerCase())
+                                    .replace("@@", "\n");
+                            System.out.println("le msg " + msg);
+                            e.setCancelled(true);
+                            e.setCancelReason(TextComponent.fromLegacyText(msg));
+                        }
                     }
                 }
                 else
@@ -170,4 +192,25 @@ public final class PlayerListener implements Listener {
             }
         });
     }
+
+    private TimeUnit getBiggerTimeUnit(long time)
+    {
+        if(TimeUnit.MILLISECONDS.toDays(time) > 0)
+        {
+            return TimeUnit.DAYS;
+        }
+        else if(TimeUnit.MILLISECONDS.toHours(time) > 0)
+        {
+            return TimeUnit.HOURS;
+        }
+        else if(TimeUnit.MILLISECONDS.toMinutes(time) > 0)
+        {
+            return TimeUnit.MINUTES;
+        }
+        else
+        {
+            return TimeUnit.SECONDS;
+        }
+    }
+
 }

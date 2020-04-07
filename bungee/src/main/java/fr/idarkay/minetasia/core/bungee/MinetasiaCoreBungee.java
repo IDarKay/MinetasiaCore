@@ -6,6 +6,7 @@ import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.core.bungee.event.MessageEvent;
 import fr.idarkay.minetasia.core.bungee.listener.MessageListener;
 import fr.idarkay.minetasia.core.bungee.listener.PlayerListener;
+import fr.idarkay.minetasia.core.bungee.utils.Lang;
 import fr.idarkay.minetasia.core.bungee.utils.MongoDBManager;
 import fr.idarkay.minetasia.core.bungee.utils.proxy.ProxyManager;
 import fr.idarkay.minetasia.core.bungee.utils.user.PlayerManager;
@@ -63,6 +64,7 @@ public final class MinetasiaCoreBungee extends Plugin {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Lang.setConfig(configuration);
 
         final int publishPort = getConfig().getInt("publish-port");
         messageServer = new MessageServer(publishPort);

@@ -20,7 +20,10 @@ public enum MongoCollections
     PROXY("proxy"),
     PARTY("party"),
     ADVANCEMENT("advancement"),
-    SETTINGS("settings")
+    SETTINGS("settings"),
+
+    SKYBLOCK_SHOP_ITEM("skyblock_shop_item"),
+    SKYBLOCK_HDV("skyblock_hdv")
 
     ;
     public final String name;

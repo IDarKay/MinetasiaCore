@@ -25,7 +25,7 @@ public abstract class CoreMessage
 
 
 
-   CoreMessage(String identifier)
+   public CoreMessage(String identifier)
    {
        MESSAGE.put(identifier, this);
    }

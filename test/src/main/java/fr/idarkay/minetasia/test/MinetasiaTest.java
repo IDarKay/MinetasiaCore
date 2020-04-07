@@ -796,6 +796,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         ipConsumers.add(ipConsumer);
     }
 
+    @Override
+    public boolean isMuted(UUID player)
+    {
+        return false;
+    }
+
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {
         maxPlayerCount = maxPlayer;
@@ -912,6 +918,40 @@ public class MinetasiaTest extends MinetasiaCoreApi
             return getPlayerData(uuid, key);
         }
 
+        @Override
+        public @Nullable <T> T getData(@NotNull String key, @NotNull Class<T> clazz)
+        {
+            Validate.notNull(key);
+            Validate.notNull(clazz);
+            final Object value = data.get(key);
+            if(!(clazz.isInstance(value))) throw new ClassCastException("cant cast value to " + clazz.getName());
+            return (T) value;
+        }
+
+        @Override
+        public @NotNull <T> List<T> getDataList(@NotNull String key, @NotNull Class<T> clazz)
+        {
+            Validate.notNull(key);
+            Validate.notNull(clazz);
+            final List list = getData(key, List.class);
+
+            if(list == null) return Collections.emptyList();
+
+            final Iterator iterator = list.iterator();
+
+            Object current;
+            do {
+                if(!iterator.hasNext())
+                {
+                    return list;
+                }
+
+                current = iterator.next();
+            } while (clazz.isAssignableFrom(current.getClass()));
+
+            throw new ClassCastException(String.format("List element cannot be cast to %s", clazz.getName()));
+
+        }
         @Override
         public void putData(@NotNull String key, @Nullable Object value)
         {
