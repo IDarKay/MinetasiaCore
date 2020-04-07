@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * File <b>GeneralUtils</b> located on fr.idarkay.minetasia.hub.utils
@@ -75,4 +76,23 @@ public class GeneralUtils
         throw new IllegalArgumentException("map is empty");
     }
 
+    public static TimeUnit getBiggerTimeUnit(long time)
+    {
+        if(TimeUnit.MILLISECONDS.toDays(time) > 0)
+        {
+            return TimeUnit.DAYS;
+        }
+        else if(TimeUnit.MILLISECONDS.toHours(time) > 0)
+        {
+            return TimeUnit.HOURS;
+        }
+        else if(TimeUnit.MILLISECONDS.toMinutes(time) > 0)
+        {
+            return TimeUnit.MINUTES;
+        }
+        else
+        {
+            return TimeUnit.SECONDS;
+        }
+    }
 }

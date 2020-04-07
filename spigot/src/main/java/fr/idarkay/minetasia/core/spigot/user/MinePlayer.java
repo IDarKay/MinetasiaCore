@@ -12,6 +12,7 @@ import fr.idarkay.minetasia.core.api.event.PlayerMoneyChangeEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
+import fr.idarkay.minetasia.core.spigot.moderation.PlayerSanction;
 import fr.idarkay.minetasia.core.spigot.moderation.Sanction;
 import fr.idarkay.minetasia.core.spigot.moderation.SanctionType;
 import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
@@ -49,16 +50,23 @@ public class MinePlayer implements MinetasiaPlayer
     @NotNull private final UUID uuid;
     private final boolean isCache;
 
-    private final Map<String, Object> data;
-    private final Map<UUID, Tuple<String, String>> friends; // map uuid of the friend ; tuple< name of friend ; head texture >
-    @NotNull private final Map<Economy, Long> moneys;
-    @NotNull private final List<NamespacedKey> validateAdvancement;
+    private final Map<String, Object> data = new HashMap<>();
+    private final Map<UUID, Tuple<String, String>> friends = new HashMap<>(); // map uuid of the friend ; tuple< name of friend ; head texture >
+    @NotNull private final Map<Economy, Long> moneys = new HashMap<>();
+    @NotNull private final List<NamespacedKey> validateAdvancement = new ArrayList<>();
 
     @NotNull private String username;
 
     private Stats stats;
 
     private Boost personalBoost = HashMap::new, partyBoost = HashMap::new;
+
+    public MinePlayer(@NotNull Document document)
+    {
+        this.isCache = true;
+        this.uuid = UUID.fromString(document.getString("_id"));
+        andLoad(document);
+    }
 
     public MinePlayer(@NotNull UUID uuid, boolean isCache)
     {
@@ -95,19 +103,24 @@ public class MinePlayer implements MinetasiaPlayer
                 );
             }
         }
+        andLoad(doc);
+    }
 
-        username = doc.getString("username");
 
-        this.moneys = new HashMap<>();
+
+    private void andLoad(Document doc)
+    {
+
+        this.username = doc.getString("username");
+
         if(doc.containsKey("money"))
             doc.get("money", Document.class).forEach((k, v) -> moneys.put(Economy.valueOf(k), (Long) v));
 
 
-        this.friends = new HashMap<>();
         if(doc.containsKey("friends"))
             doc.getList("friends", Document.class).forEach( v -> friends.put(UUID.fromString((v).getString("uuid")), new Tuple<>( (v).getString("name"), null)));
 
-        this.data = new HashMap<>();
+
         if(doc.containsKey("data"))
             doc.get("data", Document.class).forEach(data::put);
 
@@ -115,7 +128,7 @@ public class MinePlayer implements MinetasiaPlayer
             this.stats = new Stats(doc.get("stats", Document.class));
         else
             this.stats = new Stats();
-        this.validateAdvancement = new ArrayList<>();
+
         if(doc.containsKey("advancement"))
         {
             doc.getList("advancement", String.class).forEach(n -> validateAdvancement.add(BukkitUtils.namespaceKeyFromSting((String) n)));
@@ -160,52 +173,69 @@ public class MinePlayer implements MinetasiaPlayer
         return validateAdvancement;
     }
 
-    public void unsetSanction(@NotNull Sanction sanction, boolean removeHistory)
+    public void unsetSanction(@NotNull PlayerSanction playerSanction, boolean removeHistory)
     {
-        Validate.notNull(sanction);
+        Validate.notNull(playerSanction);
         if(removeHistory)
         {
-            data.remove(sanction.getType().name());
+            final Document remove = (Document) data.remove(playerSanction.getType().name());
+            if(remove == null) return;
+            data.merge("history", Collections.emptyList(), (old, newValue) ->  ((List<Document>) old).removeIf(d -> d.getInteger("start", -1) == remove.getInteger("start", -1)));
             CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()),
                     Updates.combine(
-                            Updates.unset("data." + sanction.getType().name()),
-                            Updates.pull("data.history." + sanction.getType().name(), Filters.eq("start", sanction.startTime))
+                            Updates.unset("data." + playerSanction.getType().name()),
+                            Updates.pull("data.history", Filters.eq("start", playerSanction.startTime))
                     )
             );
         }
         else
-            putData(sanction.getType().name(), null);
+            putData(playerSanction.getType().name(), null);
     }
 
-    public void setSanction(@NotNull Sanction sanction)
+    public void setSanction(@NotNull PlayerSanction playerSanction)
     {
-        Validate.notNull(sanction);
-        data.put(sanction.getType().name(), sanction.toDocument());
+        Validate.notNull(playerSanction);
+        data.put(playerSanction.getType().name(), playerSanction.toDocument());
+        data.merge("history", Collections.singletonList(playerSanction.toDocument()), (old, newValue) ->  {
+            final List<Document> old1 = (List<Document>) old;
+            old1.addAll((List<Document>) newValue);
+            return old1;
+        });
         CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()),
                 Updates.combine(
-                        Updates.push("data.history." + sanction.getType().name(), sanction.toDocument()),
-                        Updates.set("data." + sanction.getType().name(), sanction.toDocument())
+                        Updates.push("data.history", playerSanction.toDocument()),
+                        Updates.set("data." + playerSanction.getType().name(), playerSanction.toDocument())
                 )
         );
     }
 
+    public List<Document> getHistory()
+    {
+        return getDataList("history", Document.class);
+    }
+
+    public int getRecurrenceOfASanction(@NotNull Sanction genericName)
+    {
+        return (int) getHistory().stream().filter(document -> document.getString("generic_name").equalsIgnoreCase(genericName.getGenericName())).count();
+    }
+
     @Nullable
-    public Sanction getSanction(@NotNull SanctionType type)
+    public PlayerSanction getSanction(@NotNull SanctionType type)
     {
         Validate.notNull(type);
-        final Document document = (Document) getData(type.toString());
+        final Document document = (Document) getData(type.name());
         if(document == null)
         {
             return null;
         }
-        final Sanction sanction = Sanction.fromDocument(type, document);
-        if(sanction.isEnd())
+        final PlayerSanction playerSanction = PlayerSanction.fromDocument(document);
+        if(playerSanction.isEnd())
         {
             //remove the sanction
             putData(type.toString(), null);
             return null;
         }
-        return sanction;
+        return playerSanction;
     }
 
     public void setUsername(@NotNull String username)
@@ -352,6 +382,41 @@ public class MinePlayer implements MinetasiaPlayer
     {
         Validate.notNull(key);
         return data.get(key);
+    }
+
+    @Override
+    public @Nullable <T> T getData(@NotNull String key, @NotNull Class<T> clazz)
+    {
+        Validate.notNull(key);
+        Validate.notNull(clazz);
+        final Object value = data.get(key);
+        if(value == null) return  null;
+        return clazz.cast(value);
+    }
+
+    @Override
+    public @NotNull <T> List<T> getDataList(@NotNull String key, @NotNull Class<T> clazz)
+    {
+        Validate.notNull(key);
+        Validate.notNull(clazz);
+        final List list = getData(key, List.class);
+
+        if(list == null) return Collections.emptyList();
+
+        final Iterator iterator = list.iterator();
+
+        Object current;
+        do {
+            if(!iterator.hasNext())
+            {
+                return list;
+            }
+
+            current = iterator.next();
+        } while (clazz.isAssignableFrom(current.getClass()));
+
+        throw new ClassCastException(String.format("List element cannot be cast to %s", clazz.getName()));
+
     }
 
     @Override
