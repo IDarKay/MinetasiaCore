@@ -58,11 +58,6 @@ public enum CommandPermission {
     PERMISSION_GROUP_SAVE("permission.group.save", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_DEFAULT("permission.group.default", ALL_PERMISSION_GROUP),
 
-    ALL_MODERATION("moderation", ALL),
-
-    BAN("moderation.ban", ALL_MODERATION),
-    MUTE("moderation.mute", ALL_MODERATION),
-
     UTILS_CHAT_COLOR("utils.chat.color", ALL),
     UTILS_CHAT_MAGIC("utils.chat.magic", ALL),
     UTILS_CHAT_WHITE("utils.chat.white", ALL),
@@ -77,9 +72,20 @@ public enum CommandPermission {
     MAX_FRIEND("friend.max_size"),
     HELP("help", ALL),
     HELP_STAFF("help.staff", HELP),
+
     ADMIN("admin", ALL),
     SETTINGS_EDITOR("admin.settingseditor", ADMIN),
 
+
+
+    MODERATION("moderation", ALL),
+    SANCTION("moderation.sanction", MODERATION),
+    BAN("moderation.ban", MODERATION),
+    MUTE("moderation.mute", MODERATION),
+    WARN("moderation.warn", MODERATION),
+    UN_BAN("moderation.unban", MODERATION),
+    UN_MUTE("moderation.unmute", MODERATION),
+    UN_WARN("moderation.unwarn", MODERATION),
     ;
 
 

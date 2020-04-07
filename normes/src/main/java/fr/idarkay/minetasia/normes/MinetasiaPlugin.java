@@ -51,6 +51,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
             MinetasiaNpc.setPlugin(this);
             getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
             isEnable = true;
+            registerPlayerPacketComingEvent();
         }
     }
 

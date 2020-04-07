@@ -263,11 +263,35 @@ public class MinetasiaNpc
     }
 
     /**
-     * turn the npc
+     * turn the head and boy of the npc npc
      * @param yaw the yaw (horizontal)
      * @param pitch the pitch (vertical)
      */
     public void turn(float yaw, float pitch)
+    {
+        turnHead(yaw);
+        turnBody(yaw, pitch);
+    }
+
+    /**
+     * turn the npc head
+     * @param yaw the yaw (horizontal)
+     */
+    public void turnHead(float yaw)
+    {
+        this.currentLocation.setYaw(yaw);
+        PacketPlayOutEntityHeadRotation rotationPacket = new PacketPlayOutEntityHeadRotation(npc,
+                floatAngleToByte(yaw)
+        );
+        sendUpdatePacket(rotationPacket);
+    }
+
+    /**
+     * turn the body npc
+     * @param yaw the yaw (horizontal)
+     * @param pitch the pitch (vertical)
+     */
+    public void turnBody(float yaw, float pitch)
     {
         PacketPlayOutEntity.PacketPlayOutEntityLook packet = new PacketPlayOutEntity.PacketPlayOutEntityLook(
                 npc.getId(),
@@ -277,11 +301,7 @@ public class MinetasiaNpc
         );
         this.currentLocation.setYaw(yaw);
         this.currentLocation.setPitch(pitch);
-        PacketPlayOutEntityHeadRotation rotationPacket = new PacketPlayOutEntityHeadRotation(npc,
-                floatAngleToByte(yaw)
-        );
         sendUpdatePacket(packet);
-        sendUpdatePacket(rotationPacket);
     }
 
     /**

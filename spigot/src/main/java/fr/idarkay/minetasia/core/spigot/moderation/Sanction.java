@@ -1,11 +1,11 @@
 package fr.idarkay.minetasia.core.spigot.moderation;
 
+import fr.idarkay.minetasia.normes.utils.Message;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * File <b>Sanction</b> located on fr.idarkay.minetasia.core.spigot.moderation
@@ -15,75 +15,42 @@ import java.util.UUID;
  * <p>
  *
  * @author alice. B. (IDarKay),
- * Created the 13/03/2020 at 23:15
+ * Created the 03/04/2020 at 16:46
  */
 public class Sanction
 {
 
-    public final long startTime, during;
-    public final UUID author;
-    public final String authorName, reason;
-    public final SanctionType sanctionType;
-
-    public Sanction(@NotNull SanctionType sanctionType, long startTime, long during, @NotNull UUID author, @NotNull String authorName, @NotNull String reason)
-    {
-        this.sanctionType = Objects.requireNonNull(sanctionType);
-        this.startTime = startTime;
-        this.during = during;
-        this.author = Objects.requireNonNull(author);
-        this.authorName = Objects.requireNonNull(authorName);
-        this.reason = Objects.requireNonNull(reason);
-    }
-
-    public Sanction(@NotNull SanctionType sanctionType, long during, @NotNull UUID author, @NotNull String authorName, @NotNull String reason)
-    {
-        this(sanctionType, System.currentTimeMillis(), during, author, authorName, reason);
-    }
-
-    public static Sanction fromDocument(@NotNull SanctionType sanctionType, @NotNull Document document)
-    {
-        Validate.notNull(document);
-        return new Sanction(
-                Objects.requireNonNull(sanctionType),
-                document.getLong("start"),
-                document.getLong("during"),
-                UUID.fromString(document.getString("author")),
-                document.getString("author_username"),
-                document.getString("reason")
-        );
-    }
-
-    private Document document;
-
     @NotNull
-    public SanctionType getType()
+    private final String genericName;
+    @NotNull
+    private final Message message;
+    @NotNull
+    private final RepetitionSanction[] sanctions;
+
+    public Sanction(@NotNull final Document document)
     {
-        return sanctionType;
+        // name to enter in /sanction and show in /history
+        this.genericName = Objects.requireNonNull(document.getString("generic_name"), "no generic name in on sanction");
+        final Document msg = Objects.requireNonNull(document.get("message", Document.class), "no message set in sanction : " + genericName);
+        this.message = new Message(msg.getString("key"), msg.getString("default"));
+        System.out.println(document.toJson());
+        this.sanctions = document.getList("sanction", Document.class).stream().map(RepetitionSanction::new).sorted().toArray(RepetitionSanction[]::new);
+    }
+
+    public RepetitionSanction getSanctions(int repetition)
+    {
+        Validate.isTrue(repetition >= 0, "a player can't sanction for negative or null number of repetition !");
+        return repetition >= sanctions.length ? sanctions[sanctions.length - 1] : sanctions[repetition];
+    }
+
+    public Message getMessage()
+    {
+        return message;
     }
 
     @NotNull
-    public Document toDocument()
+    public String getGenericName()
     {
-        if(document == null)
-        {
-            document = new Document()
-                    .append("start", startTime)
-                    .append("during", during)
-                    .append("author", author.toString())
-                    .append("author_username", authorName)
-                    .append("reason", reason);
-        }
-        return document;
+        return genericName;
     }
-
-    public boolean isEnd()
-    {
-        return getReamingTime() <= 0L;
-    }
-
-    public long getReamingTime()
-    {
-        return startTime + during - System.currentTimeMillis();
-    }
-
 }

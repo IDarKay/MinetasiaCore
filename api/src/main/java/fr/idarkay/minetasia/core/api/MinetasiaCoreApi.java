@@ -625,4 +625,6 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract void registerIpConsumer(Consumer<String> ipConsumer);
 
+    public abstract boolean isMuted(UUID player);
+
 }

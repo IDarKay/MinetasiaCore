@@ -21,7 +21,8 @@ public final class SettingsKey<T>
     private static final List<SettingsKey<?>> value = new ArrayList<>();
 
     public static final SettingsKey<List> MOTD = new SettingsKey<>("MOTD", List.class);
-    public static final SettingsKey<List>  ANNOUNCE_BOSS_BAR = new SettingsKey<>("ANNOUNCE_BOSS_BAR", List.class);
+    public static final SettingsKey<List> ANNOUNCE_BOSS_BAR = new SettingsKey<>("ANNOUNCE_BOSS_BAR", List.class);
+    public static final SettingsKey<List> SANCTION = new SettingsKey<>("SANCTION", List.class);
 
 
 

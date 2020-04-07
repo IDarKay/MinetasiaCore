@@ -24,6 +24,9 @@ import fr.idarkay.minetasia.core.spigot.advancement.MinetasiaAdvancement;
 import fr.idarkay.minetasia.core.spigot.command.CommandManager;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.executor.*;
+import fr.idarkay.minetasia.core.spigot.executor.sanction.AdminSanctionCommand;
+import fr.idarkay.minetasia.core.spigot.executor.sanction.SanctionCommand;
+import fr.idarkay.minetasia.core.spigot.executor.sanction.UnSanctionCommand;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
 import fr.idarkay.minetasia.core.spigot.kits.KitMain;
 import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
@@ -35,6 +38,11 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryClickListene
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryCloseListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
+import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
+import fr.idarkay.minetasia.core.spigot.messages.SanctionMessage;
+import fr.idarkay.minetasia.core.spigot.moderation.PlayerSanction;
+import fr.idarkay.minetasia.core.spigot.moderation.SanctionManger;
+import fr.idarkay.minetasia.core.spigot.moderation.SanctionType;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.runnable.IpRunnable;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
@@ -157,6 +165,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private AdvancementManager advancementManager;
     private PlayerListManager playerListManager;
     private SettingsManager settingsManager;
+    private SanctionManger sanctionManger;
     private GUI gui;
 
     private IpRunnable ipRunnable;
@@ -290,6 +299,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         advancementManager = new AdvancementManager(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init settings manager");
         settingsManager = new SettingsManager(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init sanction manager");
+        sanctionManger = new SanctionManger(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init gui");
         gui = new GUI(this);
 
@@ -351,6 +362,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         Objects.requireNonNull(getCommand("help")).setExecutor(customCommandExecutor);
         Objects.requireNonNull(getCommand("settingseditor")).setExecutor(new SettingsEditorExecutor(this));
+        Objects.requireNonNull(getCommand("sanction")).setExecutor(new SanctionCommand(this));
+        Objects.requireNonNull(getCommand("ban")).setExecutor(new AdminSanctionCommand(this, CommandPermission.BAN, SanctionType.BAN));
+        Objects.requireNonNull(getCommand("mute")).setExecutor(new AdminSanctionCommand(this, CommandPermission.MUTE, SanctionType.MUTE));
+        Objects.requireNonNull(getCommand("warn")).setExecutor(new AdminSanctionCommand(this, CommandPermission.WARN, SanctionType.WARN));
+        Objects.requireNonNull(getCommand("unban")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_BAN, SanctionType.BAN));
+        Objects.requireNonNull(getCommand("unmute")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_MUTE, SanctionType.MUTE));
+        Objects.requireNonNull(getCommand("unwarn")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_WARN, SanctionType.WARN));
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "register events");
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -979,6 +997,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             Bukkit.getLogger().warning("plugin :" + getName() + " want give party won money but server have PARTY_XP_BOOST = false");
     }
 
+    @Override
+    public boolean isMuted(UUID player)
+    {
+        final PlayerSanction sanction = getPlayerManager().get(player).getSanction(SanctionType.MUTE);
+        return sanction != null && !sanction.isEnd();
+    }
+
     private void addGameWonMoneyToOfflinePlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
     {
         if(moneyUpdater.getUpdateMoney().isEmpty()) return;
@@ -1370,5 +1395,48 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public SettingsManager getSettingsManager()
     {
         return settingsManager;
+    }
+
+    public SanctionManger getSanctionManger()
+    {
+        return sanctionManger;
+    }
+
+    public void applySanctionToPlayerServerBound(@NotNull MinePlayer minetasiaPlayer, @NotNull PlayerSanction sanction)
+    {
+        Validate.notNull(minetasiaPlayer);
+        Validate.notNull(sanction);
+        final Player bukkitPlayer = Bukkit.getPlayer(minetasiaPlayer.getUUID());
+        minetasiaPlayer.setSanction(sanction);
+        //for client bound
+        if(bukkitPlayer != null)
+        {
+            applySanctionToPlayerClientBound(bukkitPlayer, sanction);
+        }
+        else
+        {
+            final PlayerStatueFix playerStatue = getPlayerStatue(minetasiaPlayer.getUUID());
+            if(playerStatue != null)
+            {
+                publishTarget(CoreMessage.CHANNEL, SanctionMessage.getMessage(minetasiaPlayer.getUUID(), sanction), playerStatue.getServer(), false, false);
+            }
+        }
+    }
+
+    public void applySanctionToPlayerClientBound(@NotNull Player player, @NotNull PlayerSanction sanction)
+    {
+        if(sanction.sanctionType == SanctionType.BAN)
+        {
+            player.kickPlayer(Lang.BAN_FORMAT.getWithoutPrefix(getPlayerLang(player.getUniqueId()), Lang.Argument.PLAYER.match(sanction.authorName)
+                    , Lang.Argument.REASON.match(sanction.reason)
+                    , Lang.Argument.TIME.match(sanction.baseTimeUnit.convert(sanction.during, TimeUnit.MILLISECONDS) + " " + sanction.baseTimeUnit.name().toLowerCase()))
+                    .replace("@@", "\n"));
+        }
+        else
+        {
+            player.sendMessage(( sanction.sanctionType == SanctionType.MUTE ? Lang.MUTE_FORMAT : Lang.WARN_FORMAT).get(getPlayerLang(player.getUniqueId()), Lang.Argument.PLAYER.match(sanction.authorName)
+                    , Lang.Argument.REASON.match(sanction.reason)
+                    , Lang.Argument.TIME.match(sanction.baseTimeUnit.convert(sanction.during, TimeUnit.MILLISECONDS) + " " + sanction.baseTimeUnit.name().toLowerCase())));
+        }
     }
 }

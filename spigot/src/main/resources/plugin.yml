@@ -41,3 +41,23 @@ commands:
     description: get the hekp
   settingseditor:
     description: change general settings of the network
+  ban:
+    description: ban a player with a reason (admin)
+  unban:
+    description: unban a player and remove from history
+  mute:
+    description: mute a player with a reason (admin)
+  unmute:
+    description: unmute a player and remove from history
+  warn:
+    description: wan a plyer with a reason (admin)
+  unwarn:
+    description: unwarn a player and remove from histoyr
+  sanction:
+    description: auto sanction a player
+  #todo: report
+  report:
+    description: plaer cmd report a player
+
+
+

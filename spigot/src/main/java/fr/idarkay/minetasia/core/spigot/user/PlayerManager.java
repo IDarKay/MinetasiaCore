@@ -1,9 +1,13 @@
 package fr.idarkay.minetasia.core.spigot.user;
 
+import com.mongodb.client.model.Filters;
+import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.Group;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import org.apache.commons.lang.Validate;
+import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +41,22 @@ public class PlayerManager {
     {
         final MinePlayer p = userCache.get(uuid);
         return p == null ? new MinePlayer(uuid, true) : p;
+    }
+
+    public @Nullable MinePlayer get(String userName)
+    {
+        final Player player = Bukkit.getPlayer(userName);
+        if(player != null)
+        {
+            return get(player.getUniqueId());
+        }
+        else
+        {
+            final Document playerDoc = plugin.getMongoDbManager().getCollection(MongoCollections.USERS).find(Filters.eq("username", userName)).first();
+            if(playerDoc == null) return null;
+            return new MinePlayer(playerDoc);
+        }
+
     }
 
     @NotNull

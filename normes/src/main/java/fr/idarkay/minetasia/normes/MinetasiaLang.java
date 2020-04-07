@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.normes;
 
+import fr.idarkay.minetasia.normes.utils.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -7,7 +8,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -140,7 +140,50 @@ public class MinetasiaLang {
         }
 
         return ChatColor.translateAlternateColorCodes('&', msg);
+    }
 
+    /**
+     * get a message from the lang file <br>
+     *      <br>
+     *  if no match return the default file <br>
+     *      <br>
+     *  need to use {@link MinetasiaLang#init()}  first <br>
+     *
+     *  <br>
+     *  standard: <br>
+     *
+     *  <br>
+     *  For use this you need to create Lang enumeration ! <br>
+     *  with : <br>
+     *
+     *   public enum Lang <br>
+     *   { <br>
+     *      EXAMPLE("example", "Default msg); <br>
+     * <br>
+     * <br>
+     *      private final String path; <br>
+     *      private final String defaultMsg; <br>
+     * <br>
+     *      Lang(String path, String defaultMsg){<br>
+     *          this.path = path;<br>
+     *          this.defaultMsg = defaultMsg;<br>
+     *      }<br>
+     * <br>
+     *      public String get(@NotNull String lang, Object... args)<br>
+     *      {<br>
+     *          return MinetasiaLang.get(path, defaultMsg, lang, args);<br>
+     *      }<br>
+     *      }<br>
+     * @param lang the lang of the player
+     * @param message the message
+     * @param args argument
+     * @param <T> type of object
+     * @return string message
+     */
+    @SafeVarargs
+    public final <T> String getFromMessage(String lang, Message message, Tuple<? extends Args, T>... args)
+    {
+        return get(message.getPath(), message.getDef(), lang, args);
     }
 
 }
