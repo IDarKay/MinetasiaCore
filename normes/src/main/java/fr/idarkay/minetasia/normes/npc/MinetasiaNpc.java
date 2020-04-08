@@ -4,8 +4,23 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import fr.idarkay.minetasia.normes.Reflection;
+import fr.idarkay.minetasia.normes.hologram.Hologram;
 import fr.idarkay.minetasia.normes.utils.BukkitUtils;
-import net.minecraft.server.v1_15_R1.*;
+import fr.idarkay.minetasia.normes.utils.NMSUtils;
+import net.minecraft.server.v1_15_R1.DataWatcherObject;
+import net.minecraft.server.v1_15_R1.DataWatcherRegistry;
+import net.minecraft.server.v1_15_R1.EntityPlayer;
+import net.minecraft.server.v1_15_R1.MinecraftServer;
+import net.minecraft.server.v1_15_R1.Packet;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntity;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityHeadRotation;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityTeleport;
+import net.minecraft.server.v1_15_R1.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_15_R1.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_15_R1.PlayerInteractManager;
+import net.minecraft.server.v1_15_R1.WorldServer;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -41,7 +56,7 @@ public class MinetasiaNpc
 
     private static MinetasiaPlugin plugin;
     private static final BukkitRunnable runnable = new NPCRunnable();
-    private static boolean isRunnable = false;
+    private volatile static boolean isRunnable = false;
 
     public static void setPlugin(MinetasiaPlugin plugin)
     {
@@ -52,7 +67,10 @@ public class MinetasiaNpc
     private final GameProfile gameProfile;
     private final UUID uuid = getUUIDV2();
 
+    @Nullable
     private String sName = null;
+    @Nullable
+    private Hologram hologram;
 
     public MinetasiaNpc()
     {
@@ -82,6 +100,11 @@ public class MinetasiaNpc
         if(data.length > 1) property = new Property("textures", data[0], data[1]);
         else property = new Property("textures", string);
         gameProfile.getProperties().put("textures", property);
+    }
+
+    public void withHologram(@Nullable Hologram hologram)
+    {
+        this.hologram = hologram;
     }
 
     private static final Field GAME_PROFILE_NAME = Reflection.getDeclaredField(GameProfile.class, "name", true);
@@ -171,6 +194,11 @@ public class MinetasiaNpc
         isLoad = true;
         loadNpc.add(this);
         checkNeedRegister();
+
+        if(hologram != null)
+        {
+            hologram.spawn(location.clone().add(0, 2, 0));
+        }
     }
 
     @Nullable
@@ -197,6 +225,23 @@ public class MinetasiaNpc
     {
         loadPlayer.remove(uuid);
         Reflection.sendPacket(player, packetDestroy);
+    }
+
+    public static void disconnectPlayerForAll(Player player)
+    {
+        for (MinetasiaNpc minetasiaNpc : loadNpc)
+        {
+            minetasiaNpc.disconnectPlayer(player);
+        }
+    }
+
+    protected void disconnectPlayer(Player player)
+    {
+        for (MinetasiaNpc minetasiaNpc : loadNpc)
+        {
+            loadPlayer.remove(player.getUniqueId());
+        }
+
     }
 
     private void updateSpawnPacket()
@@ -245,15 +290,18 @@ public class MinetasiaNpc
         updatePlayerLocation(location);
         PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(npc);
         sendUpdatePacket(packet);
+
+        if(hologram != null)
+            hologram.teleport(location);
     }
 
     /**
      * move the npc max 8 block
-     * @param v the move vector
+     * @param vector the move vector
      */
-    public void move(Vector v)
+    public void move(Vector vector)
     {
-        final Location newLocation = currentLocation.clone().add(v);
+        final Location newLocation = currentLocation.clone().add(vector);
         PacketPlayOutEntity.PacketPlayOutRelEntityMove packet = new PacketPlayOutEntity.PacketPlayOutRelEntityMove(
                 npc.getId(),
                 toXDelta(newLocation),
@@ -263,6 +311,9 @@ public class MinetasiaNpc
         );
         this.currentLocation = newLocation;
         sendUpdatePacket(packet);
+
+        if(hologram != null)
+            hologram.move(vector);;
     }
 
     /**
@@ -284,7 +335,7 @@ public class MinetasiaNpc
     {
         this.currentLocation.setYaw(yaw);
         PacketPlayOutEntityHeadRotation rotationPacket = new PacketPlayOutEntityHeadRotation(npc,
-                floatAngleToByte(yaw)
+                NMSUtils.floatAngleToByte(yaw)
         );
         sendUpdatePacket(rotationPacket);
     }
@@ -298,8 +349,8 @@ public class MinetasiaNpc
     {
         PacketPlayOutEntity.PacketPlayOutEntityLook packet = new PacketPlayOutEntity.PacketPlayOutEntityLook(
                 npc.getId(),
-                floatAngleToByte(yaw),
-                floatAngleToByte(pitch),
+                NMSUtils.floatAngleToByte(yaw),
+                NMSUtils.floatAngleToByte(pitch),
                 true
         );
         this.currentLocation.setYaw(yaw);
@@ -309,13 +360,13 @@ public class MinetasiaNpc
 
     /**
      * move and turn the npc
-     * @param v the move vector
+     * @param vector the move vector
      * @param yaw the yaw
      * @param pitch the pitch
      */
-    public void moveAndTurn(Vector v, float yaw, float pitch)
+    public void moveAndTurn(Vector vector, float yaw, float pitch)
     {
-        final Location newLocation = currentLocation.clone().add(v);
+        final Location newLocation = currentLocation.clone().add(vector);
         newLocation.setYaw(yaw);
         newLocation.setPitch(pitch);
         PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook packet = new PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook(
@@ -323,16 +374,19 @@ public class MinetasiaNpc
                 toXDelta(newLocation),
                 toYDelta(newLocation),
                 toZDelta(newLocation),
-                floatAngleToByte(newLocation.getYaw()),
-                floatAngleToByte(newLocation.getPitch()),
+                NMSUtils.floatAngleToByte(newLocation.getYaw()),
+                NMSUtils.floatAngleToByte(newLocation.getPitch()),
                 true
         );
         PacketPlayOutEntityHeadRotation rotationPacket = new PacketPlayOutEntityHeadRotation(npc,
-                floatAngleToByte(newLocation.getYaw())
+                NMSUtils.floatAngleToByte(newLocation.getYaw())
         );
         this.currentLocation = newLocation;
         sendUpdatePacket(packet);
         sendUpdatePacket(rotationPacket);
+
+        if(hologram != null)
+            hologram.move(vector);;
     }
 
     private void sendUpdatePacket(Packet<?> packet)
@@ -346,32 +400,19 @@ public class MinetasiaNpc
         });
     }
 
-    private short toXDelta(Location c)
+    private  short toXDelta(Location c)
     {
-        return toDelta(currentLocation.getX(), c.getX());
+        return NMSUtils.toDelta(currentLocation.getX(), c.getX());
     }
 
     private short toYDelta(Location c)
     {
-        return toDelta(currentLocation.getY(), c.getY());
+        return NMSUtils.toDelta(currentLocation.getY(), c.getY());
     }
 
     private short toZDelta(Location c)
     {
-        return toDelta(currentLocation.getZ(), c.getZ());
-    }
-
-    private short toDelta(double old, double neww)
-    {
-        double v = (neww * 32 - old * 32) * 128;
-        if(v > Short.MAX_VALUE) throw new IllegalArgumentException("max move is 8 block ");
-        return (short) v;
-    }
-
-    private byte floatAngleToByte(float angle)
-    {
-        return (byte)((int)(angle * 256.0F / 360.0F));
-
+        return NMSUtils.toDelta(currentLocation.getZ(), c.getZ());
     }
 
     /**

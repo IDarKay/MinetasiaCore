@@ -78,11 +78,25 @@ public class BukkitUtils
         return back;
     }
 
+    public static int getItemRecurrence(Inventory inventory, ItemStack itemStack)
+    {
+        int back = 0;
+        for(ItemStack i : inventory.getStorageContents())
+        {
+            //noinspection ConstantConditions
+            if(i != null && !i.getType().isAir() && i.isSimilar(itemStack))
+            {
+                back += i.getAmount();
+            }
+        }
+        return back;
+    }
+
     public static boolean canBeStack(ItemStack it1, ItemStack it2){
 
         if(it1.getType() == it2.getType())
             if(it1.getAmount() + it2.getAmount()  <= it1.getMaxStackSize())
-                return Reflection.hasSameCompound(it1, it2);
+                return it1.isSimilar(it2);
         return false;
     }
 
@@ -135,6 +149,11 @@ public class BukkitUtils
         throw new NullPointerException("no texture found");
     }
 
+    /**
+     * get a NamespacedKey from string example (minecraft:diamond)
+     * @param string string NamespacedKey
+     * @return the string
+     */
     public static NamespacedKey namespaceKeyFromSting(String string)
     {
         final String[] split = string.split(":");
@@ -160,6 +179,12 @@ public class BukkitUtils
         return CraftItemStack.asBukkitCopy(it);
     }
 
+    /**
+     * remove a string nbt from the item
+     * @param itemStack the item
+     * @param key the key
+     * @return new item
+     */
     @NotNull
     public static ItemStack removeNBTTag(final ItemStack itemStack, String key)
     {

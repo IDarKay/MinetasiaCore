@@ -14,6 +14,8 @@ package fr.idarkay.minetasia.normes;
  * implements your lang enum with this for get the standard methods
  */
 
+import org.bukkit.entity.Player;
+
 /**
  * implement your Lang enum with this
  */
@@ -38,5 +40,16 @@ public interface IMinetasiaLang
       * @return message
       */
       <T> String getWithoutPrefix(String lang, Tuple<? extends Args, T>... args);
+
+    /**
+     * only for npc
+     * @param lang lang
+     * @param player player
+     * @return msg
+     */
+      default String getWithoutPrefixPlayer(String lang, Player player)
+      {
+          return this.getWithoutPrefix(lang);
+      }
 
 }
