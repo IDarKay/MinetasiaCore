@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 public class NPCRunnable extends BukkitRunnable
 {
-    private final static int viewRayon = 32; //in block
+    private final static int viewRayon = 64; //in block
 
     @Override
     public void run()
