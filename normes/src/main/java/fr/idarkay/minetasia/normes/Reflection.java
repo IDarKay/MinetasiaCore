@@ -1,7 +1,9 @@
 package fr.idarkay.minetasia.normes;
 
-import fr.idarkay.minetasia.normes.utils.ReflectionVar;
+import net.minecraft.server.v1_15_R1.Packet;
+import net.minecraft.server.v1_15_R1.PlayerConnection;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -30,8 +32,8 @@ public class Reflection
      */
     public static void sendPacket(Player player, Object packet) {
         try {
-            final Object playerConnection = ReflectionVar.ENTITY_PLAYER_CONFECTION_FIELD.get(ReflectionVar.CRAFT_PLAYER_GET_HANDLE.invoke(player));
-            ReflectionVar.SEND_PACKET_METHOD.invoke(playerConnection, packet);
+            final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
+            playerConnection.sendPacket((Packet<?>) packet);
         } catch (Exception e) {
             e.printStackTrace();
         }

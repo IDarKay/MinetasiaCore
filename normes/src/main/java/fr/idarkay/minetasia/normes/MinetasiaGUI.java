@@ -1,12 +1,25 @@
 package fr.idarkay.minetasia.normes;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import fr.idarkay.minetasia.normes.component.BaseComponent;
+import fr.idarkay.minetasia.normes.component.TextComponent;
 import fr.idarkay.minetasia.normes.utils.ReflectionVar;
+import net.minecraft.server.v1_15_R1.IChatBaseComponent;
+import net.minecraft.server.v1_15_R1.MojangsonParser;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import net.minecraft.server.v1_15_R1.NBTTagList;
+import net.minecraft.server.v1_15_R1.NBTTagString;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Skull;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
@@ -21,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author AloIs B. (IDarKay),
@@ -221,6 +235,14 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
         return back;
     }
 
+    /**
+     * create new custom item
+     * @param material the tpe of the item
+     * @param lore lore to add
+     * @param amount teh amount
+     * @param name name of the item
+     * @return the item
+     */
     public static ItemStack createItemStack(Material material, int amount, String name, List<String> lore)
     {
         ItemStack back = new ItemStack(material, amount);
@@ -231,6 +253,15 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
         return back;
     }
 
+    /**
+     * create new custom item
+     * @param material the tpe of the item
+     * @param lore lore to add
+     * @param amount teh amount
+     * @param name name of the item
+     * @param flags flags to add to the item
+     * @return the item
+     */
     public static ItemStack createItemStack(Material material, int amount, String name, @NotNull ItemFlag[] flags, String... lore)
     {
         ItemStack back = new ItemStack(material, amount);
@@ -242,6 +273,173 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
         return back;
     }
 
+    /**
+     * create new custom item
+     * @param material the tpe of the item
+     * @param nbt the nbt of the item
+     * @param amount teh amount
+     * @return the item
+     */
+    public static ItemStack createItemStack(Material material, String nbt, int amount)
+    {
+        try
+        {
+            final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
+            final NBTTagCompound nbtTagCompound = MojangsonParser.parse(nbt);
+            itemStack.setTag(nbtTagCompound);
+            return CraftItemStack.asBukkitCopy(itemStack);
+        } catch (CommandSyntaxException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * create new custom item
+     * @param material the tpe of the item
+     * @param lore lore to add
+     * @param amount teh amount
+     * @param name name of the item with BaseComponent
+     * @return the item
+     */
+    public static ItemStack createItemStack(Material material, List<String> lore,  int amount, BaseComponent... name)
+    {
+        final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
+        final NBTTagCompound nbtTagCompound = new NBTTagCompound();
+
+        final NBTTagCompound display = new NBTTagCompound();
+
+        final JsonArray array = new JsonArray();
+        for (BaseComponent component : name)
+        {
+            array.add(component.toJsonElement());
+        }
+        display.setString("Name", array.toString());
+
+
+
+        final NBTTagList tagList = new NBTTagList();
+
+
+
+        final List<NBTTagString> nbtLore = lore.stream().map(line -> NBTTagString.a(jsonArrayAsList(new TextComponent(line).toJsonElement()).toString())).collect(Collectors.toList());
+
+        tagList.addAll(nbtLore);
+
+        display.set("Lore", tagList);
+        nbtTagCompound.set("display", display);
+        itemStack.setTag(nbtTagCompound);
+        return CraftItemStack.asBukkitCopy(itemStack);
+    }
+
+    /**
+     * create new custom item
+     * @param material the tpe of the item
+     * @param nbt the nbt of the item
+     * @param amount teh amount
+     * @param name name of the item with BaseComponent
+     * @return the item
+     */
+    public static ItemStack createItemStack(Material material,  String nbt, int amount, BaseComponent... name)
+    {
+        try
+        {
+            final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
+            final NBTTagCompound nbtTagCompound = MojangsonParser.parse(nbt);
+            itemStack.setTag(nbtTagCompound);
+            final JsonArray array = new JsonArray();
+            for (BaseComponent component : name)
+            {
+                array.add(component.toJsonElement());
+            }
+
+            itemStack.a(IChatBaseComponent.ChatSerializer.a(array));
+            return CraftItemStack.asBukkitCopy(itemStack);
+        } catch (CommandSyntaxException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * create new custom item
+     * @param material the tpe of the item
+     * @param nbt the nbt of the item
+     * @param addLore lore to add
+     * @param afterComponentNbtLore true for set the addlore after the nbt lore
+     * @param amount teh amount
+     * @param name name of the item with BaseComponent
+     * @return the item
+     */
+    public static ItemStack createItemStack(Material material,  String nbt, List<String> addLore, boolean afterComponentNbtLore, int amount, BaseComponent... name)
+    {
+        try
+        {
+            final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
+            final NBTTagCompound nbtTagCompound = MojangsonParser.parse(nbt);
+            Validate.notNull(nbtTagCompound);
+
+            final NBTTagCompound display;
+            if (nbtTagCompound.hasKeyOfType("display", 10)) {
+                display =  nbtTagCompound.getCompound("display");
+            } else {
+                display = new NBTTagCompound();
+            }
+
+            final JsonArray array = new JsonArray();
+            for (BaseComponent component : name)
+            {
+                array.add(component.toJsonElement());
+            }
+            display.setString("Name", array.toString());
+
+
+
+            NBTTagList tagList;
+
+            if(display.hasKeyOfType("Lore", 9))
+            {
+                tagList = display.getList("Lore", 8);
+            }
+            else tagList = new NBTTagList();
+
+
+            List<NBTTagString> nbtLore = addLore.stream().map(line -> NBTTagString.a(jsonArrayAsList(new TextComponent(line).toJsonElement()).toString())).collect(Collectors.toList());
+
+            if(afterComponentNbtLore)
+            {
+                final NBTTagList loreNbt = new NBTTagList();
+                loreNbt.addAll(nbtLore);
+                loreNbt.addAll(tagList);
+                tagList = loreNbt;
+            }
+            else
+            {
+                tagList.addAll(nbtLore);
+            }
+
+            display.set("Lore", tagList);
+            nbtTagCompound.set("display", display);
+            itemStack.setTag(nbtTagCompound);
+            return CraftItemStack.asBukkitCopy(itemStack);
+        } catch (CommandSyntaxException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static JsonArray jsonArrayAsList(JsonElement... jsonElement)
+    {
+        final JsonArray jsonArray = new JsonArray();
+        for (JsonElement element : jsonElement)
+        {
+            jsonArray.add(element);
+        }
+        return jsonArray;
+    }
 
     /**
      * create a head with many argument
