@@ -26,6 +26,11 @@ public abstract class HeadConstant
     public static final String LEFT_ARROW = getTexture("left-arrow");
     public static final String RIGHT_ARROW = getTexture("right-arrow");
     public static final String QUESTION_MARK = getTexture("question-mak");
+    public static final String UNKNOWN = getTexture("unknown");
+    public static final String BAN = getTexture("ban");
+    public static final String MUTE = getTexture("mute");
+    public static final String WARN = getTexture("warn");
+
 
 
     private static final String CONFIG_NAME = "data/head.yml";

@@ -70,15 +70,16 @@ public enum CommandPermission {
     PARTY_SIZE("party.size"),
     FRIEND("friend", ALL),
     MAX_FRIEND("friend.max_size"),
+    REPORT("report", ALL),
     HELP("help", ALL),
     HELP_STAFF("help.staff", HELP),
 
-    ADMIN("admin", ALL),
+    ADMIN("admin.*", ALL),
     SETTINGS_EDITOR("admin.settingseditor", ADMIN),
 
 
 
-    MODERATION("moderation", ALL),
+    MODERATION("moderation.*", ALL),
     SANCTION("moderation.sanction", MODERATION),
     BAN("moderation.ban", MODERATION),
     MUTE("moderation.mute", MODERATION),
@@ -86,6 +87,7 @@ public enum CommandPermission {
     UN_BAN("moderation.unban", MODERATION),
     UN_MUTE("moderation.unmute", MODERATION),
     UN_WARN("moderation.unwarn", MODERATION),
+    REPORT_VIEWER("moderation.report_viewer", MODERATION)
     ;
 
 
