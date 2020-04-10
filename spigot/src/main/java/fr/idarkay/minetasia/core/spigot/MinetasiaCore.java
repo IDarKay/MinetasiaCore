@@ -40,14 +40,17 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
 import fr.idarkay.minetasia.core.spigot.messages.SanctionMessage;
+import fr.idarkay.minetasia.core.spigot.messages.ServerMessage;
 import fr.idarkay.minetasia.core.spigot.moderation.PlayerSanction;
 import fr.idarkay.minetasia.core.spigot.moderation.SanctionManger;
 import fr.idarkay.minetasia.core.spigot.moderation.SanctionType;
+import fr.idarkay.minetasia.core.spigot.moderation.report.ReportManager;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.runnable.IpRunnable;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import fr.idarkay.minetasia.core.spigot.server.ServerManager;
 import fr.idarkay.minetasia.core.spigot.settings.SettingsManager;
+import fr.idarkay.minetasia.core.spigot.user.CorePlayer;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PartyManager;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
@@ -66,6 +69,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -166,6 +170,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private PlayerListManager playerListManager;
     private SettingsManager settingsManager;
     private SanctionManger sanctionManger;
+    private ReportManager reportManager;
     private GUI gui;
 
     private IpRunnable ipRunnable;
@@ -301,6 +306,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         settingsManager = new SettingsManager(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init sanction manager");
         sanctionManger = new SanctionManger(this);
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init report manager");
+        reportManager = new ReportManager(this.getConfig());
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init gui");
         gui = new GUI(this);
 
@@ -372,6 +379,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Objects.requireNonNull(getCommand("unmute")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_MUTE, SanctionType.MUTE));
         Objects.requireNonNull(getCommand("unwarn")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_WARN, SanctionType.WARN));
 
+        Objects.requireNonNull(getCommand("report")).setExecutor(new ReportExecutor(this));
+
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "register events");
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new PluginMessageReceivedListener());
@@ -381,29 +390,30 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "start player count schedule");
         initClientReceiver();
-        startPlayerCountSchedule();
 
-        if(getConfig().getBoolean("default-register"))
-        {
-            this.setMaxPlayerCount(60);
-            this.setServerPhase(ServerPhase.STARTUP);
-        }
+
 
         //for sign
-        registerPlayerPacketComingEvent();
+//        registerPlayerPacketComingEvent();
 
         this.ipRunnable = new IpRunnable(this);
         this.ipRunnable.runTaskTimerAsynchronously(this, 20L, 8L);
         this.playerListManager = new PlayerListManager(this);
-
-
-
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, new PlayerCountScheduler(), 0L, 20L);
 
         setCommandsIsEnable(Command.TAB_RANK.by, getConfig().getBoolean("commands.rank_in_tab", true));
         if(isCommandEnable(Command.TAB_RANK))
         {
            Bukkit.getScheduler().runTaskLater(this, this.permissionManager::loadTabGroup, 1L);
         }
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if(getConfig().getBoolean("default-register"))
+            {
+                this.setMaxPlayerCount(60);
+                this.setServerPhase(ServerPhase.STARTUP);
+            }
+        }, 1);
 
     }
 
@@ -419,9 +429,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         getServer().getPluginManager().registerEvents(new AsyncPlayerChatListener(this), this);
     }
 
-    private void startPlayerCountSchedule()
+    public class PlayerCountScheduler implements Runnable
     {
-        //todo: change
+        final int lastPlayerCount = 0;
+
+        @Override
+        public void run()
+        {
+            final int c = Bukkit.getOnlinePlayers().size();
+            if(c != lastPlayerCount)
+            {
+                MinetasiaCore.this.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.PLAYER_COUNT, MinetasiaCore.this.getThisServer().getName(), c), true);
+            }
+        }
     }
 
     @Override
@@ -483,7 +503,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public @Nullable UUID getPlayerUUID(@NotNull String username) {
         final Player p = Bukkit.getPlayer(username);
         if(p != null) return p.getUniqueId();
-        final Document d = mongoDBManager.getCollection(MongoCollections.USERS).find(Filters.eq("username", username)).first();
+        final Document d = mongoDBManager.getCollection(MongoCollections.USERS).find(Filters.regex("username", "/^" + username + "$/i")).first();
         if (d == null) return null;
         else return UUID.fromString(d.getString("_id"));
     }
@@ -633,7 +653,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             final String fullMsg = chanel + ";" + (message == null ? "" : message);
             if(proxy)
             {
-                mongoDBManager.getAll(MongoCollections.PROXY).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("port"), fullMsg, false));
+                mongoDBManager.getAll(MongoCollections.PROXY).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
             }
 
 
@@ -665,16 +685,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     public void publishHub(@NotNull String chanel, String message, boolean sync)
     {
-        Validate.notNull(chanel);
-        final Runnable run = () -> {
-
-            final String fullMsg = chanel + ";" + (message == null ? "" : message);
-
-            mongoDBManager.getSimpleFilter(MongoCollections.SERVERS, "type", "hub").forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
-        };
-
-        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
-        else run.run();
+       publishServerType(chanel, message, "hub", sync);
     }
 
     @Override
@@ -913,6 +924,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Validate.notNull(uuid, "uuid can't be null");
         Validate.notNull(statsUpdater, "statsUpdater can't be null");
         if(statsUpdater.getUpdate().isEmpty()) return;
+        CorePlayer corePlayer = getPlayerManager().getCorePlayer(uuid);
+        if(corePlayer.getPlayTime() > 30_000)
+        {
+            statsUpdater.getUpdate().put(getServerType() + ".play_time", TimeUnit.MICROSECONDS.toSeconds(corePlayer.getPlayTime()));
+            corePlayer.resetJoinTime();
+        }
         final Consumer<BukkitTask> c = bukkitTask -> {
             try
             {
@@ -1145,6 +1162,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             }
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
                 mongoDBManager.getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(getThisServer().getName()), Updates.set("phase", phase.ordinal()));
+                publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_STATUE, getThisServer().getName(), phase.name()), true);
             });
         }
     }
@@ -1440,5 +1458,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                     , Lang.Argument.REASON.match(sanction.reason)
                     , Lang.Argument.TIME.match(sanction.baseTimeUnit.convert(sanction.during, TimeUnit.MILLISECONDS) + " " + sanction.baseTimeUnit.name().toLowerCase())));
         }
+    }
+
+    public ReportManager getReportManager()
+    {
+        return reportManager;
     }
 }

@@ -100,15 +100,12 @@ public abstract class Command {
         if(sender.hasPermission(permission.getPermission()))
         {
             final List<String> b = new ArrayList<>();
-            getChild().forEach(v -> {
-                if(sender.hasPermission(v.permission.getPermission())){
-                    if (v instanceof FlexibleCommand
-                            || args.length < length
-                            || v.getLabel().equalsIgnoreCase(args[length -1])
-                            || v.getLabel().startsWith(args[length - 1].toLowerCase())  )
-                        b.add(v.getLabel());
-                    if(v instanceof FlexibleCommand && ((FlexibleCommand) v).getPossibilities() != null)
-                        b.addAll(((FlexibleCommand) v).getPossibilities().stream().filter(s -> s.startsWith(args[length -1]) ).collect(Collectors.toList()));
+            getChild().forEach(command -> {
+                if(sender.hasPermission(command.permission.getPermission())){
+                    if(command.getLabel().startsWith(args[length - 1].toLowerCase()))
+                        b.add(command.getLabel());
+                    if(command instanceof FlexibleCommand && ((FlexibleCommand) command).getPossibilities() != null)
+                        b.addAll(((FlexibleCommand) command).getPossibilities().stream().filter(s -> s.toLowerCase().startsWith(args[length -1].toLowerCase())).collect(Collectors.toList()));
                 }
             });
             return b;
@@ -120,15 +117,17 @@ public abstract class Command {
     {
         if(sender.hasPermission(permission.getPermission()))
         {
-            final List<String> b = new ArrayList<>();
-            elements.forEach(v -> {
-                if (!filter
-                        || args.length < length
-                        || v.equalsIgnoreCase(args[length -1])
-                        || v.toLowerCase().startsWith(args[length - 1].toLowerCase()))
-                    b.add(v);
-            });
-            return b;
+            if(!filter) return new ArrayList<>(elements);
+            return elements.stream().filter(value -> value.toLowerCase().startsWith(args[length - 1].toLowerCase())).collect(Collectors.toList());
+//            final List<String> b = new ArrayList<>();
+//            elements.forEach(v -> {
+//                if (!filter
+//                        || args.length < length
+//                        || v.equalsIgnoreCase(args[length -1])
+//                        || v.toLowerCase().startsWith(args[length - 1].toLowerCase()))
+//                    b.add(v);
+//            });
+//            return b;
         }
         else return Collections.emptyList();
     }

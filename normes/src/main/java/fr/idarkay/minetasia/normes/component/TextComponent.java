@@ -1,11 +1,9 @@
 package fr.idarkay.minetasia.normes.component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import org.bukkit.ChatColor;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.minecraft.server.v1_15_R1.ChatBaseComponent;
+import net.minecraft.server.v1_15_R1.ChatComponentText;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * File <b>TextBaseComponent</b> located on fr.idarkay.minetasia.normes.component
@@ -20,96 +18,25 @@ import java.util.List;
 public class TextComponent extends BaseComponent
 {
 
-    private final String msg;
-    private final List<BaseComponent> compounds = new ArrayList<>();
+    private final String text;
 
-    private boolean italic = false;
-    private boolean strikethrough = false;
-    private boolean bold = false;
-    private boolean underlined = false;
-    private ChatColor chatColor = null;
-
-    public TextComponent(String msg)
+    public TextComponent(String text)
     {
-        this.msg = msg;
-    }
-
-    public TextComponent setBold(boolean bold)
-    {
-        this.bold = bold;
-        return this;
-    }
-
-    public TextComponent setItalic(boolean italic)
-    {
-        this.italic = italic;
-        return this;
-    }
-
-    public TextComponent setStrikethrough(boolean strikethrough)
-    {
-        this.strikethrough = strikethrough;
-        return this;
-    }
-
-    public TextComponent setUnderlined(boolean underlined)
-    {
-        this.underlined = underlined;
-        return this;
-    }
-
-    public boolean isBold()
-    {
-        return bold;
-    }
-
-    public boolean isItalic()
-    {
-        return italic;
-    }
-
-    public boolean isStrikethrough()
-    {
-        return strikethrough;
-    }
-
-    public boolean isUnderlined()
-    {
-        return underlined;
-    }
-
-    /**
-     * set color of the message
-     * @param chatColor the color not format
-     * @return self
-     */
-    public TextComponent setChatColor(ChatColor chatColor)
-    {
-        if(chatColor.isFormat()) throw new IllegalArgumentException("chatcolor can only be a color");
-        this.chatColor = chatColor;
-        return this;
-    }
-
-    public ChatColor getChatColor()
-    {
-        return chatColor;
+        this.text = text;
     }
 
     @Override
-    public JsonElement toJsonElement()
+    protected @NotNull NBTTagCompound getAddon()
     {
-        final JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("text", msg);
-        if(isBold())
-            jsonObject.addProperty("bold", true);
-        if(!isItalic()) // italic is default
-            jsonObject.addProperty("italic", false);
-        if(isStrikethrough())
-            jsonObject.addProperty("strikethrough", true);
-        if(isUnderlined())
-            jsonObject.addProperty("underlined", true);
-        if(chatColor != null)
-            jsonObject.addProperty("color", chatColor.name().toLowerCase());
-        return jsonObject;
+        final NBTTagCompound nbtTagCompound = new NBTTagCompound();
+        nbtTagCompound.setString("text", text);
+        return nbtTagCompound;
     }
+
+    @Override
+    protected @NotNull ChatBaseComponent getBaseChatComponent()
+    {
+        return new ChatComponentText(text);
+    }
+
 }

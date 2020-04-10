@@ -1,13 +1,14 @@
 package fr.idarkay.minetasia.normes.component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import net.minecraft.server.v1_15_R1.ChatBaseComponent;
+import net.minecraft.server.v1_15_R1.ChatMessage;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import net.minecraft.server.v1_15_R1.NBTTagList;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * File <b>TranslatableComponent</b> located on fr.idarkay.minetasia.normes.component
@@ -23,7 +24,7 @@ public class TranslatableComponent extends BaseComponent
 {
 
     private final String src;
-    private final List<BaseComponent> compounds = new ArrayList<>();
+    private final NBTTagList with = new NBTTagList();
 
     /**
      * create Translatable component
@@ -41,38 +42,45 @@ public class TranslatableComponent extends BaseComponent
      */
     public static TranslatableComponent getTranslatableComponentForItem(Material material)
     {
-        return new TranslatableComponent((material.isBlock() ? "block" : "item") + ".minecraft." + material.name().toLowerCase());
+        return new TranslatableComponent((material.isBlock() ? "block." : "item.") + "minecraft."  + material.name().toLowerCase().replace('_', '.'));
     }
 
     /**
      * add argument
      * @param component argument
      */
-    public void with(BaseComponent component)
+    public void with(BaseComponent... component)
     {
-        compounds.add(component);
+        with.addAll(Arrays.stream(component).map(BaseComponent::toNbtTagCompound).collect(Collectors.toList()));
     }
 
     /**
      * add argument
      * @param component argument
      */
-    public void with(String component)
+    public void with(String... component)
     {
-        compounds.add(new TextComponent(component));
+        with.addAll(Arrays.stream(component).map(co -> new TextComponent(co).toNbtTagCompound()).collect(Collectors.toList()));
     }
 
     @Override
-    public JsonElement toJsonElement()
+    protected @NotNull NBTTagCompound getAddon()
     {
-        final JsonObject component = new JsonObject();
-        component.addProperty("translate", src);
-        if(!compounds.isEmpty())
+        final NBTTagCompound nbtTagCompound = new NBTTagCompound();
+        nbtTagCompound.setString("translate", src);
+        if(!with.isEmpty())
         {
-            final JsonArray array = new JsonArray();
-            compounds.forEach(c -> array.add(c.toJsonElement()));
-            component.add("with", array);
+            nbtTagCompound.set("with", with);
         }
-        return component;
+
+        return nbtTagCompound;
     }
+
+    @Override
+    protected @NotNull ChatBaseComponent getBaseChatComponent()
+    {
+        return new ChatMessage(src);
+    }
+
+
 }

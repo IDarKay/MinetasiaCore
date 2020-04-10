@@ -195,7 +195,7 @@ public class MinetasiaAdvancement implements MinetasiaBaseAdvancement
         display.addProperty("title", advancementLang.getTitle());
         display.addProperty("description", advancementLang.getDescription());
         display.addProperty("frame", frame.value);
-        display.addProperty("show_toast", true);
+        display.addProperty("show_toast", false); //remove popup
         if(background != null)
         {
             display.addProperty("background", background);

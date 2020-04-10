@@ -32,7 +32,8 @@ public abstract class CoreMessage
 
     public abstract void actionOnGet(MinetasiaCore plugin, String... args);
 
-    static @NotNull String getMessage(String identifier, Object... args)
+     @SafeVarargs
+     static @NotNull String getMessage(String identifier, Object... args)
     {
         final StringBuilder builder = new StringBuilder(identifier + ";");
         for(Object a : args)

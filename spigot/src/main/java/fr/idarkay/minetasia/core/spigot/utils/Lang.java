@@ -82,7 +82,9 @@ public enum Lang implements IMinetasiaLang {
                                                             "&c=========================================="),
     SETTINGS_COMMANDS_FORMAT                    ("&c/settingseditor <key> <value>"),
     SETTINGS_COMMANDS_INVALID_KEY               ("&cinvalid key"),
-    SETTINGS_COMMANDS_END                       ("&a" + Argument.SETTINGS + " set to " + Argument.VALUE ),
+    SETTINGS_COMMANDS_END                       ("&a" + Argument.SETTINGS + " set to " + Argument.VALUE),
+    HOVER_CLICK_FOR_TELEPORT                    ("&8&lClick to teleport"),
+
 
     //party
     PARTY_NOT_IN_PARTY("&cSorry you're not in party"),
@@ -256,7 +258,46 @@ public enum Lang implements IMinetasiaLang {
             Argument.IP),
 
     //moderation
-    WRONG_SANCTION("&cInvalid sanction !")
+    WRONG_SANCTION("&cInvalid sanction !"),
+
+    CHALLENGE_COMPLETE("&8________&7_______&e_______&6_______&e_______&7_______&8@@  @@&5&kl&6Challenge complete:&5&kl@@       " + Argument.CHALLENGE + "@@  @@ &8______&7_____&e_____&6_____&e_____&7_____&8"),
+
+    REPORT("Reporting " + Argument.PLAYER),
+    REPORT_SELF("&cYou can't report your self..."),
+    REPORT_TYPE_FORMAT("   => " + Argument.REPORT_TYPE),
+    REPORT_HOVER("&7Click for report " + Argument.PLAYER + " for " + Argument.REPORT_TYPE),
+    REPORT_HOVER_ARGS("&7Click for select argument"),
+    REPORT_VALIDATE("&a&lClick for report &a&l" + Argument.PLAYER),
+    REPORT_CANCEL("&c&lClick for cancel &c&lreport "),
+    REPORT_NO_ARGS("&7You must be select at least one argument"),
+    REPORT_END("&aThanks you for reporting"),
+
+    REPORT_WAR_MESSAGE("&d&l" + Argument.PLAYER + " &a&l warn &d&l" + Argument.TARGET + " &a&lfor &d&l" + Argument.REASON + " " + Argument.ARGUMENT + " &8&l[CLICK TO TP]"),
+
+    //sanction gui
+    FILTER_NAME("&aFilter"),
+    FILTER_LORE("&8&l[TYPE]@@" +
+            "&f&lLeft-Click: &d&lBan@@" +
+            "&f&lMiddle-Click: &d&lMute@@" +
+            "&f&lRight-Click: &d&lWarn@@" +
+            "&f&lDrop: &d&lReset@@" +
+            ""),
+    SANCTION_HEAD_NAME("&8&l[INFO]"),
+    SANCTION_HEAD_LORE(
+            "&f&lType: &a" + Argument.SANCTION_TYPE + "@@" +
+            "&f&lGeneric reason: &a" + Argument.GENERIC_REASON + "@@" +
+            "&f&lReason: &a" + Argument.REASON + "@@" +
+            "&f&lBy: &a" + Argument.PLAYER + "@@" +
+            "&f&lDate: &a" + Argument.DATE + "@@" +
+            "&f&lFor: &a" + Argument.TIME + "@@" +
+            "&f&lStatus: " + Argument.STATUS + "@@" +
+            ""),
+    SIGN_FILTER_NAME("&aFilter by reason"),
+    SIGN_FILTER_LOR("&8&l[TYPE]@@" +
+            "&f&lLeft-Click: &d&lOpen filter@@" +
+            "&f&lRight-Click: &d&lReset@@"),
+
+    SANCTION_SIGN_FILTER_CONTENT(">@@enter sanction@@name filter@@---------------")
 
     ;
 
@@ -310,7 +351,7 @@ public enum Lang implements IMinetasiaLang {
     {
         PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
         DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP, COMMAND, DESCRIPTION, PAGE, MAX_PAGE, SETTINGS, REASON, REPETITION,
-        SANCTION_TYPE
+        SANCTION_TYPE, CHALLENGE, REPORT_TYPE, DATE, STATUS, GENERIC_REASON, TARGET, ARGUMENT
         ;
 
         String node;

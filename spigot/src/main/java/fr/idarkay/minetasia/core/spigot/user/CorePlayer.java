@@ -1,7 +1,5 @@
 package fr.idarkay.minetasia.core.spigot.user;
 
-import org.apache.commons.lang.Validate;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +33,7 @@ public class CorePlayer
     private final Map<CountdownType, Long> countdown = new EnumMap<>(CountdownType.class);
 
     private String prefix;
+    private long joinTime = System.currentTimeMillis();
 
     public CorePlayer(@NotNull UUID uuid, @NotNull String name)
     {
@@ -95,6 +94,17 @@ public class CorePlayer
     {
         this.prefix = prefix;
     }
+
+    public long getPlayTime()
+    {
+        return joinTime - System.currentTimeMillis();
+    }
+
+    public void resetJoinTime()
+    {
+        joinTime = System.currentTimeMillis();
+    }
+
 
     public enum CountdownType
     {
