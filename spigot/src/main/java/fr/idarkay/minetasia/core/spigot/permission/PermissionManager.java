@@ -230,8 +230,8 @@ public class PermissionManager
     private void add(@NotNull UUID player, @NotNull String args, @NotNull String type, boolean update)
     {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String data = plugin.getPlayerData(player, type, String.class);
-            JsonArray p = data == null ? new JsonArray() : PARSER.parse(data).getAsJsonArray();
+            final String data = plugin.getPlayerData(player, type, String.class);
+            final JsonArray p = data == null ? new JsonArray() : PARSER.parse(data).getAsJsonArray();
             p.add(args);
             plugin.setPlayerData(player, type, p.toString());
             if(update) sayUpdate(player);
@@ -457,7 +457,10 @@ public class PermissionManager
             if(reset)
             {
                 HashMap<String, PermissionAttachment> paa = permissionAttachments.get(uuid);
-                if(paa != null) paa.values().forEach(p::removeAttachment);
+                if(paa != null) {
+                    paa.values().forEach(p::removeAttachment);
+                    paa.clear();
+                }
             }
             byte u =0;
             final HashMap<String, PermissionAttachment> map = new HashMap<>();

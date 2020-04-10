@@ -7,6 +7,8 @@ import fr.idarkay.minetasia.core.api.ServerPhase;
 import fr.idarkay.minetasia.core.api.event.PlayerPermissionLoadEndEvent;
 import fr.idarkay.minetasia.core.api.utils.Boost;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import fr.idarkay.minetasia.core.spigot.user.CorePlayer;
+import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -14,6 +16,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 /**
  * File <b>PlayerListener</b> located on fr.idarkay.minetasia.core.common.listener
@@ -75,10 +80,22 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuitEvent(PlayerQuitEvent e)
     {
-        plugin.getPlayerManager().removePlayer(e.getPlayer().getUniqueId());
-        plugin.getPartyManager().disconnectPlayer(e.getPlayer().getUniqueId());
-        plugin.getPermissionManager().removePlayer(e.getPlayer().getUniqueId());
-        plugin.socialSpyPlayer.remove(e.getPlayer());
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            final CorePlayer corePlayer = plugin.getPlayerManager().getCorePlayer(e.getPlayer().getUniqueId());
+            if(corePlayer.getPlayTime() > 30_000)
+            {
+                final MinePlayer minePlayer = plugin.getPlayerManager().get(e.getPlayer().getUniqueId());
+                if(minePlayer != null)
+                    minePlayer.updatePlayerStats(() -> Collections.singletonMap(plugin.getServerType() + ".play_time", TimeUnit.MILLISECONDS.toSeconds(corePlayer.getPlayTime())));
+                corePlayer.resetJoinTime();
+            }
+
+
+            plugin.getPlayerManager().removePlayer(e.getPlayer().getUniqueId());
+            plugin.getPartyManager().disconnectPlayer(e.getPlayer().getUniqueId());
+            plugin.getPermissionManager().removePlayer(e.getPlayer().getUniqueId());
+            plugin.socialSpyPlayer.remove(e.getPlayer());
+        });
         e.setQuitMessage(null);
     }
 
@@ -92,7 +109,6 @@ public class PlayerListener implements Listener {
                 if(!e.getPlayer().hasPermission(GeneralPermission.ADMIN_SPECTATOR.getPermission()))
                 {
                     plugin.movePlayerToHub(e.getPlayer());
-                    return;
                 }
             }
         }

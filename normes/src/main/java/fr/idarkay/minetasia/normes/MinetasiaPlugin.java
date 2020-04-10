@@ -2,6 +2,7 @@ package fr.idarkay.minetasia.normes;
 
 import fr.idarkay.minetasia.normes.Listener.PlayerPacketListener;
 import fr.idarkay.minetasia.normes.Listener.PlayerQuitListener;
+import fr.idarkay.minetasia.normes.books.MinetasiaBook;
 import fr.idarkay.minetasia.normes.hologram.Hologram;
 import fr.idarkay.minetasia.normes.npc.MinetasiaNpc;
 import fr.idarkay.minetasia.normes.packet.PlayerConnectionListener;
@@ -51,6 +52,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         {
             MinetasiaNpc.setPlugin(this);
             Hologram.setPlugin(this);
+            MinetasiaBook.setPlugin(this);
             getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
             isEnable = true;
             registerPlayerPacketComingEvent();

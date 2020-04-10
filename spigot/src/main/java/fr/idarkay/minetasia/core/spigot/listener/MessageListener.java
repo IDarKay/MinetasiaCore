@@ -40,6 +40,7 @@ public final class MessageListener implements Listener {
         new ServerMessage();
         new SettingsUpdate();
         new SanctionMessage();
+        new ReportMessage();
     }
 
     @EventHandler

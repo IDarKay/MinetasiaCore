@@ -55,7 +55,6 @@ commands:
     description: unwarn a player and remove from histoyr
   sanction:
     description: auto sanction a player
-  #todo: report
   report:
     description: plaer cmd report a player
 

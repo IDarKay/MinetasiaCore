@@ -14,6 +14,8 @@ package fr.idarkay.minetasia.normes;
  * implements your lang enum with this for get the standard methods
  */
 
+import fr.idarkay.minetasia.normes.component.BaseComponent;
+import fr.idarkay.minetasia.normes.component.TextComponent;
 import org.bukkit.entity.Player;
 
 /**
@@ -26,7 +28,7 @@ public interface IMinetasiaLang
       * @see MinetasiaLang#get(String, String, String, Tuple[])
       * @param lang lang of user in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
       * @param args all argument of the message use {@link Args#match(Object)}
-      * @param <T> type of object
+      * @param <T> type of object-
       * @return message
       */
      <T> String get(String lang, Tuple<? extends Args, T>... args);
@@ -40,6 +42,17 @@ public interface IMinetasiaLang
       * @return message
       */
       <T> String getWithoutPrefix(String lang, Tuple<? extends Args, T>... args);
+
+
+      default BaseComponent getWithoutPrefixToBaseComponent(String lang, Tuple<? extends Args, Object>... args)
+      {
+          return new TextComponent(getWithoutPrefix(lang, args));
+      }
+
+      default BaseComponent[] getWithoutPrefixToBaseComponentArray(String lang, Tuple<? extends Args, Object>... args)
+      {
+          return new BaseComponent[0];
+      }
 
     /**
      * only for npc

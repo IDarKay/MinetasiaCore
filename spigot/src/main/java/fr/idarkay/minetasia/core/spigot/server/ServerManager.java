@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.spigot.server;
 
+import com.mongodb.client.model.Filters;
 import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
@@ -10,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -38,8 +40,7 @@ public final class ServerManager {
         this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(), plugin.getServerConfig());
         servers.put(server.getName(), server);
 
-        plugin.getMongoDbManager().getAll(MongoCollections.SERVERS).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
-
+        plugin.getMongoDbManager().getCollection(MongoCollections.SERVERS).find(Filters.regex("_id", Objects.requireNonNull(plugin.getConfig().getString("server_type_load")))).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
     }
 
     private boolean register = false;
@@ -49,8 +50,16 @@ public final class ServerManager {
         if(!register)
         {
             plugin.getMongoDbManager().insert(MongoCollections.SERVERS, server.toDocument());
-            plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
-            plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
+
+            if(server.getType().equalsIgnoreCase("hub"))
+            {
+                plugin.publishGlobal(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true, true);
+            }
+            else
+            {
+                plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
+                plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
+            }
             register = true;
         }
     }

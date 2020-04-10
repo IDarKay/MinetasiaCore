@@ -10,6 +10,7 @@ import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -80,8 +81,13 @@ public class SanctionCommand implements TabExecutor
                 }
                 else
                 {
-                    commandSender.sendMessage("not set yet!");
-                    //todo: gui
+                    if(commandSender instanceof Player)
+                        core.getGui().sanctionHistoryGUI.open((Player) commandSender, minePlayer);
+                    else if(commandSender instanceof ConsoleCommandSender)
+                    {
+                        //for console send raw txt no gui
+                        minePlayer.getHistory().forEach(document -> commandSender.sendMessage(command.toString()));
+                    }
                 }
             }
             else commandSender.sendMessage(ChatColor.RED + "/sanction <name> [sanction_name]");
