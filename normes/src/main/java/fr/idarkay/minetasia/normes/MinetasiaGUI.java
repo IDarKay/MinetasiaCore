@@ -9,11 +9,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fr.idarkay.minetasia.normes.component.BaseComponent;
 import fr.idarkay.minetasia.normes.component.TextComponent;
 import fr.idarkay.minetasia.normes.utils.ReflectionVar;
-import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.MojangsonParser;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.minecraft.server.v1_15_R1.NBTTagList;
-import net.minecraft.server.v1_15_R1.NBTTagString;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -295,6 +293,7 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
         }
     }
 
+
     /**
      * create new custom item
      * @param material the tpe of the item
@@ -305,27 +304,39 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      */
     public static ItemStack createItemStack(Material material, List<String> lore,  int amount, BaseComponent... name)
     {
+        return createItemStack(material, amount, lore.stream().map(TextComponent::new).collect(Collectors.toList()), name);
+    }
+
+    /**
+     * create new custom item
+     * @param material the tpe of the item
+     * @param lore lore to add
+     * @param amount teh amount
+     * @param name name of the item with BaseComponent
+     * @return the item
+     */
+    public static ItemStack createItemStack(Material material, int amount, List<BaseComponent> lore, BaseComponent... name)
+    {
         final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
         final NBTTagCompound nbtTagCompound = new NBTTagCompound();
 
         final NBTTagCompound display = new NBTTagCompound();
 
-        final JsonArray array = new JsonArray();
+        final NBTTagList array = new NBTTagList();
         for (BaseComponent component : name)
         {
-            array.add(component.toJsonElement());
+            array.add(component.toNbtTagCompound());
         }
-        display.setString("Name", array.toString());
+        display.set("Name", array);
 
 
 
         final NBTTagList tagList = new NBTTagList();
 
-
-
-        final List<NBTTagString> nbtLore = lore.stream().map(line -> NBTTagString.a(jsonArrayAsList(new TextComponent(line).toJsonElement()).toString())).collect(Collectors.toList());
-
-        tagList.addAll(nbtLore);
+        for (BaseComponent baseComponent : lore)
+        {
+            tagList.add(baseComponent.toNbtTagCompound());
+        }
 
         display.set("Lore", tagList);
         nbtTagCompound.set("display", display);
@@ -348,13 +359,13 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
             final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
             final NBTTagCompound nbtTagCompound = MojangsonParser.parse(nbt);
             itemStack.setTag(nbtTagCompound);
-            final JsonArray array = new JsonArray();
+            final NBTTagList array = new NBTTagList();
             for (BaseComponent component : name)
             {
-                array.add(component.toJsonElement());
+                array.add(component.toNbtTagCompound());
             }
 
-            itemStack.a(IChatBaseComponent.ChatSerializer.a(array));
+            itemStack.a(array.l());
             return CraftItemStack.asBukkitCopy(itemStack);
         } catch (CommandSyntaxException e)
         {
@@ -375,6 +386,21 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      */
     public static ItemStack createItemStack(Material material,  String nbt, List<String> addLore, boolean afterComponentNbtLore, int amount, BaseComponent... name)
     {
+        return createItemStack(material, nbt, afterComponentNbtLore, addLore.stream().map(TextComponent::new).collect(Collectors.toList()), amount, name);
+    }
+
+    /**
+     * create new custom item
+     * @param material the tpe of the item
+     * @param nbt the nbt of the item
+     * @param addLore lore to add
+     * @param afterComponentNbtLore true for set the addlore after the nbt lore
+     * @param amount teh amount
+     * @param name name of the item with BaseComponent
+     * @return the item
+     */
+    public static ItemStack createItemStack(Material material,  String nbt, boolean afterComponentNbtLore, List<BaseComponent> addLore, int amount, BaseComponent... name)
+    {
         try
         {
             final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
@@ -388,12 +414,12 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
                 display = new NBTTagCompound();
             }
 
-            final JsonArray array = new JsonArray();
+            final NBTTagList array = new NBTTagList();
             for (BaseComponent component : name)
             {
-                array.add(component.toJsonElement());
+                array.add(component.toNbtTagCompound());
             }
-            display.setString("Name", array.toString());
+            display.set("Name", array);
 
 
 
@@ -406,18 +432,20 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
             else tagList = new NBTTagList();
 
 
-            List<NBTTagString> nbtLore = addLore.stream().map(line -> NBTTagString.a(jsonArrayAsList(new TextComponent(line).toJsonElement()).toString())).collect(Collectors.toList());
+            final NBTTagList loreNBT = new NBTTagList();
+
+            for (BaseComponent baseComponent : addLore)
+            {
+                loreNBT.add(baseComponent.toNbtTagCompound());
+            }
 
             if(afterComponentNbtLore)
             {
-                final NBTTagList loreNbt = new NBTTagList();
-                loreNbt.addAll(nbtLore);
-                loreNbt.addAll(tagList);
-                tagList = loreNbt;
+                tagList.addAll(0, loreNBT);
             }
             else
             {
-                tagList.addAll(nbtLore);
+                tagList.addAll(loreNBT);
             }
 
             display.set("Lore", tagList);

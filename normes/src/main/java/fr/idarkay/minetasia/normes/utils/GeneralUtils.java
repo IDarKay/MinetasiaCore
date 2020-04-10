@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,20 @@ public class GeneralUtils
             return value;
         }
         throw new IllegalArgumentException("map is empty");
+    }
+
+    public static <T> T[] concat(@NotNull T[] a, @NotNull T[] b)
+    {
+        final Class<? extends Object[]> newType = a.getClass();
+        final T[] newTab = (newType == Object[].class)
+                        ? (T[]) new Object[a.length + b.length]
+                        : (T[]) Array.newInstance(newType.getComponentType(), a.length + b.length);
+
+        for (int i = 0; i < a.length; i++) newTab[i] = a[i];
+
+        for (int i = 0; i <  b.length; i++) newTab[i + a.length] = b[i];
+
+        return newTab;
     }
 
     public static TimeUnit getBiggerTimeUnit(long time)

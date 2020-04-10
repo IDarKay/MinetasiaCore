@@ -6,9 +6,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.component.BaseComponent;
-import net.minecraft.server.v1_15_R1.IChatBaseComponent;
-import net.minecraft.server.v1_15_R1.MojangsonParser;
-import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import net.minecraft.server.v1_15_R1.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -254,12 +252,53 @@ public class BukkitUtils
     public static ItemStack setComponentDisplayName(@NotNull ItemStack itemStack, BaseComponent... components)
     {
         final net.minecraft.server.v1_15_R1.ItemStack it = CraftItemStack.asNMSCopy(itemStack);
-        final JsonArray array = new JsonArray();
+        final NBTTagList array = new NBTTagList();
         for (BaseComponent component : components)
         {
-            array.add(component.toJsonElement());
+            array.add(component.toNbtTagCompound());
         }
-        it.a(IChatBaseComponent.ChatSerializer.a(array));
+        it.a(array.l());
         return CraftItemStack.asBukkitCopy(it);
     }
+
+    public static void sendToPlayer(Player player, BaseComponent... components)
+    {
+        if(components.length != 1)
+        {
+            for (BaseComponent component : components)
+            {
+                PacketPlayOutChat packetPlayOutChat = new PacketPlayOutChat(component.toChatBaseComponent(), ChatMessageType.SYSTEM);
+                Reflection.sendPacket(player, packetPlayOutChat);
+            }
+
+        }
+        else
+        {
+            PacketPlayOutChat packetPlayOutChat = new PacketPlayOutChat(components[0].toChatBaseComponent(), ChatMessageType.SYSTEM);
+            Reflection.sendPacket(player, packetPlayOutChat);
+        }
+    }
+
+    public static void sendToPlayer(Iterable<Player> players, BaseComponent... components)
+    {
+        NBTTagList nbtTagList = new NBTTagList();
+        for (BaseComponent component : components)
+        {
+            nbtTagList.add(component.toNbtTagCompound());
+        }
+        PacketPlayOutChat packetPlayOutChat = new PacketPlayOutChat(nbtTagList.l(), ChatMessageType.SYSTEM);
+        for (Player player : players)
+        {
+            Reflection.sendPacket(player, packetPlayOutChat);
+        }
+    }
+
+    @Nullable
+    public static String  getRawNBTFromItem(@NotNull ItemStack itemStack)
+    {
+        Validate.notNull(itemStack);
+        final NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).getTag();
+        return tag == null ? null : tag.toString();
+    }
+
 }

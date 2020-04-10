@@ -454,14 +454,13 @@ public class MinePlayer implements MinetasiaPlayer
     public void updatePlayerStats(@NotNull StatsUpdater updater)
     {
         stats.update(updater);
-        if(validateNotCache(PlayerMessage.ActionType.UPDATE_STATS, stats.toJsonObject().toString()))
-        {
+        if(!isCache)
             CORE.getAdvancementManager().playerStatsUpdate(updater, this);
-            final Document doc =  new Document();
-            updater.getUpdate().forEach(doc::append);
+        final Document doc =  new Document();
+        updater.getUpdate().forEach((name, value) -> doc.append("stats." + name, value));
 
-            CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), new Document("$inc", doc));
-        }
+        CORE.getMongoDbManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), new Document("$inc", doc));
+
     }
 
     @Override

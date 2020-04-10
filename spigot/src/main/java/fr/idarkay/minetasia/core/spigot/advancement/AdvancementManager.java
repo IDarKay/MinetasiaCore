@@ -2,20 +2,17 @@ package fr.idarkay.minetasia.core.spigot.advancement;
 
 import com.mongodb.MongoWriteException;
 import fr.idarkay.minetasia.core.api.MongoCollections;
-import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
-import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
-import fr.idarkay.minetasia.core.api.advancement.Criteria;
 import fr.idarkay.minetasia.core.api.utils.PlayerStats;
 import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
+import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.Tuple;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.entity.Player;
@@ -116,7 +113,11 @@ public class AdvancementManager
         final Player player = Bukkit.getPlayer(minePlayer.getUUID());
         if(player != null)
         {
-            Bukkit.getScheduler().runTask(core, () -> validateLocal(namespacedKey, player));
+            Bukkit.getScheduler().runTask(core, () -> {
+                validateLocal(namespacedKey, player);
+                player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
+                player.sendMessage(Lang.CHALLENGE_COMPLETE.get(minePlayer.getLang(), Lang.Argument.CHALLENGE.match(advancement.getLang(minePlayer.getLang()).getTitle())));
+            });
         }
         minePlayer.completeAdvancement(namespacedKey);
         if(advancement.getRewards() != null)

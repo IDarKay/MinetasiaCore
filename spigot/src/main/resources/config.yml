@@ -85,6 +85,73 @@ advancement_lang:
   - "fr"
   - "en"
 
+# javascript regex server type load
+server_type_load: "/.*/"
 
 # in phase Game and end add  maxPlayerCount by next number only for admin spectator
 max-player-count-add-admin: 5
+
+report:
+  cheat:
+    display:
+      key: REPORTE_CHEAT
+      default: "cheat"
+    args:
+      fly:
+        key: REPORTE_ARGUMENT_FLY
+        default: "fly"
+      killAura:
+        key: REPORTE_ARGUMENT_KILL_AURA
+        default: "killAura"
+      AutoCliker:
+        key: REPORTE_ARGUMENT_AUTO_CLIKER
+        default: "Auto Cliker"
+      Speed:
+        key: REPORTE_ARGUMENT_SPEED
+        default: "speed"
+      AntiKnockback:
+        key: REPORTE_ARGUMENT_ANTI_KNOCKBACK
+        default: "Anti KnockBack"
+      Reach:
+        key: REPORTE_ARGUMENT_REACH
+        default: "reach"
+  public_chat:
+    display:
+      key: REPORTE_PUBLIC_CHAT
+      default: "public chat"
+    args:
+      pub:
+        key: REPORTE_ARGUMENT_PUB
+        default: "pub"
+      insulte:
+        key: REPORTE_ARGUMENT_INSULTE
+        default: "insulte"
+      bad_link:
+        key: REPORTE_ARGUMENT_BAD_LINK
+        default: "bad link"
+  private_chat:
+    display:
+      key: REPORTE_PRIVATE_CHAT
+      default: "private chat"
+    args:
+      pub:
+        key: REPORTE_ARGUMENT_PUB
+        default: "pub"
+      insulte:
+        key: REPORTE_ARGUMENT_INSULTE
+        default: "insulte"
+      bad_link:
+        key: REPORTE_ARGUMENT_BAD_LINK
+        default: "bad link"
+  bad_name:
+    display:
+      key: REPORTE_PBAD_NAME
+      default: "bad name"
+  cross_teaming:
+    display:
+      key: REPORTE_CROSS_TEAMING
+      default: "cross teaming"
+  bad_skin:
+    display:
+      key: REPORTE_BAD_SKIN
+      default: "bad skin"
