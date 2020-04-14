@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonParser;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
@@ -69,7 +70,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -368,6 +368,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         }
 
         Objects.requireNonNull(getCommand("help")).setExecutor(customCommandExecutor);
+        Objects.requireNonNull(getCommand("playerdata")).setExecutor(customCommandExecutor);
+        Objects.requireNonNull(getCommand("broadcast")).setExecutor(customCommandExecutor);
+        Objects.requireNonNull(getCommand("whitelist")).setExecutor(customCommandExecutor);
+        Objects.requireNonNull(getCommand("maintenance")).setExecutor(customCommandExecutor);
         Objects.requireNonNull(getCommand("settingseditor")).setExecutor(new SettingsEditorExecutor(this));
         Objects.requireNonNull(getCommand("sanction")).setExecutor(new SanctionCommand(this));
 
@@ -431,7 +435,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     public class PlayerCountScheduler implements Runnable
     {
-        final int lastPlayerCount = 0;
+        private volatile int lastPlayerCount = 0;
 
         @Override
         public void run()
@@ -439,6 +443,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             final int c = Bukkit.getOnlinePlayers().size();
             if(c != lastPlayerCount)
             {
+                lastPlayerCount = c;
                 MinetasiaCore.this.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.PLAYER_COUNT, MinetasiaCore.this.getThisServer().getName(), c), true);
             }
         }
@@ -503,7 +508,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public @Nullable UUID getPlayerUUID(@NotNull String username) {
         final Player p = Bukkit.getPlayer(username);
         if(p != null) return p.getUniqueId();
-        final Document d = mongoDBManager.getCollection(MongoCollections.USERS).find(Filters.regex("username", "/^" + username + "$/i")).first();
+        final Document d = mongoDBManager.getCollection(MongoCollections.USERS).find(Filters.regex("username",  "^" + username + "$", "i")).first();
         if (d == null) return null;
         else return UUID.fromString(d.getString("_id"));
     }
@@ -656,11 +661,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 mongoDBManager.getAll(MongoCollections.PROXY).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
             }
 
+            mongoDBManager.getAll(MongoCollections.SERVERS).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
 
+//            final Map<String, Integer> ipPortMap = getServers().values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort));
 
-            final Map<String, Integer> ipPortMap = getServers().values().stream().collect(Collectors.toMap(Server::getIp, Server::getPublishPort));
-
-            ipPortMap.forEach((ip, port) -> MessageClient.send(ip, port, fullMsg, false));
+//            ipPortMap.forEach((ip, port) -> MessageClient.send(ip, port, fullMsg, false));
 
         };
 
@@ -696,15 +701,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
             final String fullMsg = chanel + ";" + (message == null ? "" : message);
 
-            List<String> pas = new ArrayList<>();
-            getServers(serverType).forEach((name, server) -> {
-                if(!pas.contains(server.getIp() + ";" + server.getPort()))
-                {
-                    pas.add(server.getIp() + ";" + server.getPort());
-                    MessageClient.send(server.getIp(), server.getPort(), fullMsg, false);
-                }
+            mongoDBManager.getCollection(MongoCollections.SERVERS).find(Filters.regex("type", "^" + serverType +"$", "i")).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
 
-            });
+//            List<String> pas = new ArrayList<>();
+//            getServers(serverType).forEach((name, server) -> {
+//                System.out.println(name + " " + fullMsg);
+//                if(!pas.contains(server.getIp() + ";" + server.getPort()))
+//                {
+//                    pas.add(server.getIp() + ";" + server.getPort());
+//                    MessageClient.send(server.getIp(), server.getPublishPort(), fullMsg, false);
+//                }
+//
+//            });
         };
 
         if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
@@ -741,6 +749,22 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync)
     {
         return publishTarget(chanel, message, target.getServer(), rep, sync);
+    }
+
+    public String publishTarget(@NotNull String chanel, String message, @NotNull String ip, int port, boolean rep, boolean sync)
+    {
+        if(rep && !sync) throw new IllegalArgumentException("cant get rep in async");
+        final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+        if(sync)
+        {
+            return MessageClient.send(ip, port, fullMsg, rep);
+        }
+        else
+        {
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> MessageClient.send(ip, port, fullMsg, false));
+            return null;
+        }
     }
 
     @Override
@@ -817,7 +841,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public PlayerStatueFix getPlayerStatue(String name) {
-        final Document d = mongoDBManager.getWithReferenceAndMatch(MongoCollections.ONLINE_USERS, "username", name, "servers", "server_id", "_id", "server").first();
+//        Filters.regex("username", "/^" + username + "$/i")
+
+        final Document d =  mongoDBManager.getCollection(MongoCollections.ONLINE_USERS).aggregate(Arrays.asList(
+                Aggregates.match(Filters.regex("username",  "^" + name + "$", "i")),
+                Aggregates.lookup("servers", "server_id", "_id", "server"))).first();
+
         if(d == null) return null;
 
         return new PlayerStatueFixC(

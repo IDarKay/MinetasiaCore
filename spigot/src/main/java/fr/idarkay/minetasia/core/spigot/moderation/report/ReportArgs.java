@@ -24,7 +24,6 @@ public class ReportArgs
 
     public ReportArgs(@NotNull FileConfiguration configuration, @NotNull String path)
     {
-        System.out.println(path);
         this.generic = path.split("\\.")[3];
         this.display = new Message(Objects.requireNonNull(configuration.getString(path + ".key")), Objects.requireNonNull(configuration.getString(path + ".default")));
     }

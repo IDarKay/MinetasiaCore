@@ -1,9 +1,14 @@
 package fr.idarkay.minetasia.normes;
 
+import net.minecraft.server.v1_15_R1.ChatComponentText;
+import net.minecraft.server.v1_15_R1.IScoreboardCriteria;
+import net.minecraft.server.v1_15_R1.PacketPlayOutScoreboardDisplayObjective;
+import net.minecraft.server.v1_15_R1.PacketPlayOutScoreboardObjective;
+import net.minecraft.server.v1_15_R1.PacketPlayOutScoreboardScore;
+import net.minecraft.server.v1_15_R1.ScoreboardServer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -24,11 +29,21 @@ public class PlayerScoreBoard
 {
 
     protected final UUID player;
-    private HashMap<Integer, String> lines = new HashMap<>();
+    private final HashMap<Integer, String> lines = new HashMap<>();
+    private String display;
+    private boolean load = true;
 
     public PlayerScoreBoard(Player player, String display)
     {
         this.player = player.getUniqueId();
+        this.display = display;
+    }
+
+    public void show()
+    {
+        if(load) return;
+        load = true;
+        final Player player = getPlayer();
 
         try
         {
@@ -38,18 +53,16 @@ public class PlayerScoreBoard
         {
             e.printStackTrace();
         }
-
     }
-
 
     private Player getPlayer()
     {
         return Bukkit.getPlayer(player);
     }
 
-    private static final Class<?> packetPlayOutScoreboardScoreClass = Reflection.getNMSClass("PacketPlayOutScoreboardScore");
-    private static final Class<?> action = Reflection.getNMSClass("ScoreboardServer$Action");
-    private static final Constructor<?> pPOSSConstructor = Reflection.getConstructor(packetPlayOutScoreboardScoreClass, false, action, String.class, String.class, int.class);
+//    private static final Class<?> packetPlayOutScoreboardScoreClass = Reflection.getNMSClass("PacketPlayOutScoreboardScore");
+//    private static final Class<?> action = Reflection.getNMSClass("ScoreboardServer$Action");
+//    private static final Constructor<?> pPOSSConstructor = Reflection.getConstructor(packetPlayOutScoreboardScoreClass, false, action, String.class, String.class, int.class);
 
     /**
      * set new line to list
@@ -78,8 +91,11 @@ public class PlayerScoreBoard
 
         try
         {
-            final Player player = getPlayer();
-            Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.CHANGE.asNMS, player.getName(), text, line));
+            if (load)
+            {
+                final Player player = getPlayer();
+                Reflection.sendPacket(player, new PacketPlayOutScoreboardScore(ScoreboardServer.Action.CHANGE, player.getName(), text, line));
+            }
             lines.put(line, text);
         }
         catch(Exception e) { e.printStackTrace(); }
@@ -92,7 +108,7 @@ public class PlayerScoreBoard
         {
             try
             {
-                Reflection.sendPacket(player, pPOSSConstructor.newInstance(action.asNMS, player.getName(), text, line));
+                Reflection.sendPacket(player, new PacketPlayOutScoreboardScore(action.asNMS, player.getName(), text, line));
             }
             catch(Exception e) { e.printStackTrace(); }
         });
@@ -107,8 +123,11 @@ public class PlayerScoreBoard
     {
         try
         {
-            Player player = getPlayer();
-            Reflection.sendPacket(player, pPOSSConstructor.newInstance(Action.REMOVE.asNMS, player.getName(), lines.get(line), 0));
+            if (load)
+            {
+                Player player = getPlayer();
+                Reflection.sendPacket(player, new PacketPlayOutScoreboardScore(ScoreboardServer.Action.REMOVE, player.getName(), lines.get(line), 0));
+            }
             lines.remove(line);
         }
         catch(Exception e) { e.printStackTrace(); }
@@ -120,11 +139,15 @@ public class PlayerScoreBoard
      */
     public void setDisplayName(String display)
     {
-        try
+        this.display = display;
+        if(load)
         {
-            Reflection.sendPacket(getPlayer(), getEditDisplayPacket(2, display));
+            try
+            {
+                Reflection.sendPacket(getPlayer(), getEditDisplayPacket(2, display));
+            }
+            catch(Exception e) { e.printStackTrace(); }
         }
-        catch(Exception e) { e.printStackTrace(); }
     }
 
     /**
@@ -132,6 +155,7 @@ public class PlayerScoreBoard
      */
     public void destroy()
     {
+        load = false;
         try
         {
             Reflection.sendPacket(getPlayer(), getEditDisplayPacket(1, null));
@@ -140,34 +164,24 @@ public class PlayerScoreBoard
     }
 
     private static final Class<?> packetPlayOutScoreboardObjectiveClass = Reflection.getNMSClass("PacketPlayOutScoreboardObjective");
-    private static final Constructor<?> packetPlayOutScoreboardObjectiveClassConstructor = Reflection.getConstructor(packetPlayOutScoreboardObjectiveClass, false);
     private static final Field pPOSOFAName = Reflection.getDeclaredField(packetPlayOutScoreboardObjectiveClass, "a", true);
     private static final Field pPOSOFBDisplay = Reflection.getDeclaredField(packetPlayOutScoreboardObjectiveClass, "b", true);
     private static final Field pPOSOFDMode = Reflection.getDeclaredField(packetPlayOutScoreboardObjectiveClass, "d", true);
     private static final Field pPOSOFCType = Reflection.getDeclaredField(packetPlayOutScoreboardObjectiveClass, "c", true);
-    private static final Object integerTypeEnum;
 
-    static {
-        try {
-            integerTypeEnum = Reflection.getNMSClass("IScoreboardCriteria$EnumScoreboardHealthDisplay").getField("INTEGER").get(null);
-        }
-        catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
 
     private Object getEditDisplayPacket(int mode, String name) throws InstantiationException, IllegalAccessException, InvocationTargetException
     {
-        Object packet = packetPlayOutScoreboardObjectiveClassConstructor.newInstance();
+        PacketPlayOutScoreboardObjective packet = new PacketPlayOutScoreboardObjective();
 
         pPOSOFAName.set(packet, getPlayer().getName());
         pPOSOFDMode.set(packet, mode);
 
         if(mode == 0 || mode == 2)
         {
-            pPOSOFBDisplay.set(packet, Reflection.getIChatBaseComponent(name));
-            pPOSOFCType.set(packet, integerTypeEnum);
+            pPOSOFBDisplay.set(packet, new ChatComponentText(name));
+
+            pPOSOFCType.set(packet, IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER);
         }
 
         return packet;
@@ -175,13 +189,12 @@ public class PlayerScoreBoard
 
 
     private static final Class<?> packetPlayOutScoreboardDisplayObjectiveClass = Reflection.getNMSClass("PacketPlayOutScoreboardDisplayObjective");
-    private static final Constructor<?> packetPlayOutScoreboardDisplayObjectiveConstructor = Reflection.getConstructor(packetPlayOutScoreboardDisplayObjectiveClass, false);
     private static final Field pPOSDOFAPosition = Reflection.getDeclaredField(packetPlayOutScoreboardDisplayObjectiveClass, "a", true);
     private static final Field pPOSDOFBName = Reflection.getDeclaredField(packetPlayOutScoreboardDisplayObjectiveClass, "b", true);
 
     private Object getShowPacket() throws InstantiationException, IllegalAccessException, InvocationTargetException
     {
-        Object packet = packetPlayOutScoreboardDisplayObjectiveConstructor.newInstance();
+        PacketPlayOutScoreboardDisplayObjective packet = new PacketPlayOutScoreboardDisplayObjective();
 
         pPOSDOFAPosition.set(packet, 1);
         pPOSDOFBName.set(packet, getPlayer().getName());
@@ -190,19 +203,15 @@ public class PlayerScoreBoard
 
     public enum Action
     {
-        CHANGE,
-        REMOVE,
+        CHANGE(ScoreboardServer.Action.CHANGE),
+        REMOVE(ScoreboardServer.Action.REMOVE),
         ;
 
-        public Object asNMS;
+        public ScoreboardServer.Action asNMS;
 
-        Action()
+        Action(ScoreboardServer.Action asNMS)
         {
-            try {
-                asNMS = action.getField(name()).get(null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            this.asNMS = asNMS;
         }
 
     }

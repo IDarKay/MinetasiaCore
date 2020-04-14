@@ -3,9 +3,12 @@ package fr.idarkay.minetasia.core.spigot.executor;
 import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
+import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
+import fr.idarkay.minetasia.core.spigot.messages.MsgMessage;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -15,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * File <b>RExecutor</b> located on fr.idarkay.minetasia.core.spigot.Executor
@@ -40,27 +42,59 @@ public class RExecutor implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         final String lang = sender instanceof Player ? minetasiaCore.getPlayerLang(((Player) sender).getUniqueId()) : MinetasiaLang.BASE_LANG;
-        if(sender.hasPermission(CommandPermission.UTILS_CHAT_MSG.getPermission()) && sender instanceof Player)
+        if(!(sender instanceof Player))
+        {
+            sender.sendMessage(ChatColor.RED + "need be a player !");
+            return true;
+        }
+
+        if(sender.hasPermission(CommandPermission.UTILS_CHAT_MSG.getPermission()))
         {
             if(args.length > 0)
             {
                 Bukkit.getScheduler().runTaskAsynchronously(minetasiaCore, () -> {
-                    try
-                    {
-                        UUID u = UUID.fromString(minetasiaCore.getPlayerData(((Player) sender).getUniqueId(), "last_talker").toString());
-                            final PlayerStatueFix playerStatueFix = minetasiaCore.getPlayerStatue(u);
-                            if(playerStatueFix != null)
-                            {
-                                String msg = concat(args, " ", 1);
-                                sender.sendMessage(Lang.MSG_FORMAT.getWithoutPrefix(lang, Lang.Argument.PLAYER_SENDER.match(sender.getName()), Lang.Argument.PLAYER_RECEIVER.match(args[0]), Lang.Argument.MESSAGE.match(msg)));
-                                minetasiaCore.publishTargetPlayer("core-msg","MSG_FORMAT;" + u.toString() + ";false;" + Lang.Argument.PLAYER_SENDER.name() + "\\" + sender.getName() + ";" + Lang.Argument.PLAYER_RECEIVER.name() + "\\" + args[0] + ";" + Lang.Argument.MESSAGE + "\\" + msg.replace(';', ':').replace('\\', '/'), playerStatueFix, false, true);
-                            }
-                            else sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(lang));
-                    }
-                    catch (Exception e)  // if uuid is wrong or null
+
+                    final String lastTalker = minetasiaCore.getPlayerData(((Player) sender).getUniqueId(), "last_talker", String.class);
+                    if(lastTalker == null)
                     {
                         sender.sendMessage(Lang.NO_PREVIOUS_MSG.get(lang));
+                        return;
                     }
+
+                    final String msg = concat(args, " ", 0);
+                    final String fullMsg = Lang.MSG_FORMAT.getWithoutPrefix(lang, Lang.Argument.PLAYER_SENDER.match(sender.getName()), Lang.Argument.PLAYER_RECEIVER.match(lastTalker), Lang.Argument.MESSAGE.match(msg));
+
+                    final Player player = Bukkit.getPlayer(label);
+
+                    if(player != null)
+                    {
+                        player.sendMessage(fullMsg);
+                    }
+                    else
+                    {
+                        final PlayerStatueFix playerStatueFix = minetasiaCore.getPlayerStatue(lastTalker);
+
+                        if(playerStatueFix != null)
+                        {
+                            minetasiaCore.publishTargetPlayer(CoreMessage.CHANNEL,
+                                    MsgMessage.getMessage(Lang.MSG_FORMAT, playerStatueFix.getUUID(), false,
+                                            Lang.Argument.PLAYER_SENDER.match(sender.getName()),
+                                            Lang.Argument.PLAYER_RECEIVER.match(lastTalker),
+                                            Lang.Argument.MESSAGE.match(msg))
+                                    , playerStatueFix, false, true);
+                        }
+                        else
+                        {
+                            sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(lang));
+                            return;
+                        }
+                    }
+
+                    // socialspy
+                    final String ssMsg = Lang.MSG_FORMAT_SOCIAL_SPY.getWithoutPrefix(MinetasiaLang.BASE_LANG, Lang.Argument.MESSAGE.match(fullMsg));
+                    for(Player pl : minetasiaCore.socialSpyPlayer) pl.sendMessage(ssMsg);
+                    sender.sendMessage(fullMsg);
+
                 });
             }
             else sender.sendMessage(Lang.DESC_R.get(lang));

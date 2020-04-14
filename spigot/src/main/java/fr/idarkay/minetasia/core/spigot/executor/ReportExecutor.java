@@ -152,7 +152,7 @@ public class ReportExecutor implements TabExecutor
     {
         if(commandSender.hasPermission(CommandPermission.REPORT.getPermission()) && args.length == 1)
         {
-            return this.plugin.getOnlinePlayersForTab().stream().filter(player -> player.startsWith(args[0])).collect(Collectors.toList());
+            return this.plugin.getOnlinePlayersForTab().stream().filter(player -> player.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }

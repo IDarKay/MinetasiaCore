@@ -36,10 +36,11 @@ public class PlayerManager {
         }
     }
 
-    public void newPlayer(UUID uuid, String name, String lang)
+    public MinePlayer newPlayer(UUID uuid, String name, String lang)
     {
         MinePlayer p = new MinePlayer(uuid, name);
         p.putData("lang", lang);
         p.saveNew();
+        return p;
     }
 }

@@ -3,6 +3,8 @@ package fr.idarkay.minetasia.core.spigot.executor;
 import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
+import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
+import fr.idarkay.minetasia.core.spigot.messages.MsgMessage;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import org.bukkit.Bukkit;
@@ -43,28 +45,50 @@ public class MSGExecutor implements TabExecutor {
             if(args.length > 1)
             {
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                    UUID u = plugin.getPlayerUUID(args[0]);
-                    if(u != null)
-                    {
-                        final PlayerStatueFix playerStatueFix = plugin.getPlayerStatue(u);
-                        if(playerStatueFix != null)
-                        {
-                            String msg = concat(args, " ", 1);
-                            sender.sendMessage(Lang.MSG_FORMAT.getWithoutPrefix(lang, Lang.Argument.PLAYER_SENDER.match(sender instanceof Player ? sender.getName() : "console")
-                                    , Lang.Argument.PLAYER_RECEIVER.match(args[0]), Lang.Argument.MESSAGE.match(msg)));
-                            plugin.publishTargetPlayer( "core-msg","MSG_FORMAT;" + u.toString() + ";false;" +  (sender instanceof Player ? sender.getName() : "console") + ";" + args[0] +";" + msg.replace(';', ':'), playerStatueFix, false, true);
-                            if(sender instanceof Player)
-                            {
-                                String uu = u.toString();
-                                String data = plugin.getPlayerData(((Player) sender).getUniqueId(), "last_talker").toString();
-                                if(data == null || !data.equals(uu))
-                                    plugin.setPlayerData(((Player) sender).getUniqueId(), "last_talker", uu);
-                            }
+                    final String msg = concat(args, " ", 1);
+                    final String fullMsg = Lang.MSG_FORMAT.getWithoutPrefix(lang, Lang.Argument.PLAYER_SENDER.match(sender instanceof Player ? sender.getName() : "console")
+                            , Lang.Argument.PLAYER_RECEIVER.match(args[0]), Lang.Argument.MESSAGE.match(msg));
 
-                        }
-                        else sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(lang));
+
+                    final Player receiver = Bukkit.getPlayer(args[0]);
+                    final String name;
+                    if(receiver != null) //same server
+                    {
+                        name = receiver.getName();
+                        receiver.sendMessage(fullMsg);
+
                     }
-                    else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
+                    else
+                    {
+                        final PlayerStatueFix playerStatueFix = plugin.getPlayerStatue(args[0]);
+                        if(playerStatueFix == null)
+                        {
+                            sender.sendMessage(Lang.PLAYER_NOT_ONLINE.get(lang));
+                            return;
+                        }
+                        name = playerStatueFix.getUserName();
+                        plugin.publishTargetPlayer(CoreMessage.CHANNEL,
+                                MsgMessage.getMessage(Lang.MSG_FORMAT, playerStatueFix.getUUID(), false,
+                                        Lang.Argument.PLAYER_SENDER.match(sender instanceof Player ? sender.getName() : "console"),
+                                        Lang.Argument.PLAYER_RECEIVER.match(args[0]),
+                                        Lang.Argument.MESSAGE.match(msg))
+                                , playerStatueFix, false, true);
+                    }
+
+                    if(name != null)
+                    {
+                        // socialspy
+                        final String ssMsg = Lang.MSG_FORMAT_SOCIAL_SPY.getWithoutPrefix(MinetasiaLang.BASE_LANG, Lang.Argument.MESSAGE.match(fullMsg));
+                        for(Player pl : plugin.socialSpyPlayer) pl.sendMessage(ssMsg);
+                        sender.sendMessage(fullMsg);
+
+                        if(sender instanceof Player)
+                        {
+                            final String data = plugin.getPlayerData(((Player) sender).getUniqueId(), "last_talker", String.class);
+                            if(data == null || !data.equals(name))
+                                plugin.setPlayerData(((Player) sender).getUniqueId(), "last_talker", name);
+                        }
+                    }
                 });
             }
             else sender.sendMessage(Lang.DESC_MSG.get(lang));
@@ -78,7 +102,7 @@ public class MSGExecutor implements TabExecutor {
         if(sender.hasPermission(CommandPermission.UTILS_CHAT_MSG.getPermission()))
         {
             if(args.length == 0)return plugin.getOnlinePlayersForTab();
-            else if(args.length == 1) return plugin.getOnlinePlayersForTab().stream().filter(p -> p.startsWith(args[0])).collect(Collectors.toList());
+            else if(args.length == 1) return plugin.getOnlinePlayersForTab().stream().filter(p -> p.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
             else return Collections.singletonList("<msg>");
         }
         return null;

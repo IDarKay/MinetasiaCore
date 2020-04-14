@@ -777,11 +777,49 @@ public class MinetasiaTest extends MinetasiaCoreApi
 
     }
 
+    final Map<SettingsKey<?>, MinetasiaSettings<?>> settings = new HashMap();
+
     @NotNull
     @Override
     public <T> MinetasiaSettings<T> getSettings(@NotNull SettingsKey<T> key)
     {
-        return null;
+        MinetasiaSettings<T> minetasiaSettings = (MinetasiaSettings<T>) settings.get(key);
+        if(minetasiaSettings != null) return minetasiaSettings;
+        else
+        {
+            minetasiaSettings = new MinetasiaSettings<T>()
+            {
+
+                private T value = null;
+
+                @Nullable
+                @Override
+                public T getValue()
+                {
+                    return value;
+                }
+
+                @Override
+                public void setValue(@NotNull T value)
+                {
+                    this.value = value;
+                }
+
+                @Override
+                public void setValueLocal(@NotNull T value)
+                {
+                    this.value = value;
+                }
+
+                @Override
+                public Class<T> getClazz()
+                {
+                    return key.getClazz();
+                }
+            };
+            settings.put(key, minetasiaSettings);
+            return  minetasiaSettings;
+        }
     }
 
     @Override

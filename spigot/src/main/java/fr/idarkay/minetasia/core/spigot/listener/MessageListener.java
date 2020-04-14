@@ -7,10 +7,6 @@ import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.commands.friends.FriendCommand;
 import fr.idarkay.minetasia.core.spigot.messages.*;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
-import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.normes.Args;
-import fr.idarkay.minetasia.normes.MinetasiaLang;
-import fr.idarkay.minetasia.normes.Tuple;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -28,8 +24,6 @@ import java.util.UUID;
  */
 public final class MessageListener implements Listener {
 
-
-
     private final MinetasiaCore plugin;
 
     public MessageListener(MinetasiaCore plugin)
@@ -41,6 +35,9 @@ public final class MessageListener implements Listener {
         new SettingsUpdate();
         new SanctionMessage();
         new ReportMessage();
+        new MsgMessage();
+        new BroadCastMessage();
+        new ForceDisconnectMessage();
     }
 
     @EventHandler
@@ -100,55 +97,6 @@ public final class MessageListener implements Listener {
                 }
                 break;
             }
-            case "core-msg":
-            {
-                String[] msg = e.getValue().split(";");
-                if (msg.length > 2) {
-                    try {
-                        UUID u = UUID.fromString(msg[1]);
-                        org.bukkit.entity.Player p = plugin.getServer().getPlayer(u);
-                        if(msg[0].equals(Lang.MSG_FORMAT.name()))
-                        {
-                            for(org.bukkit.entity.Player pl : plugin.socialSpyPlayer) pl.sendMessage(Lang.MSG_FORMAT_SOCIAL_SPY.getWithoutPrefix(MinetasiaLang.BASE_LANG, Lang.Argument.PLAYER_SENDER.match(msg[3])
-                                    , Lang.Argument.PLAYER_RECEIVER.match(msg[4]), Lang.Argument.MESSAGE.match(msg[5])));
-                        }
-                        if (p != null) {
-                            boolean prefix = Boolean.parseBoolean(msg[2]);
-                            String[] arg = new String[msg.length - 3];
-                            for (int i = 3; i < msg.length; i++) arg[i - 3] = msg[i];
-                            String m;
-
-                            Tuple<? extends Args, Object>[] argument = new Tuple[arg.length];
-
-                            int c = 0;
-                            for (String o : arg)
-                            {
-                                String[] split = splitInTow(o, '\\');
-                                argument[c] = Lang.Argument.valueOf(split[0]).match(split[1]);
-                                c++;
-                            }
-
-                            if(prefix)  m = Lang.valueOf(msg[0]).get(plugin.getPlayerLang(u), argument);
-                            else m = Lang.valueOf(msg[0]).getWithoutPrefix(plugin.getPlayerLang(u), argument);
-
-                            if(msg[0].equals(Lang.MSG_FORMAT.name()) && !msg[3].equals("console"))
-                            {
-                                UUID uu = plugin.getPlayerUUID(msg[3]);
-                                if(uu != null)
-                                {
-                                    final String uus = uu.toString();
-                                    final String data = plugin.getPlayerData(u, "last_talker").toString();
-                                    if(data == null || !data.equals(uus))
-                                        plugin.setPlayerData(u, "last_talker", uus);
-                                }
-                            }
-                            p.sendMessage(m);
-                        }
-                    } catch (IllegalArgumentException ignore) {
-                    }
-                }
-                break;
-            }
             case CoreMessage.CHANNEL:
             {
                 String[] split = e.getValue().split(";");
@@ -165,15 +113,4 @@ public final class MessageListener implements Listener {
         String r = result.toString();
         return r.equals("null") ? null : r;
     }
-
-    private static String[] splitInTow(String s, char spliter)
-    {
-        String[] back = new String[2];
-        int i = s.indexOf(spliter);
-        back[0] = s.substring(0, i);
-        back[1] = s.substring(i + 1);
-        return back;
-    }
-
-
 }

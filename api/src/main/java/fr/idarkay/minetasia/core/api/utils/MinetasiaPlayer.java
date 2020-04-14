@@ -109,6 +109,7 @@ public interface MinetasiaPlayer
      * @param key of the data
      * @return value or null if not found
      */
+    @Deprecated
     @Nullable Object getGeneralData(@NotNull String key);
 
     /**
@@ -117,6 +118,7 @@ public interface MinetasiaPlayer
      * @param key of the data
      * @param value value of the data set {@code null} for remove
      */
+    @Deprecated
     void putGeneralData(@NotNull String key, @Nullable Object value);
 
     /**
