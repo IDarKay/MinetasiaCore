@@ -48,6 +48,7 @@ public final class MinetasiaCoreBungee extends Plugin {
     private PlayerManager playerManager;
     private MessageServer messageServer;
     private SettingsManager settingsManager;
+    private PlayerListener playerListener;
     private static MinetasiaCoreBungee instance;
     private final List<UUID> whitelist = new ArrayList<>();
     private final List<String> maintenanceServer = new ArrayList<>();
@@ -81,7 +82,6 @@ public final class MinetasiaCoreBungee extends Plugin {
 
         mongoDBManager = new MongoDBManager(Objects.requireNonNull(configuration.getString("dbm.host")),
                 Objects.requireNonNull(configuration.getString("dbm.dbname")));
-
     }
 
     public void initClientReceiver()
@@ -172,8 +172,9 @@ public final class MinetasiaCoreBungee extends Plugin {
         if(settings.getValue() != null)
             maintenanceServer.addAll((List<String>) settings.getValue());
 
+        playerListener = new PlayerListener(this);
 
-        getProxy().getPluginManager().registerListener(this, new PlayerListener(this));
+        getProxy().getPluginManager().registerListener(this, playerListener);
         getProxy().getPluginManager().registerListener(this, new MessageListener(this));
 
         initClientReceiver();
@@ -229,5 +230,10 @@ public final class MinetasiaCoreBungee extends Plugin {
     public List<String> getMaintenanceServer()
     {
         return maintenanceServer;
+    }
+
+    public PlayerListener getPlayerListener()
+    {
+        return playerListener;
     }
 }
