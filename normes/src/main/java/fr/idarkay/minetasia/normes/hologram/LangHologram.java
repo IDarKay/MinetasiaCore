@@ -72,41 +72,34 @@ public class LangHologram extends Hologram
         super.unShowToPlayer(player);
     }
 
+    @Override
+    protected void unShowWithoutRemove(Player player)
+    {   if(isPlayerDynamicArgs)
+            playerArmorStand.remove(player.getUniqueId());
+        super.unShowWithoutRemove(player);
+    }
+
     public void updateArgs()
     {
-        langArmorStand.forEach((lang, fullEntityArmorStands) -> {
-            for (FullEntityArmorStand armorStand :  fullEntityArmorStands)
-            {
-                if(armorStand == null) continue;
-                final LangFullEntityArmorStand stand = (LangFullEntityArmorStand) armorStand;
-                if(stand.isDynamicArgs)
-                {
-                    stand.update(lang, null);
-                }
-            }
-        });
-        if(isPlayerDynamicArgs)
-        {
-            playerArmorStand.forEach((uuid, fullEntityArmorStands) -> {
-                final Player player = Bukkit.getPlayer(uuid);
-                if(player == null) return;
-                final String lang = getLangFunction.apply(player);
-                for (FullEntityArmorStand armorStand :  fullEntityArmorStands)
-                {
-                    final LangFullEntityArmorStand stand = (LangFullEntityArmorStand) armorStand;
-                    if(stand.isDynamicArgs)
-                    {
-                        stand.update(lang, player);
-                    }
-                }
-            });
-        }
         for (UUID uuid : loadPlayer)
         {
             final Player player = Bukkit.getPlayer(uuid);
             if(player == null) continue;
-            updates(player);
+            unShowWithoutRemove(player);
         }
+        loadPlayer.clear();
+        langArmorStand.clear();
+//        langArmorStand.forEach((lang, fullEntityArmorStands) -> {
+//            for (FullEntityArmorStand armorStand :  fullEntityArmorStands)
+//            {
+//                if(armorStand == null) continue;
+//                final LangFullEntityArmorStand stand = (LangFullEntityArmorStand) armorStand;
+//                if(stand.isDynamicArgs)
+//                {
+//                    stand.update(lang, null);
+//                }
+//            }
+//        });
     }
 
     @Override
@@ -148,7 +141,7 @@ public class LangHologram extends Hologram
 
     private FullEntityArmorStand[] getDefaultArmorStands(Player player)
     {
-        FullEntityArmorStand[] armorStands = langArmorStand.get(lang);
+        FullEntityArmorStand[] armorStands = langArmorStand.get(getLangFunction.apply(player));
         if(armorStands == null)
         {
             final String lang = getLangFunction.apply(player);
@@ -156,7 +149,7 @@ public class LangHologram extends Hologram
             final Location currentLocation = getCurrentLocation();
             for (int i = 0; i < this.lang.length; i++)
             {
-                if(this.lang[i] instanceof DynamicalLang && ((DynamicalLang) this.lang[i]).isOnlyServer() )
+                if(!(this.lang[i] instanceof DynamicalLang) || ((DynamicalLang) this.lang[i]).isOnlyServer() )
                 {
                     final EntityArmorStand armorStand = new EntityArmorStand(((CraftWorld)currentLocation.getWorld()).getHandle(), currentLocation.getX(), currentLocation.getY() + ((this.lang.length - i) * spacing), currentLocation.getZ());
                     armorStand.setCustomName(new TextComponent(LangHologram.this.lang[i].getWithoutPrefixPlayer(lang, player)).toChatBaseComponent());

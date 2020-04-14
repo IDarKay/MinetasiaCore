@@ -508,7 +508,6 @@ public class MinetasiaNpc
             moveAndTurn(getVector(currentLocation.clone(), l), nextLoc == null ? currentLocation.getYaw() : (float) getAngle(l, nextLoc),0);
 //            teleport(l);
             i++;
-            System.out.println(i + "      "  + locations.length);
             if(i >= locations.length)
             {
                 cancel();

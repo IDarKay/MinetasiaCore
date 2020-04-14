@@ -86,7 +86,7 @@ advancement_lang:
   - "en"
 
 # javascript regex server type load
-server_type_load: "/.*/"
+server_type_load: ".*$"
 
 # in phase Game and end add  maxPlayerCount by next number only for admin spectator
 max-player-count-add-admin: 5

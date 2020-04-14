@@ -76,7 +76,13 @@ public enum CommandPermission {
 
     ADMIN("admin.*", ALL),
     SETTINGS_EDITOR("admin.settingseditor", ADMIN),
-
+    PLAYER_DATA_ALL("admin.playerdata.*", ADMIN),
+    PLAYER_DATA("admin.playerdata", PLAYER_DATA_ALL),
+    PLAYER_GET("admin.playerdata.get", PLAYER_DATA_ALL),
+    PLAYER_EDIT("admin.playerdata.edit", PLAYER_DATA_ALL),
+    BROADCAST("admin.broadcast", ADMIN),
+    WHITELIST("admin.whitelist", ADMIN),
+    MAINTENANCE("admin.maintenance", ADMIN),
 
 
     MODERATION("moderation.*", ALL),
@@ -87,7 +93,9 @@ public enum CommandPermission {
     UN_BAN("moderation.unban", MODERATION),
     UN_MUTE("moderation.unmute", MODERATION),
     UN_WARN("moderation.unwarn", MODERATION),
-    REPORT_VIEWER("moderation.report_viewer", MODERATION)
+    REPORT_VIEWER("moderation.report_viewer", MODERATION),
+
+
     ;
 
 

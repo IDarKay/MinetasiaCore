@@ -136,7 +136,7 @@ public class MinetasiaLang {
 
         for (Tuple<? extends Args, T> arg : args)
         {
-             msg = Objects.requireNonNull(msg).replace(arg.a().toString(), arg.b().toString());
+             msg = Objects.requireNonNull(msg).replace(arg.a().getNode(), arg.b().toString());
         }
 
         return ChatColor.translateAlternateColorCodes('&', msg);

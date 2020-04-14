@@ -27,9 +27,6 @@ public enum Lang implements IMinetasiaLang {
     USER_HELP(
             "default msg"
     ),
-    STAFF_HELP(
-            "oh you are a staff for get all permission you have use /help <pages>"
-    ),
     STAFF_HELP_BORDER("&7----&8----&6---- &2Minetasia Help &c" + Argument.PAGE + " / " + Argument.MAX_PAGE + " &6----&8----&7----"),
     STAFF_HELP_FORMAT(
       "&6" + Argument.COMMAND + " &2- &7" + Argument.DESCRIPTION
@@ -69,10 +66,11 @@ public enum Lang implements IMinetasiaLang {
     ILLEGAL_TIME_UNITS                          ("&cPlease set valid time units"),
     ILLEGAL_BOOLEAN_VALUE                       ("&cPlease set valid boolean (true or false)"),
     MSG_FORMAT                                  ("&6" + Argument.PLAYER_SENDER + " &c-> " + Argument.PLAYER_RECEIVER  + " : " + Argument.MESSAGE),
-    MSG_FORMAT_SOCIAL_SPY                       ("&c[SS] &6" + Argument.PLAYER_SENDER + " &c-> " + Argument.PLAYER_RECEIVER  + " : " + Argument.MESSAGE ),
+    MSG_FORMAT_SOCIAL_SPY                       ("&c[SS] " + Argument.MESSAGE),
     SOCIAL_SPU_ON                               ("&6SocialSpy &2on"),
     SOCIAL_SPU_OFF                              ("&6SocialSpy &4off"),
     SERVER_NOT_FOUND                            ("&cServer not found"),
+    PROXY_NOT_FOUND                             ("&cProxy not found"),
     WORLD_NOT_FOUND                             ("&cWorld not found"),
     INCOMPATIBLE_CMD_TP                         ("&cYou can't tp @a to another server"),
     PLAYER_BOOST                                ("&6 " + Argument.PLAYER + " &aboost " + Argument.MONEY_TYPE + " &afor the party (" + Argument.ACTUAL_BOOST + " /" + Argument.MAX_BOOST + "%)"),
@@ -227,6 +225,35 @@ public enum Lang implements IMinetasiaLang {
     DESC_TP_USER                                ("if no second argument tp the executor to the player, else tp player to second argument"),
     DESC_TP_A                                   ("tp all player of the server (no all proxy) to second argument"),
 
+    BROADCAST_MESSAGE_SEND("&aMessage send"),
+
+    DESC_BROADCAST_ALL("<message> send a specific message to all server"),
+    DESC_BROADCAST_SERVER("<server> <message> send a specific message to specific server"),
+    DESC_BROADCAST_SERVER_MESSAGE("<message> send a specific message to specific server"),
+    DESC_BROADCAST_SERVER_TYPE("<server> <message> send a specific message to specific group of server"),
+    DESC_BROADCAST_SERVER_TYPE_MESSAGE("<message> send a specific message to specific group of server"),
+    DESC_BROADCAST_PROXY("<proxy> <message> send a specific message to specific proxy"),
+    DESC_BROADCAST_PROXY_MESSAGE("<message> send a specific message to specific proxy"),
+
+    DESC_WHITELIST_LIST("get all player in maintenance whitelist "),
+    DESC_WHITELIST_ADD("add player in maintenance whitelist"),
+    DESC_WHITELIST_REMOVE("remove player in maintenance whitelist"),
+
+    WHITELIST_LIST("&aPlayer in whitelist: " + Argument.PLAYERS),
+    WHITELIST_ADD("&aYou have add " + Argument.PLAYERS + " from the whitelist"),
+    WHITELIST_REMOVE_GOOD("&aYou have remove " + Argument.PLAYERS + " from the whitelist"),
+    WHITELIST_REMOVE_FAIL("&a" + Argument.PLAYERS + " is not in the whitelist"),
+
+    DESC_MAINTENANCE_ALL("set on / off maintenance for all servers"),
+    DESC_MAINTENANCE_ALL_OFF("turn off maintenance for all servers"),
+    DESC_MAINTENANCE_ALL_ON("<disconnect> turn on maintenance for all servers with disconnect option"),
+    DESC_MAINTENANCE_SERVER_TYPE("turn on / off maintenance for specific type of servers"),
+
+    MAINTENANCE_ENABLE("&aEnable maintenance for " + Argument.SERVER_TYPE + " servers"),
+    MAINTENANCE_DISABLE("&aDisable maintenance for " + Argument.SERVER_TYPE + " servers"),
+    MAINTENANCE("&aMinetasia@@ &cSorry the server is on maintenance !@@retry later !"),
+
+
     BAN_FORMAT("&c&lYou are banned by " + Argument.PLAYER + "@@&c for the reason : " + Argument.REASON + "@@&c for " + Argument.TIME),
     MUTE_FORMAT("&c&lYou are muted by " + Argument.PLAYER + "&c for the reason : " + Argument.REASON + "&c for " + Argument.TIME),
     WARN_FORMAT("&c&lYou are warned by " + Argument.PLAYER + "&c for the reason : " + Argument.REASON + "&c for " + Argument.TIME),
@@ -245,6 +272,11 @@ public enum Lang implements IMinetasiaLang {
     DESC_PARTY_KICK("<player> kick a player from your party"),
     DESC_MAKER_LEADER("<player> set the new owner of the group"),
     DESC_HELP("get information about access command "),
+
+    DESC_PLAYER_DATA_PLAYER("manage player"),
+    DESC_PLAYER_DATA_PLAYER_GET("get a player data"),
+    DESC_PLAYER_DATA_PLAYER_SET("<value> set a player data"),
+    DESC_PLAYER_DATA_PLAYER_REMOVE("remove a player data"),
 
     LIST_PLAYER_HEADER("&3>>>&a&lMine&6&lTasia&r&3<<<@@" +
             "@@" +
@@ -297,7 +329,13 @@ public enum Lang implements IMinetasiaLang {
             "&f&lLeft-Click: &d&lOpen filter@@" +
             "&f&lRight-Click: &d&lReset@@"),
 
-    SANCTION_SIGN_FILTER_CONTENT(">@@enter sanction@@name filter@@---------------")
+    SANCTION_SIGN_FILTER_CONTENT(">@@enter sanction@@name filter@@---------------"),
+
+    PLAYER_DATA_INVALID_KEY("&cThe have'nt this data"),
+    PLAYER_DATA_REMOVE("&aData removed !"),
+    PLAYER_DATA_SET("&aData set !"),
+    PLAYER_DATA_SET_NO_VALUE("&cPlease set value"),
+    PLAYER_DATA_GET("&aThe value of the data is " + Argument.VALUE),
 
     ;
 
@@ -351,7 +389,7 @@ public enum Lang implements IMinetasiaLang {
     {
         PLAYER, PLAYER_SENDER, PLAYER_RECEIVER, MESSAGE, LANG, MONEY_TYPE, ACTUAL_BOOST, MAX_BOOST, SERVER_TYPE, REWARDS, AMOUNT, GROUP_NAME, PERMISSION_NAME,
         DISPLAY, VALUE, NUMBER, GROUP_PARENT, BOOST_VALUE, BOOST_TYPE, MEMBERS, TIME, MS, IP, COMMAND, DESCRIPTION, PAGE, MAX_PAGE, SETTINGS, REASON, REPETITION,
-        SANCTION_TYPE, CHALLENGE, REPORT_TYPE, DATE, STATUS, GENERIC_REASON, TARGET, ARGUMENT
+        SANCTION_TYPE, CHALLENGE, REPORT_TYPE, DATE, STATUS, GENERIC_REASON, TARGET, ARGUMENT, PLAYERS
         ;
 
         String node;

@@ -42,7 +42,7 @@ public class TranslatableComponent extends BaseComponent
      */
     public static TranslatableComponent getTranslatableComponentForItem(Material material)
     {
-        return new TranslatableComponent((material.isBlock() ? "block." : "item.") + "minecraft."  + material.name().toLowerCase().replace('_', '.'));
+        return new TranslatableComponent((material.isBlock() ? "block." : "item.") + "minecraft."  + material.name().toLowerCase());
     }
 
     /**

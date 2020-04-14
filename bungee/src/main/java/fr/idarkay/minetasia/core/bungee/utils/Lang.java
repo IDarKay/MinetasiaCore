@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 public enum Lang
 {
     BAN_FORMAT("&c&lBanned by {player}@@&cReason : {reason}@@&cFor {time}"),
+    MAINTENANCE("&aMinetasia@@ &cSorry the server is on maintenance !@@retry later !"),
+    IN_GAME_MAINTENANCE("&aSorry this server is on maintenance !")
     ;
 
    private static Configuration config;
