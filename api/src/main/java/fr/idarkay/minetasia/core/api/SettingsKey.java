@@ -23,8 +23,9 @@ public final class SettingsKey<T>
     public static final SettingsKey<List> MOTD = new SettingsKey<>("MOTD", List.class);
     public static final SettingsKey<List> ANNOUNCE_BOSS_BAR = new SettingsKey<>("ANNOUNCE_BOSS_BAR", List.class);
     public static final SettingsKey<List> SANCTION = new SettingsKey<>("SANCTION", List.class);
-
-
+    public static final SettingsKey<List> WHITELIST = new SettingsKey<>("WHITELIST", List.class);
+    public static final SettingsKey<List> HUB_JUMP_LEADER_BOARD = new SettingsKey<>("HUB_JUMP_LEADER_BOARD", List.class);
+    public static final SettingsKey<List> MAINTENANCE = new SettingsKey<>("MAINTENANCE", List.class);
 
 
     private final int hash;

@@ -97,10 +97,6 @@ public class Help extends Command
         {
             sender.sendMessage(s);
         }
-        if(sender.hasPermission(CommandPermission.HELP_STAFF.getPermission()))
-        {
-            sender.sendMessage(Lang.STAFF_HELP.getWithoutPrefix(lang));
-        }
     }
 
     /**

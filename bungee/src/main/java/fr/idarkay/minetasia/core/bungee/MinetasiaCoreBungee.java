@@ -6,6 +6,9 @@ import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.core.bungee.event.MessageEvent;
 import fr.idarkay.minetasia.core.bungee.listener.MessageListener;
 import fr.idarkay.minetasia.core.bungee.listener.PlayerListener;
+import fr.idarkay.minetasia.core.bungee.settings.Settings;
+import fr.idarkay.minetasia.core.bungee.settings.SettingsKey;
+import fr.idarkay.minetasia.core.bungee.settings.SettingsManager;
 import fr.idarkay.minetasia.core.bungee.utils.Lang;
 import fr.idarkay.minetasia.core.bungee.utils.MongoDBManager;
 import fr.idarkay.minetasia.core.bungee.utils.proxy.ProxyManager;
@@ -17,8 +20,11 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
+import org.bson.Document;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Function;
@@ -41,7 +47,11 @@ public final class MinetasiaCoreBungee extends Plugin {
     private ProxyManager proxyManager;
     private PlayerManager playerManager;
     private MessageServer messageServer;
+    private SettingsManager settingsManager;
     private static MinetasiaCoreBungee instance;
+    private final List<UUID> whitelist = new ArrayList<>();
+    private final List<String> maintenanceServer = new ArrayList<>();
+    private boolean globalMaintenance = false;
 
     @Override
     public void onLoad() {
@@ -152,6 +162,16 @@ public final class MinetasiaCoreBungee extends Plugin {
         proxyManager = new ProxyManager(this);
         proxyManager.init();
         playerManager = new PlayerManager(this);
+        settingsManager = new SettingsManager(this);
+
+        Settings<List> settings = settingsManager.getSettings(SettingsKey.WHITELIST);
+        if(settings.getValue() != null)
+            whitelist.addAll(((List<Document>) settings.getValue()).stream().map(document -> UUID.fromString(document.getString("uuid"))).collect(Collectors.toList()));
+
+        settings = settingsManager.getSettings(SettingsKey.MAINTENANCE);
+        if(settings.getValue() != null)
+            maintenanceServer.addAll((List<String>) settings.getValue());
+
 
         getProxy().getPluginManager().registerListener(this, new PlayerListener(this));
         getProxy().getPluginManager().registerListener(this, new MessageListener(this));
@@ -196,4 +216,18 @@ public final class MinetasiaCoreBungee extends Plugin {
         return instance;
     }
 
+    public SettingsManager getSettingsManager()
+    {
+        return settingsManager;
+    }
+
+    public List<UUID> getWhitelist()
+    {
+        return whitelist;
+    }
+
+    public List<String> getMaintenanceServer()
+    {
+        return maintenanceServer;
+    }
 }

@@ -293,15 +293,18 @@ public class MinetasiaAdvancement implements MinetasiaBaseAdvancement
                     {
                         datapacks.mkdirs();
                         final File pack = new File(datapacks, "pack.mcmeta");
-                        FileWriter writer = new FileWriter(pack);
                         final JsonObject mcmeta = new JsonObject();
                         final JsonObject p = new JsonObject();
                         p.addProperty("description", "Data pack form custom advancement of Minetasia");
                         p.addProperty("pack_format", 1);
                         mcmeta.add("pack", p);
-                        writer.write(gson.toJson(mcmeta));
-                        writer.flush();
-                        writer.close();
+
+                        try (FileWriter writer = new FileWriter(pack))
+                        {
+                            writer.write(gson.toJson(mcmeta));
+                            writer.flush();
+                        }
+
                     } catch (IOException e)
                     {
                         e.printStackTrace();

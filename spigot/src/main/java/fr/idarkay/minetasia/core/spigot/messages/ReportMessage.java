@@ -14,8 +14,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 /**
  * File <b>ReportMessage</b> located on fr.idarkay.minetasia.core.spigot.messages
  * ReportMessage is a part of MinetasiaCore.
@@ -36,11 +34,8 @@ public class ReportMessage extends CoreMessage
     @Override
     public void actionOnGet(MinetasiaCore plugin, String... args)
     {
-        System.out.println(Arrays.toString(args));
         String arg = GeneralUtils.concat(args, " ", 4);
-        System.out.println(arg);;
         arg = arg.isEmpty() ? "" : "[" + arg + "]";
-        System.out.println(arg);
 
         final Tuple<? extends Args, Object>[] argument = new Tuple[] {
                 Lang.Argument.PLAYER.match(args[1]),
@@ -66,7 +61,7 @@ public class ReportMessage extends CoreMessage
     public static @NotNull String getMessage(@NotNull String sender, @NotNull String targetName, @NotNull String reportType, @NotNull String... args)
     {
         Validate.noNullElements(args);
-        return CoreMessage.getMessage(getIdentifier(),  sender, targetName, reportType,  (Object[]) args);
+        return CoreMessage.getMessage(getIdentifier(), GeneralUtils.concat(new Object[]{sender, targetName, reportType},  (Object[]) args));
     }
 
     public static @NotNull String getIdentifier()

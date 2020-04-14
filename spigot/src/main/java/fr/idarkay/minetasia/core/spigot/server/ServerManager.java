@@ -40,7 +40,7 @@ public final class ServerManager {
         this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(), plugin.getServerConfig());
         servers.put(server.getName(), server);
 
-        plugin.getMongoDbManager().getCollection(MongoCollections.SERVERS).find(Filters.regex("_id", Objects.requireNonNull(plugin.getConfig().getString("server_type_load")))).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
+        plugin.getMongoDbManager().getCollection(MongoCollections.SERVERS).find(Filters.regex("type", Objects.requireNonNull(plugin.getConfig().getString("server_type_load")))).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
     }
 
     private boolean register = false;
@@ -67,8 +67,18 @@ public final class ServerManager {
     public void disable()
     {
         plugin.getMongoDbManager().delete(MongoCollections.SERVERS, server.getName());
-        plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
-        plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
+        if(server.getType().equalsIgnoreCase("hub"))
+        {
+            plugin.publishGlobal(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true, true);
+        }
+        else
+        {
+            plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
+            plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
+        }
+        register = true;
+
+
     }
 
     public MineServer getServer()

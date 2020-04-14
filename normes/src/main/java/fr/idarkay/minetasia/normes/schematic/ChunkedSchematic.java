@@ -1,16 +1,13 @@
 package fr.idarkay.minetasia.normes.schematic;
 
-import fr.idarkay.minetasia.normes.Direction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * File <b>ChunkedSchematic</b> located on fr.idarkay.minetasia.normes.schematic
@@ -31,14 +28,9 @@ public class ChunkedSchematic
     public ChunkedSchematic(Schematic schematic, Location location)
     {
         this.schematic = schematic;
-        System.out.println(location);
         this.min = new ChunkLocation(location);
-        System.out.println(new Location(null, schematic.getLength(), schematic.getHeight(), schematic.getWidth()).add(location));
         this.max = new ChunkLocation(new Location(null, schematic.getLength(), schematic.getHeight(), schematic.getWidth()).add(location));
         min.sort(max);
-        System.out.println(min);
-        System.out.println(max);
-        System.out.println(schematic.getLength() * schematic.getHeight() * schematic.getWidth());
     }
 
     public boolean isInclude(int cx, int cz)

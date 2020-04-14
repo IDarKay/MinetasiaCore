@@ -2,10 +2,3 @@ name: MinetasiaCoreBungee
 main: fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee
 version: @version@
 prefix: MinetasiaCoreBungee
-commands:
-  #todo : whitelist
-  whitelist:
-    description: manage whitilist
-  #todo: maintenance
-  maintenance:
-    description: manage maintenance

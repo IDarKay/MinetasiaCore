@@ -19,6 +19,7 @@ import fr.idarkay.minetasia.core.spigot.utils.JSONUtils;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import fr.idarkay.minetasia.normes.Tuple;
 import fr.idarkay.minetasia.normes.utils.BukkitUtils;
+import org.apache.commons.lang.IllegalClassException;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
 import org.bukkit.Bukkit;
@@ -386,7 +387,41 @@ public class MinePlayer implements MinetasiaPlayer
     public @Nullable Object getData(@NotNull String key)
     {
         Validate.notNull(key);
-        return data.get(key);
+        try
+        {
+            final String[] split = key.split("\\.");
+            Document current = null;
+            for (int i = 0; i < split.length; i++)
+            {
+                if(i != split.length - 1)
+                {
+                    if(current == null)
+                    {
+                        current = (Document) data.get(split[i]);
+                    }
+                    else
+                    {
+                        current = current.get(split[i], Document.class);
+                    }
+                    if(current == null) return null;
+                }
+                else
+                {
+                    return  current == null ? data.get(split[i]) : current.get(split[i]);
+                }
+            }
+            return data.get(key);
+        }
+        catch (IllegalClassException ignore)
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
     @Override
@@ -395,7 +430,7 @@ public class MinePlayer implements MinetasiaPlayer
         Validate.notNull(key);
         Validate.notNull(clazz);
         final Object value = data.get(key);
-        if(value == null) return  null;
+        if(value == null) return null;
         return clazz.cast(value);
     }
 
@@ -430,19 +465,87 @@ public class MinePlayer implements MinetasiaPlayer
         Validate.notNull(key);
         if(validateNotCache(PlayerMessage.ActionType.PUT_CUSTOM_DATA, key, value))
         {
-            if(value == null)
+            final String[] split = key.split("\\.");
+            Document current = null;
+            if (value == null)
             {
+                for (int i = 0; i < split.length; i++)
+                {
+                    if(i != split.length - 1)
+                    {
+                        if(current == null)
+                        {
+                            current = (Document) data.get(split[i]);
+                        }
+                        else
+                        {
+                            current = current.get(split[i], Document.class);
+                        }
+                        if(current == null) return;
+                    }
+                    else
+                    {
+                        if ((current == null ? data.remove(split[i]) : current.remove(split[i])) == null) return;
+                        unset("data." + key);
+                        return;
+                    }
+                }
                 if(data.remove(key) == null) return;
                 unset("data." + key);
+                return;
             }
             else
             {
+                for (int i = 0; i < split.length; i++)
+                {
+                    if(i != split.length - 1)
+                    {
+                        if(current == null)
+                        {
+                            if(!data.containsKey(split[i]))
+                            {
+                                current = new Document();
+                                data.put(split[i], current);
+                            }
+                            else
+                            {
+                                current = (Document) data.get(split[i]);
+                            }
+                        }
+                        else
+                        {
+                            if(!current.containsKey(split[i]))
+                            {
+                                final Document tmp = new Document();
+                                current.put(split[i], tmp);
+                                current = tmp;
+                            }
+                            else
+                            {
+                                current = current.get(split[i], Document.class);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(current == null)
+                        {
+                            data.put(split[i], value);
+                        }
+                        else
+                        {
+                            current.append(split[i], value);
+                        }
+                        set("data." + key, value);
+                        return;
+                    }
+                }
                 data.put(key, value);
                 set("data." + key, value);
             }
-
         }
     }
+
 
     @Override
     public @NotNull PlayerStats getStats()
@@ -466,7 +569,7 @@ public class MinePlayer implements MinetasiaPlayer
     @Override
     public long getStatus()
     {
-        return (long) data.getOrDefault("statue", 0L);
+        return (long) data.getOrDefault("status", 0L);
     }
 
     @Override

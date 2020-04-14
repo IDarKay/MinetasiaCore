@@ -107,7 +107,7 @@ public class SanctionCommand implements TabExecutor
             }
             else if(args.length == 1)
             {
-                return core.getOnlinePlayersForTab().stream().filter(player -> player.startsWith(args[0])).collect(Collectors.toList());
+                return core.getOnlinePlayersForTab().stream().filter(player -> player.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
             }
             else if(args.length == 2)
             {

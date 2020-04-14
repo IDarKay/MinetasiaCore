@@ -7,12 +7,16 @@ import fr.idarkay.minetasia.core.spigot.command.abstraction.Command;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.FixCommand;
 import fr.idarkay.minetasia.core.spigot.command.abstraction.FlexibleCommand;
 import fr.idarkay.minetasia.core.spigot.commands.NoPermissionCommand;
+import fr.idarkay.minetasia.core.spigot.commands.broadcast.BroadcastCommand;
 import fr.idarkay.minetasia.core.spigot.commands.friends.FriendCommand;
+import fr.idarkay.minetasia.core.spigot.commands.maintenance.MaintenanceCommand;
 import fr.idarkay.minetasia.core.spigot.commands.miscellaneous.Help;
 import fr.idarkay.minetasia.core.spigot.commands.money.MoneyCommand;
 import fr.idarkay.minetasia.core.spigot.commands.party.PartyCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.PermissionCommand;
+import fr.idarkay.minetasia.core.spigot.commands.playerdata.PlayerDataCommand;
 import fr.idarkay.minetasia.core.spigot.commands.tp.TpCommand;
+import fr.idarkay.minetasia.core.spigot.commands.whitelist.WhitelistCommand;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -40,6 +44,10 @@ public class CommandManager {
                 .add(new PartyCommand(plugin))
                 .add(new Help(plugin))
                 .add(new FriendCommand(plugin))
+                .add(new PlayerDataCommand(plugin))
+                .add(new BroadcastCommand(plugin))
+                .add(new WhitelistCommand(plugin))
+                .add(new MaintenanceCommand(plugin))
                 .build();
         np = new NoPermissionCommand(plugin);
     }

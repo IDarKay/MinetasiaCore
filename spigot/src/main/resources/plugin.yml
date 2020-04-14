@@ -57,6 +57,16 @@ commands:
     description: auto sanction a player
   report:
     description: plaer cmd report a player
+  playerdata:
+    description: mange player data
+  broadcast:
+    aliases: [bc]
+    description: send message to one or more server
+  whitelist:
+    description: manage whitilist
+  maintenance:
+    description: manage maintenance
+
 
 
 
