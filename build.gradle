@@ -57,6 +57,11 @@ allprojects {
             url = 'http://maven.enginehub.org/repo/'
         }
         maven {
+            name =  'CodeMC'
+            url = 'https://repo.codemc.org/repository/maven-public'
+        }
+        maven { url 'https://jitpack.io' }
+        maven {
             url "${artifactory_contextUrl}/${artifactory_repo}"
             credentials {
                 username = "${artifactory_user}"
@@ -69,6 +74,7 @@ allprojects {
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         compile group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
+
     }
 
 

@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.normes;
 
+import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
 import fr.idarkay.minetasia.normes.Listener.PlayerPacketListener;
 import fr.idarkay.minetasia.normes.Listener.PlayerQuitListener;
 import fr.idarkay.minetasia.normes.books.MinetasiaBook;
@@ -45,6 +46,8 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
     private volatile static boolean playerPacketComingEventRegister = false;
     private volatile static boolean isEnable;
 
+    private final NoteBlockAPI noteBlockAPI = new NoteBlockAPI();
+
     @Override
     public void onEnable()
     {
@@ -56,7 +59,15 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
             isEnable = true;
             registerPlayerPacketComingEvent();
+            NoteBlockAPI.setJavaPlugin(this);
+            noteBlockAPI.onEnable();
         }
+    }
+
+    @Override
+    public void onDisable()
+    {
+        noteBlockAPI.onDisable();
     }
 
     public void registerPlayerPacketComingEvent()

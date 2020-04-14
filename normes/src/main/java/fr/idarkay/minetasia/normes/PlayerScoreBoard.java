@@ -31,7 +31,7 @@ public class PlayerScoreBoard
     protected final UUID player;
     private final HashMap<Integer, String> lines = new HashMap<>();
     private String display;
-    private boolean load = true;
+    private boolean load = false;
 
     public PlayerScoreBoard(Player player, String display)
     {
@@ -49,6 +49,9 @@ public class PlayerScoreBoard
         {
             Reflection.sendPacket(player, getEditDisplayPacket(0, display));
             Reflection.sendPacket(player, getShowPacket());
+            lines.forEach((key, value) -> {
+                Reflection.sendPacket(player, new PacketPlayOutScoreboardScore(ScoreboardServer.Action.CHANGE, player.getName(), value, key));
+            });
         } catch (Exception e)
         {
             e.printStackTrace();

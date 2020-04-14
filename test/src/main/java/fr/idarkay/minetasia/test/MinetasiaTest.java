@@ -144,6 +144,8 @@ public class MinetasiaTest extends MinetasiaCoreApi
             return  server.getServerPhase().ordinal() - getServerPhase().ordinal();
         }
 
+
+
     };
 
     private final static String LOG_PREFIX = "[Minetasia-Core-test]";

@@ -7,10 +7,14 @@ import com.mongodb.client.model.Updates;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
 import fr.idarkay.minetasia.core.bungee.MinetasiaCoreBungee;
 import fr.idarkay.minetasia.core.bungee.MongoCollections;
+import fr.idarkay.minetasia.core.bungee.settings.Settings;
+import fr.idarkay.minetasia.core.bungee.settings.SettingsKey;
 import fr.idarkay.minetasia.core.bungee.utils.Lang;
 import fr.idarkay.minetasia.core.bungee.utils.user.MinePlayer;
 import fr.idarkay.minetasia.core.bungee.utils.user.PlayerSanction;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
+import net.md_5.bungee.api.ServerPing;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.*;
@@ -40,10 +44,19 @@ public final class PlayerListener implements Listener {
 
     private MinetasiaCoreBungee plugin;
     private DatabaseReader reader;
+    private BaseComponent MOTD;
+
+
+    public void setMOTD(String motd)
+    {
+        MOTD = new TextComponent(TextComponent.fromLegacyText(motd.replace("\\n", "\n")));
+    }
 
     public PlayerListener(MinetasiaCoreBungee plugin)
     {
         this.plugin = plugin;
+        final Settings<String> settings = plugin.getSettingsManager().getSettings(SettingsKey.MOTD);
+        setMOTD(settings.getValue() == null ? " " : settings.getValue());
         try {
             File countryFile = new File(plugin.getDataFolder(), "data/GeoLite2-Country.mmdb");
             if(!countryFile.exists()) System.out.println("fil not found");
@@ -51,6 +64,25 @@ public final class PlayerListener implements Listener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @EventHandler
+    public void onPreLogEvent(ProxyPingEvent event)
+    {
+        if (event.getResponse() == null) return; // Check if response is not empty
+
+
+
+        final ServerPing ping = event.getResponse();
+        final ServerPing.Players players = ping.getPlayers();
+        final ServerPing.Protocol version = ping.getVersion();
+
+        ping.setVersion(new ServerPing.Protocol("Minetasia", 578));
+        ping.setDescriptionComponent(MOTD);
+//        final int onlineCount = plugin.getProxy().getOnlineCount();
+//        ping.setPlayers(new ServerPing.Players(onlineCount + 1, onlineCount, ));
+
+
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

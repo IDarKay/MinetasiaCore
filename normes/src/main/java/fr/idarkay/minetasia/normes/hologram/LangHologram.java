@@ -151,7 +151,7 @@ public class LangHologram extends Hologram
             {
                 if(!(this.lang[i] instanceof DynamicalLang) || ((DynamicalLang) this.lang[i]).isOnlyServer() )
                 {
-                    final EntityArmorStand armorStand = new EntityArmorStand(((CraftWorld)currentLocation.getWorld()).getHandle(), currentLocation.getX(), currentLocation.getY() + ((this.lang.length - i) * spacing), currentLocation.getZ());
+                    final EntityArmorStand armorStand = new EntityArmorStand(((CraftWorld)currentLocation.getWorld()).getHandle(), currentLocation.getX(), currentLocation.getY() + ((this.lang.length - i + 1) * spacing), currentLocation.getZ());
                     armorStand.setCustomName(new TextComponent(LangHologram.this.lang[i].getWithoutPrefixPlayer(lang, player)).toChatBaseComponent());
                     armorStands[i] = new LangFullEntityArmorStand(armorStand, this.lang[i]);
                 }
