@@ -20,7 +20,7 @@ public final class SettingsKey<T>
 {
     private static final List<SettingsKey<?>> value = new ArrayList<>();
 
-    public static final SettingsKey<List> MOTD = new SettingsKey<>("MOTD", List.class);
+    public static final SettingsKey<String> MOTD = new SettingsKey<>("MOTD", String.class);
     public static final SettingsKey<List> WHITELIST = new SettingsKey<>("WHITELIST", List.class);
     public static final SettingsKey<List> MAINTENANCE = new SettingsKey<>("MAINTENANCE", List.class);
 

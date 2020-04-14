@@ -75,8 +75,7 @@ chat_char: ' > '
 ip: "play.minetasia.com"
 
 # kit to load set * to first for all else the name of the plugin
-kits_load:
-  - '*'
+kits_load_regex: ".*$"
 
 # advancement to load (regex) : set .* for all for sbb and minekarttour set ((sbb.*)|(minekarttour.*))
 advancement_load: ".*"

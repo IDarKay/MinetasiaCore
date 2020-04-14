@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.spigot.kits;
 
+import com.mongodb.client.model.Filters;
 import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.MainKit;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
@@ -23,15 +24,15 @@ public class KitsManager {
 
     public KitsManager(MinetasiaCore plugin)
     {
-        final List<String> filter = plugin.getConfig().getStringList("kits_load");
-        boolean all = filter.size() > 0 && filter.get(0).equals("*");
+//        final List<String> filter = plugin.getConfig().getStringList("kits_load");
+//        boolean all = filter.size() > 0 && filter.get(0).equals("*");
 
-        for(final Document d : plugin.getMongoDbManager().getAll(MongoCollections.KITS))
+        for(final Document d : plugin.getMongoDbManager().getCollection(MongoCollections.KITS).find(Filters.regex("_id", plugin.getConfig().getString("kits_load_regex", ".*"))))
         {
-            if(all || validate(d.getString("_id"), filter))
-            {
+//            if(all || validate(d.getString("_id"), filter))
+//            {
                 kits.put(d.getString("_id"), new KitMain(d, plugin));
-            }
+//            }
         }
     }
 
@@ -40,13 +41,13 @@ public class KitsManager {
         return kits;
     }
 
-    private boolean validate(String name, List<String> filter)
-    {
-        for(String f : filter)
-        {
-            if(name.startsWith(f)) return true;
-        }
-        return false;
-    }
+//    private boolean validate(String name, List<String> filter)
+//    {
+//        for(String f : filter)
+//        {
+//            if(name.startsWith(f)) return true;
+//        }
+//        return false;
+//    }
 
 }

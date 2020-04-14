@@ -197,7 +197,7 @@ public class MinetasiaNpc
 
         if(hologram != null)
         {
-            hologram.spawn(location.clone().add(0, 2, 0));
+            hologram.spawn(location.clone().add(0, 1.7, 0));
         }
     }
 
