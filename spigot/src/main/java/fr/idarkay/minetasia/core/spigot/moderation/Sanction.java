@@ -33,7 +33,6 @@ public class Sanction
         this.genericName = Objects.requireNonNull(document.getString("generic_name"), "no generic name in on sanction");
         final Document msg = Objects.requireNonNull(document.get("message", Document.class), "no message set in sanction : " + genericName);
         this.message = new Message(msg.getString("key"), msg.getString("default"));
-        System.out.println(document.toJson());
         this.sanctions = document.getList("sanction", Document.class).stream().map(RepetitionSanction::new).sorted().toArray(RepetitionSanction[]::new);
     }
 

@@ -66,6 +66,7 @@ public class PlayerMessage extends CoreMessage
         ADD_FRIENDS((plugin, args) -> plugin.addFriend(UUID.fromString(args[1]), UUID.fromString(args[3]))),
         REMOVE_FRIENDS((plugin, args) -> plugin.removeFriend(UUID.fromString(args[1]), UUID.fromString(args[3]))),
 
+        @Deprecated
         PUT_GENERAL_DATA((plugin, args) -> plugin.getPlayer(UUID.fromString(args[1])).putGeneralData(args[3], args[4])),
         PUT_CUSTOM_DATA((plugin, args) -> plugin.getPlayer(UUID.fromString(args[1])).putData(args[3], args[4])),
 

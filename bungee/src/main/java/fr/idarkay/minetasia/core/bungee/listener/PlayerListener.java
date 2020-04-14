@@ -13,9 +13,7 @@ import fr.idarkay.minetasia.core.bungee.utils.user.PlayerSanction;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
-import net.md_5.bungee.api.event.LoginEvent;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
+import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -80,7 +78,7 @@ public final class PlayerListener implements Listener {
             try{
                 final PendingConnection proxiedPlayer = e.getConnection();
                 final UUID uuid = proxiedPlayer.getUniqueId();
-                final MinePlayer player = plugin.getPlayerManager().get(uuid);
+                MinePlayer player = plugin.getPlayerManager().get(uuid);
                 if(player != null)
                 {
                     String name;
@@ -101,9 +99,9 @@ public final class PlayerListener implements Listener {
                                     .replace("{reason}", playerSanction.reason)
                                     .replace("{time}", timeUnit.convert(reaming, TimeUnit.MILLISECONDS) + " " + timeUnit.name().toLowerCase())
                                     .replace("@@", "\n");
-                            System.out.println("le msg " + msg);
                             e.setCancelled(true);
                             e.setCancelReason(TextComponent.fromLegacyText(msg));
+                            return;
                         }
                     }
                 }
@@ -119,7 +117,15 @@ public final class PlayerListener implements Listener {
                         c = MinetasiaLang.BASE_LANG;
                     }
 
-                    plugin.getPlayerManager().newPlayer(uuid, proxiedPlayer.getName(), c);
+                    player = plugin.getPlayerManager().newPlayer(uuid, proxiedPlayer.getName(), c);
+                }
+
+                if((plugin.getMaintenanceServer().contains("all") || plugin.getMaintenanceServer().contains("hub")) && !plugin.getWhitelist().contains(player.getUUID()))
+                {
+                    final String msg = Lang.MAINTENANCE.getMessage(player.getLang()).replace("@@", "\n");
+                    e.setCancelled(true);
+                    e.setCancelReason(TextComponent.fromLegacyText(msg));
+                    return;
                 }
 
                 final String proxyName = plugin.getProxyManager().getProxy().getUuid().toString();
@@ -156,7 +162,6 @@ public final class PlayerListener implements Listener {
             {
                 try
                 {
-
                     final Document se = d.getList("server", Document.class).get(0);
                     final String ip = se.getString("ip");
                     final int port = se.getInteger("port");
@@ -191,6 +196,25 @@ public final class PlayerListener implements Listener {
                 );
             }
         });
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onServerSwitchEvent(ServerConnectEvent e)
+    {
+        final String server_type = e.getTarget().getName().split("#")[0];
+        if(plugin.getMaintenanceServer().contains(server_type) &&  !plugin.getWhitelist().contains(e.getPlayer().getUniqueId()))
+        {
+            if(e.getPlayer().getServer().getInfo().getName().split("#")[0].equals("hub"))
+            {
+                e.setCancelled(true);
+                plugin.getProxy().getScheduler().runAsync(plugin, () -> e.getPlayer().sendMessage(TextComponent.fromLegacyText(Lang.IN_GAME_MAINTENANCE.getMessage(plugin.getPlayerManager().get(e.getPlayer().getUniqueId()).getLang()))));
+            }
+            else
+            {
+                e.setCancelled(true);
+                plugin.getProxy().getScheduler().runAsync(plugin, () -> e.getPlayer().disconnect(TextComponent.fromLegacyText(Lang.MAINTENANCE.getMessage(plugin.getPlayerManager().get(e.getPlayer().getUniqueId()).getLang()))));
+            }
+        }
     }
 
     private TimeUnit getBiggerTimeUnit(long time)

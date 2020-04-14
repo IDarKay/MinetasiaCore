@@ -3,12 +3,7 @@ package fr.idarkay.minetasia.normes.hologram;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.utils.NMSUtils;
-import net.minecraft.server.v1_15_R1.EntityArmorStand;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntity;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityTeleport;
-import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntityLiving;
+import net.minecraft.server.v1_15_R1.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -54,7 +49,7 @@ public abstract class Hologram
     {
         Validate.isTrue(location.getWorld() != null, "can't spawn hologram no world set");
         loadHolograms.add(this);
-        this.currentLocation = location;
+        this.currentLocation = location.clone();
         if(!isRunnable)
         {
             runnable.runTaskTimerAsynchronously(plugin, 10L, 20L);
@@ -116,6 +111,19 @@ public abstract class Hologram
         final int[] value = new int[armorStands.length];
         for (int i = 0; i < armorStands.length; i++)
         {
+//            Reflection.sendPacket(player, new PacketPlayOutEntityDestroy(armorStands[i].armorStand.getId()));
+            value[i] = armorStands[i].armorStand.getId();
+        }
+        Reflection.sendPacket(player, new PacketPlayOutEntityDestroy(value));
+    }
+
+    protected void unShowWithoutRemove(Player player)
+    {
+        final FullEntityArmorStand[] armorStands = getArmorStands(player);
+        final int[] value = new int[armorStands.length];
+        for (int i = 0; i < armorStands.length; i++)
+        {
+//            Reflection.sendPacket(player, new PacketPlayOutEntityDestroy(armorStands[i].armorStand.getId()));
             value[i] = armorStands[i].armorStand.getId();
         }
         Reflection.sendPacket(player, new PacketPlayOutEntityDestroy(value));
@@ -127,6 +135,7 @@ public abstract class Hologram
         loadPlayer.add(player.getUniqueId());
         for (FullEntityArmorStand armorStand : getArmorStands(player))
         {
+            Validate.isTrue(armorStand != null);
             Reflection.sendPacket(player, new PacketPlayOutSpawnEntityLiving(armorStand.armorStand));
             Reflection.sendPacket(player, armorStand.packetPlayOutEntityMetadata);
         }

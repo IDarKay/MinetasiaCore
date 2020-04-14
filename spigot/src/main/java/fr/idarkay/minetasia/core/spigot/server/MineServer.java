@@ -3,7 +3,6 @@ package fr.idarkay.minetasia.core.spigot.server;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.idarkay.minetasia.core.api.ServerPhase;
-import fr.idarkay.minetasia.core.api.utils.Server;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -166,7 +165,6 @@ public final class MineServer implements fr.idarkay.minetasia.core.api.utils.Ser
         server.addProperty("server_config", serverConfig);
         server.addProperty("phase", serverPhase.ordinal());
         server.addProperty("max_player_count", maxPlayerCount);
-        //todo: player count
         return server.toString();
     }
 

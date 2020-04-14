@@ -38,7 +38,7 @@ public class SettingsManager
             final SettingsKey<?> tmp = SettingsKey.fromHash(id);
             if(tmp == null)
             {
-                throw new IllegalArgumentException("the hashKey " + id + "is invalid !");
+                continue;
             }
 
             loadSetting(tmp, document);

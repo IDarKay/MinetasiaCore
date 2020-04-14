@@ -52,7 +52,6 @@ public class StringHologram extends Hologram
         }
     }
 
-
     @Override
     protected FullEntityArmorStand[] getArmorStands(Player player)
     {

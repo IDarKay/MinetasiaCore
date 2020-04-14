@@ -2,7 +2,14 @@ package fr.idarkay.minetasia.normes.component;
 
 import fr.idarkay.minetasia.normes.component.event.ClickEventType;
 import fr.idarkay.minetasia.normes.component.event.hover.HoverEvent;
-import net.minecraft.server.v1_15_R1.*;
+import fr.idarkay.minetasia.normes.utils.GeneralUtils;
+import net.minecraft.server.v1_15_R1.ChatBaseComponent;
+import net.minecraft.server.v1_15_R1.ChatClickable;
+import net.minecraft.server.v1_15_R1.ChatModifier;
+import net.minecraft.server.v1_15_R1.EnumChatFormat;
+import net.minecraft.server.v1_15_R1.IChatBaseComponent;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import net.minecraft.server.v1_15_R1.NBTTagList;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +42,7 @@ public abstract class BaseComponent
     public BaseComponent()
     {
 //        this.msg = msg;
+        chatModifier.setItalic(false);
     }
 
     public BaseComponent setBold(boolean bold)
@@ -98,6 +106,15 @@ public abstract class BaseComponent
         Validate.noNullElements(extra);
         Validate.notEmpty(extra);
         this.extra = extra;
+        return this;
+    }
+
+    public BaseComponent addExtra(BaseComponent... extra)
+    {
+        Validate.noNullElements(extra);
+        Validate.notEmpty(extra);
+        if(this.extra == null) this.extra = extra;
+        else this.extra = GeneralUtils.concat(this.extra, extra);
         return this;
     }
 

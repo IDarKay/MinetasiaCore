@@ -26,4 +26,10 @@ public class Tuple<A, B> {
     public B b() {
         return this.b;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Tuple{" + "a=" + a + ", b=" + b + '}';
+    }
 }

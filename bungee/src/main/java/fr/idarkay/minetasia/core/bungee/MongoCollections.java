@@ -19,6 +19,7 @@ public enum MongoCollections
     KITS("kits"),
     PROXY("proxy"),
     PARTY("party"),
+    SETTINGS("settings"),
 
     SKYBLOCK_SHOP_ITEM("skyblock_shop_item"),
     SKYBLOCK_HDV("skyblock_hdv")

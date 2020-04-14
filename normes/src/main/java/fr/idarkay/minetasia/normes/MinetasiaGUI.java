@@ -9,9 +9,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fr.idarkay.minetasia.normes.component.BaseComponent;
 import fr.idarkay.minetasia.normes.component.TextComponent;
 import fr.idarkay.minetasia.normes.utils.ReflectionVar;
+import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.MojangsonParser;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.minecraft.server.v1_15_R1.NBTTagList;
+import net.minecraft.server.v1_15_R1.NBTTagString;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -19,7 +21,11 @@ import org.bukkit.block.Skull;
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
@@ -302,7 +308,7 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      * @param name name of the item with BaseComponent
      * @return the item
      */
-    public static ItemStack createItemStack(Material material, List<String> lore,  int amount, BaseComponent... name)
+    public static ItemStack createItemStack(Material material, List<String> lore,  int amount, BaseComponent name)
     {
         return createItemStack(material, amount, lore.stream().map(TextComponent::new).collect(Collectors.toList()), name);
     }
@@ -315,30 +321,27 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      * @param name name of the item with BaseComponent
      * @return the item
      */
-    public static ItemStack createItemStack(Material material, int amount, List<BaseComponent> lore, BaseComponent... name)
+    public static ItemStack createItemStack(Material material, int amount, List<BaseComponent> lore, BaseComponent name)
     {
         final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
         final NBTTagCompound nbtTagCompound = new NBTTagCompound();
 
         final NBTTagCompound display = new NBTTagCompound();
 
-        final NBTTagList array = new NBTTagList();
-        for (BaseComponent component : name)
+        display.set("Name", NBTTagString.a(IChatBaseComponent.ChatSerializer.a(name.toChatBaseComponent())));
+
+
+        if(lore.size() > 0)
         {
-            array.add(component.toNbtTagCompound());
-        }
-        display.set("Name", array);
+            final NBTTagList tagList = new NBTTagList();
 
-
-
-        final NBTTagList tagList = new NBTTagList();
-
-        for (BaseComponent baseComponent : lore)
-        {
-            tagList.add(baseComponent.toNbtTagCompound());
+            for (BaseComponent baseComponent : lore)
+            {
+                tagList.add(NBTTagString.a(IChatBaseComponent.ChatSerializer.a(baseComponent.toChatBaseComponent())));
+            }
+            display.set("Lore", tagList);
         }
 
-        display.set("Lore", tagList);
         nbtTagCompound.set("display", display);
         itemStack.setTag(nbtTagCompound);
         return CraftItemStack.asBukkitCopy(itemStack);
@@ -352,20 +355,16 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      * @param name name of the item with BaseComponent
      * @return the item
      */
-    public static ItemStack createItemStack(Material material,  String nbt, int amount, BaseComponent... name)
+    public static ItemStack createItemStack(Material material,  String nbt, int amount, BaseComponent name)
     {
         try
         {
             final net.minecraft.server.v1_15_R1.ItemStack itemStack = new net.minecraft.server.v1_15_R1.ItemStack(CraftMagicNumbers.getItem(material), amount);
             final NBTTagCompound nbtTagCompound = MojangsonParser.parse(nbt);
             itemStack.setTag(nbtTagCompound);
-            final NBTTagList array = new NBTTagList();
-            for (BaseComponent component : name)
-            {
-                array.add(component.toNbtTagCompound());
-            }
 
-            itemStack.a(array.l());
+            itemStack.a(name.toChatBaseComponent());
+
             return CraftItemStack.asBukkitCopy(itemStack);
         } catch (CommandSyntaxException e)
         {
@@ -384,7 +383,7 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      * @param name name of the item with BaseComponent
      * @return the item
      */
-    public static ItemStack createItemStack(Material material,  String nbt, List<String> addLore, boolean afterComponentNbtLore, int amount, BaseComponent... name)
+    public static ItemStack createItemStack(Material material,  String nbt, List<String> addLore, boolean afterComponentNbtLore, int amount, BaseComponent name)
     {
         return createItemStack(material, nbt, afterComponentNbtLore, addLore.stream().map(TextComponent::new).collect(Collectors.toList()), amount, name);
     }
@@ -399,7 +398,7 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
      * @param name name of the item with BaseComponent
      * @return the item
      */
-    public static ItemStack createItemStack(Material material,  String nbt, boolean afterComponentNbtLore, List<BaseComponent> addLore, int amount, BaseComponent... name)
+    public static ItemStack createItemStack(Material material,  String nbt, boolean afterComponentNbtLore, List<BaseComponent> addLore, int amount, BaseComponent name)
     {
         try
         {
@@ -414,12 +413,12 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
                 display = new NBTTagCompound();
             }
 
-            final NBTTagList array = new NBTTagList();
-            for (BaseComponent component : name)
-            {
-                array.add(component.toNbtTagCompound());
-            }
-            display.set("Name", array);
+//            final NBTTagList array = new NBTTagList();
+//            for (BaseComponent component : name)
+//            {
+//                array.add(component.toNbtTagCompound());
+//            }
+            display.set("Name", NBTTagString.a(IChatBaseComponent.ChatSerializer.a(name.toChatBaseComponent())));
 
 
 
@@ -436,7 +435,7 @@ public abstract class MinetasiaGUI<T extends JavaPlugin> {
 
             for (BaseComponent baseComponent : addLore)
             {
-                loreNBT.add(baseComponent.toNbtTagCompound());
+                loreNBT.add(NBTTagString.a(IChatBaseComponent.ChatSerializer.a(baseComponent.toChatBaseComponent())));
             }
 
             if(afterComponentNbtLore)

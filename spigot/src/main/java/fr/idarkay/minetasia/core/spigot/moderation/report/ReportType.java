@@ -29,7 +29,6 @@ public class ReportType
 
     public ReportType(@NotNull FileConfiguration configuration, @NotNull String path)
     {
-        System.out.println(path);
         if(configuration.contains(path + ".args"))
             args = configuration.getConfigurationSection(path + ".args").getKeys(false).stream().map(section -> new ReportArgs(configuration, path + ".args." + section)).collect(Collectors.toMap(ReportArgs::getGeneric, reportArgs -> reportArgs));
         else args = new HashMap<>();
