@@ -107,14 +107,16 @@ public class AdvancementManager
                 }
             }
             final File file = new File(datapacks, "/minecraft/advancements");
-
-            try
+            if(!file.exists())
             {
-                copyFromJar("/data/advancements", file.toPath());
+                try
+                {
+                    copyFromJar("/data/advancements", file.toPath());
 
-            } catch (URISyntaxException | IOException e)
-            {
-                e.printStackTrace();
+                } catch (URISyntaxException | IOException | FileSystemAlreadyExistsException e)
+                {
+                    e.printStackTrace();
+                }
             }
         }
     }

@@ -103,6 +103,10 @@ public class SettingsManager
             if(value != null)
                 plugin.getMaintenanceServer().addAll(((List<String>) value));
         }
+        else if(key.equals(SettingsKey.MOTD))
+        {
+            plugin.getPlayerListener().setMOTD((String) value);
+        }
     }
 
 
