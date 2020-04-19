@@ -9,6 +9,6 @@ before_script:
 build-master:
   stage: build
   script:
-    - gradlew build ArtifactoryPublish
+    - sh 'gradlew build ArtifactoryPublish'
   only:
     - master
