@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -75,6 +76,7 @@ public class PlayerListener implements Listener {
                 }
             }
         });
+        plugin.getOldCombatsManger().onPlayerJoinEvent(e.getPlayer(), e);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -97,6 +99,13 @@ public class PlayerListener implements Listener {
             plugin.socialSpyPlayer.remove(e.getPlayer());
         });
         e.setQuitMessage(null);
+        plugin.getOldCombatsManger().onPlayerQuitEvent(e.getPlayer(), e);
+    }
+
+    @EventHandler
+    public void onPlayerChangedWorldEvent(PlayerChangedWorldEvent e)
+    {
+        plugin.getOldCombatsManger().onWorldChange(e.getPlayer(), e);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

@@ -10,8 +10,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.ArrayList;
-
 /**
  * File <b>InventoryClickListener</b> located on fr.idarkay.minetasia.core.common.listener
  * InventoryClickListener is a part of MinetasiaCore.
@@ -25,7 +23,7 @@ import java.util.ArrayList;
  */
 public final class InventoryClickListener implements Listener {
 
-    public static final ArrayList<Class<? extends MinetasiaGUI>> blackListClazz = new ArrayList<>();
+//    public static final ArrayList<Class<? extends MinetasiaGUI>> blackListClazz = new ArrayList<>();
 
     private final MinetasiaCore plugin;
 
@@ -52,7 +50,7 @@ public final class InventoryClickListener implements Listener {
             {
                 final Player player = (Player) e.getWhoClicked();
                 final MinetasiaGUI gui = holder.getMinetasiaGUI();
-                if(gui != null && !blackListClazz.contains(gui.getClass()))
+                if(gui != null)
                     gui.click(player, e, holder);
             }
         }

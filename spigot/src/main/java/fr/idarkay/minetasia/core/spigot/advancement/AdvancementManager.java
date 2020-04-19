@@ -106,7 +106,7 @@ public class AdvancementManager
                     e.printStackTrace();
                 }
             }
-            final File file = new File(datapacks, "/minecraft/advancements");
+            final File file = new File(datapacks, "data/minecraft/advancements");
             if(!file.exists())
             {
                 try

@@ -46,6 +46,7 @@ import fr.idarkay.minetasia.core.spigot.moderation.PlayerSanction;
 import fr.idarkay.minetasia.core.spigot.moderation.SanctionManger;
 import fr.idarkay.minetasia.core.spigot.moderation.SanctionType;
 import fr.idarkay.minetasia.core.spigot.moderation.report.ReportManager;
+import fr.idarkay.minetasia.core.spigot.old_combats.OldCombatsManger;
 import fr.idarkay.minetasia.core.spigot.permission.PermissionManager;
 import fr.idarkay.minetasia.core.spigot.runnable.IpRunnable;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
@@ -62,7 +63,6 @@ import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.Tuple;
-import fr.idarkay.minetasia.normes.anontation.MinetasiaGuiNoCallEvent;
 import org.apache.commons.lang.Validate;
 import org.bson.Document;
 import org.bukkit.Bukkit;
@@ -81,11 +81,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -171,6 +172,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private SettingsManager settingsManager;
     private SanctionManger sanctionManger;
     private ReportManager reportManager;
+    private OldCombatsManger oldCombatsManger;
     private GUI gui;
 
     private IpRunnable ipRunnable;
@@ -308,6 +310,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         sanctionManger = new SanctionManger(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init report manager");
         reportManager = new ReportManager(this.getConfig());
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init old combats manager");
+        oldCombatsManger = new OldCombatsManger(this);
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init gui");
         gui = new GUI(this);
 
@@ -453,6 +457,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void onDisable() {
         serverManager.disable();
         mongoDBManager.close();
+        messageServer.close();
     }
 
     @Override
@@ -742,7 +747,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public String publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean rep, boolean sync)
     {
-        return publishTarget(chanel, message, getPlayerStatue(target).getServer(), rep, sync);
+        PlayerStatueFix playerStatue = getPlayerStatue(target);
+        if(playerStatue != null)
+            return publishTarget(chanel, message, playerStatue.getServer(), rep, sync);
+        return null;
     }
 
     @Override
@@ -1230,29 +1238,29 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void registerGui(MinetasiaGUI gui)
     {
-        final Class<? extends MinetasiaGUI> clazz = gui.getClass();
-        for(Method method : clazz.getDeclaredMethods())
-        {
-            if(method.getDeclaredAnnotation(MinetasiaGuiNoCallEvent.class) != null)
-            {
-                final String name = method.getName();
-                switch (name)
-                {
-                    case OPEN_METHODS_NAME:
-                        InventoryOpenListener.blackListClazz.add(clazz);
-                        break;
-                    case CLOSE_METHODS_NAME:
-                        InventoryCloseListener.blackListClazz.add(clazz);
-                        break;
-                    case CLICK_METHODS_NAME:
-                        InventoryClickListener.blackListClazz.add(clazz);
-                        break;
-                    case DRAG_METHODS_NAME:
-                        InventoryDragListener.blackListClazz.add(clazz);
-                        break;
-                }
-            }
-        }
+//        final Class<? extends MinetasiaGUI> clazz = gui.getClass();
+//        for(Method method : clazz.getDeclaredMethods())
+//        {
+//            if(method.getDeclaredAnnotation(MinetasiaGuiNoCallEvent.class) != null)
+//            {
+//                final String name = method.getName();
+//                switch (name)
+//                {
+//                    case OPEN_METHODS_NAME:
+//                        InventoryOpenListener.blackListClazz.add(clazz);
+//                        break;
+//                    case CLOSE_METHODS_NAME:
+//                        InventoryCloseListener.blackListClazz.add(clazz);
+//                        break;
+//                    case CLICK_METHODS_NAME:
+//                        InventoryClickListener.blackListClazz.add(clazz);
+//                        break;
+//                    case DRAG_METHODS_NAME:
+//                        InventoryDragListener.blackListClazz.add(clazz);
+//                        break;
+//                }
+//            }
+//        }
     }
 
     @Override
@@ -1492,5 +1500,32 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public ReportManager getReportManager()
     {
         return reportManager;
+    }
+
+
+    /**
+     * Method used by power, effect and particle manager to get every classes registered in package
+     * @param pckgname Name of the package (with '/' instead of '.')
+     * @return List of Class<?> in this package
+     * @throws ClassNotFoundException If we can't find the class in the package
+     * @throws IOException If we can't find the package
+     */
+    public List<Class<?>> getClasses(String pckgname) throws ClassNotFoundException, IOException
+    {
+        final ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+        final JarFile jar = new JarFile(this.getFile());
+        Enumeration<JarEntry> jfile = jar.entries();
+        while(jfile.hasMoreElements())
+        {
+            String name = jfile.nextElement().getName();
+            if(name.startsWith(pckgname) && name.split("/").length > pckgname.split("/").length) classes.add(Class.forName(name.substring(0, name.length() - 6).replace('/', '.')));
+        }
+        jar.close();
+        return classes;
+    }
+
+    public OldCombatsManger getOldCombatsManger()
+    {
+        return oldCombatsManger;
     }
 }

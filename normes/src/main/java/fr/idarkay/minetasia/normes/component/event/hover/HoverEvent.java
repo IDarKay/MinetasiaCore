@@ -36,7 +36,7 @@ public interface HoverEvent
 
     default ChatHoverable toChatHoverable()
     {
-        return new ChatHoverable(getChatHoverable(),getValue());
+        return new ChatHoverable(getChatHoverable(), getValue());
     }
 
 

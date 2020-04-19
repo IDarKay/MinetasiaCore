@@ -186,7 +186,7 @@ public final class MinetasiaCoreBungee extends Plugin {
     public void onDisable() {
         proxyManager.disable();
         mongoDBManager.getCollection(MongoCollections.ONLINE_USERS).deleteMany(Filters.eq("proxy", proxyManager.getProxy().getUuid().toString()));
-
+        messageServer.close();
     }
 
     public Configuration getConfig() {
