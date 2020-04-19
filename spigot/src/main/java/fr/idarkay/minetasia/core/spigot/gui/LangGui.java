@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.spigot.gui;
 
+import fr.idarkay.minetasia.core.api.event.PlayerLangChangeEvent;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.*;
@@ -87,6 +88,7 @@ public class LangGui extends MinetasiaGUI<MinetasiaCore>
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->{
                     plugin.setPlayerData(p.getUniqueId(), "lang", lang);
                     p.sendMessage(Lang.SET_LANG.get(lang));
+                    plugin.getServer().getPluginManager().callEvent(new PlayerLangChangeEvent(p, "lang"));
                 });
                 p.closeInventory();
             }

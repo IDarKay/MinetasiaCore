@@ -14,8 +14,10 @@ server_type: "hub"
 #   for hub set hub
 config_name: "hub"
 
+# the publish port need be different from server port
 publish-port: 32000
 
+# just for testing if no other plugins
 default-register: false
 # =========================================================================================================== #                                                                 #
 # host: url of the db (set localhost for local db)                                                            #
@@ -41,6 +43,7 @@ cache: # NO value here !
 # turn on for games will give money turn off for hub
 partyxpboost: true
 
+#think o enable or disable
 commands:
   friends: true
   lang: true
@@ -71,7 +74,9 @@ gui:
 
 #prefix show before msg for all plugins
 prefix: "&9Mine&6Tasia&7>>"
+# could change
 chat_char: ' > '
+# ip to show in scoreboard and PlayerList
 ip: "play.minetasia.com"
 
 # kit to load set * to first for all else the name of the plugin
@@ -79,7 +84,9 @@ kits_load_regex: ".*$"
 
 # advancement to load (regex) : set .* for all for sbb and minekarttour set ((sbb.*)|(minekarttour.*))
 advancement_load: ".*"
+# all folder COULD contain a world to load data packs
 world_folder_regex: "(world|world_nether|world_the_end)"
+# all load lang need same in gui.lang.X
 advancement_lang:
   - "fr"
   - "en"
@@ -90,6 +97,22 @@ server_type_load: ".*$"
 # in phase Game and end add  maxPlayerCount by next number only for admin spectator
 max-player-count-add-admin: 5
 
+# =========================================================================================================== #
+# true = enable false = disable
+# =========================================================================================================== #
+old_combats_module:
+  no_cooldown: true
+
+# =========================================================================================================== #
+# {main_category}:
+#     display:
+#        key: lang_key
+#        default: default msg
+#     args: (can not set)
+#         {args_name}
+#              key: lang_key
+#              default: default msg
+# =========================================================================================================== #
 report:
   cheat:
     display:

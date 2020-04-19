@@ -2,25 +2,13 @@ package fr.idarkay.minetasia.normes.npc;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import fr.idarkay.minetasia.normes.IMinetasiaLang;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.hologram.Hologram;
 import fr.idarkay.minetasia.normes.utils.BukkitUtils;
 import fr.idarkay.minetasia.normes.utils.NMSUtils;
-import net.minecraft.server.v1_15_R1.DataWatcherObject;
-import net.minecraft.server.v1_15_R1.DataWatcherRegistry;
-import net.minecraft.server.v1_15_R1.EntityPlayer;
-import net.minecraft.server.v1_15_R1.MinecraftServer;
-import net.minecraft.server.v1_15_R1.Packet;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntity;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityHeadRotation;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityTeleport;
-import net.minecraft.server.v1_15_R1.PacketPlayOutNamedEntitySpawn;
-import net.minecraft.server.v1_15_R1.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_15_R1.PlayerInteractManager;
-import net.minecraft.server.v1_15_R1.WorldServer;
+import net.minecraft.server.v1_15_R1.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -39,6 +27,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * File <b>MinetasiaNpc</b> located on fr.idarkay.minetasia.normes.npc
@@ -69,6 +58,10 @@ public class MinetasiaNpc
 
     @Nullable
     private String sName = null;
+    @Nullable
+    private IMinetasiaLang iMinetasiaLang = null;
+    @Nullable
+    private Function<Player, String> getLang = null;
     @Nullable
     private Hologram hologram;
 
@@ -113,6 +106,7 @@ public class MinetasiaNpc
      * set the name of the npc
      * @param name the name
      */
+    @Deprecated
     public void witheDisplayName(String name)
     {
         this.sName = name;
@@ -125,7 +119,33 @@ public class MinetasiaNpc
         }
     }
 
+    public void withDisplayName(String name)
+    {
+        this.sName = name;
+        this.getLang = null;
+        this.iMinetasiaLang = null;
+        try
+        {
+            GAME_PROFILE_NAME.set(gameProfile, sName);
+        } catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
+    public void withDisplayName(@Nullable IMinetasiaLang lang, @Nullable Function<Player, String> getLang)
+    {
+        this.iMinetasiaLang = lang;
+        this.getLang = getLang;
+        this.sName = null;
+        try
+        {
+            GAME_PROFILE_NAME.set(gameProfile, uuid.toString().replace("-", "").substring(0, 14));
+        } catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
     //    private static final Constructor<?> PACKET_PLAY_OUT_PLAYER_INFO_CONSTRUCTOR = Reflection.getConstructor(PACKET_PLAY_OUT_PLAYER_INFO_CLASS, false);
 //    private static final Class<?> ENTITY_PLAYER_ARRAY = Objects.requireNonNull(Reflection.getArrayNMSClass("EntityPlayer"));
@@ -163,7 +183,7 @@ public class MinetasiaNpc
 
 //    private static final Object ADD_PLAYER = Reflection.getEnumField(PLAYER_INFO_ACTION, "ADD_PLAYER");
 
-    private PacketPlayOutPlayerInfo packetInfoAdd, packetInfoRemove;
+//    private PacketPlayOutPlayerInfo packetInfoAdd, packetInfoRemove;
     private PacketPlayOutNamedEntitySpawn spawnPacket;
     private PacketPlayOutEntityDestroy packetDestroy;
     private Location lastLocation, currentLocation;
@@ -178,18 +198,22 @@ public class MinetasiaNpc
     public void spawn(@NotNull Location location)
     {
         if(isLoad) throw new IllegalArgumentException("npc already load");
-        Validate.isTrue(sName != null, "no display name set");
+        Validate.isTrue(sName != null || iMinetasiaLang != null, "no display name set");
         final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
         final WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
         final PlayerInteractManager interactManager = new PlayerInteractManager(world);
 
         this.npc = new EntityPlayer(server, world, gameProfile, interactManager);
+
+        if(iMinetasiaLang != null)
+        {
+            npc.setCustomNameVisible(true);
+        }
+
         npc.getDataWatcher().set(new DataWatcherObject<>(16, DataWatcherRegistry.a), (byte) 127);
 //        npc.getDataWatcher().register();
-        this.packetInfoAdd = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc);
         this.currentLocation = location;
         updateSpawnPacket();
-        this.packetInfoRemove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc);
         this.packetDestroy = new PacketPlayOutEntityDestroy(npc.getId());
         isLoad = true;
         loadNpc.add(this);
@@ -215,10 +239,21 @@ public class MinetasiaNpc
     {
         loadPlayer.add(uuid);
         updateSpawnPacket();
-        Reflection.sendPacket(player, packetInfoAdd);
+        if(iMinetasiaLang != null)
+        {
+            try
+            {
+                GAME_PROFILE_NAME.set(gameProfile, iMinetasiaLang.getWithoutPrefix(getLang.apply(player)));
+            } catch (IllegalAccessException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        Reflection.sendPacket(player, new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc));
         Reflection.sendPacket(player, spawnPacket);
         Reflection.sendPacket(player, new PacketPlayOutEntityMetadata(npc.getId(), npc.getDataWatcher(), true));
-        Bukkit.getScheduler().runTaskLater(plugin, () ->  Reflection.sendPacket(player, packetInfoRemove), 5L);
+        Reflection.sendPacket(player, new PacketPlayOutEntityHeadRotation(npc, NMSUtils.floatAngleToByte(npc.getHeadRotation())));
+        Bukkit.getScheduler().runTaskLater(plugin, () ->  Reflection.sendPacket(player, new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc)), 5L);
     }
 
     protected void unShowToPlayer(Player player, UUID uuid)
@@ -237,10 +272,10 @@ public class MinetasiaNpc
 
     protected void disconnectPlayer(Player player)
     {
-        for (MinetasiaNpc minetasiaNpc : loadNpc)
-        {
+//        for (MinetasiaNpc minetasiaNpc : loadNpc)
+//        {
             loadPlayer.remove(player.getUniqueId());
-        }
+//        }
 
     }
 
@@ -255,6 +290,7 @@ public class MinetasiaNpc
     private void updatePlayerLocation(@NotNull Location location)
     {
         npc.setLocation(location.getX(),  location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        npc.setHeadRotation(location.getYaw());
     }
 
     private static void checkNeedRegister()
@@ -450,7 +486,7 @@ public class MinetasiaNpc
         if(!isLoad) throw new IllegalArgumentException("npc not load");
         isLoad = false;
         loadNpc.remove(this);
-        sendUpdatePacket(packetInfoRemove);
+        sendUpdatePacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc));
         checkNeedRegister();
     }
 

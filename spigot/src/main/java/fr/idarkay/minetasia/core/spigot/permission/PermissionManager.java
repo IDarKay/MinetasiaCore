@@ -456,11 +456,21 @@ public class PermissionManager
         {
             if(reset)
             {
+                if(tabGroup)
+                {
+                    Group playerMasterGroup = (Group) plugin.getPlayerMasterGroup(uuid);
+                    if(playerMasterGroup != null)
+                    {
+                        playerMasterGroup.getTeam().removeEntry(p.getName());
+                        p.setPlayerListName(p.getName());
+                    }
+                }
                 HashMap<String, PermissionAttachment> paa = permissionAttachments.get(uuid);
                 if(paa != null) {
                     paa.values().forEach(p::removeAttachment);
                     paa.clear();
                 }
+
             }
             byte u =0;
             final HashMap<String, PermissionAttachment> map = new HashMap<>();
