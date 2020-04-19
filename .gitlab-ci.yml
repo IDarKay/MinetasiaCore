@@ -9,6 +9,6 @@ before_script:
 build-master:
   stage: build
   script:
-    - gradle build ArtifactoryPublish
+    - gradlew build ArtifactoryPublish
   only:
     - master
