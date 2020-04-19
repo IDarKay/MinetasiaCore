@@ -1,6 +1,10 @@
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.15-R0.1-SNAPSHOT'
+//    compileOnly 'org.spigotmc:spigot-api:1.15-R0.1-SNAPSHOT'
+    compile 'org.mongodb:mongodb-driver-sync:4.0.0-rc0'
+    compileOnly (group: 'spigot', name: 'spigot', version: '1.15.1')
+    compile project(":normes")
+//    compile 'com.github.koca2000:NoteBlockAPI:1.5.0'
 }
 
 shadowJar {

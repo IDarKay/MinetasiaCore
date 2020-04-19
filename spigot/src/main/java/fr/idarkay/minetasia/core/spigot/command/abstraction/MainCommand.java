@@ -3,14 +3,10 @@ package fr.idarkay.minetasia.core.spigot.command.abstraction;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.normes.MinetasiaLang;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,28 +38,12 @@ public abstract class MainCommand extends Command {
     // usage of the command
     public void execute(@NotNull MinetasiaCore plugin, @NotNull CommandSender sender, @NotNull String[] args, @NotNull String label)
     {
-        final String lang = getLangOfSender(sender);
         if(sender.hasPermission(permission.getPermission()))
+            for(String m : getUsage(plugin, sender, args, label)) sender.sendMessage(m);
+        else
         {
-            //get already enter cmd
-            final String cmd = "/" + label;
-            sender.sendMessage(ChatColor.RED + "-----------" + cmd + "-----------");
-            for (Command v : child)
-            {
-                if(sender.hasPermission(v.permission.getPermission()))
-                {
-                    StringBuilder l = new StringBuilder();
-                    l.append(ChatColor.AQUA).append(cmd).append(" ");
-                    l.append(v.getLabel());
-                    if (v.getDescription() != null) {
-                        l.append(" ; ").append(ChatColor.GREEN);
-                        l.append(v.getDescription().getWithoutPrefix(lang));
-                    }
-                    sender.sendMessage(l.toString());
-                }
-            }
+            sender.sendMessage(Lang.NO_PERMISSION.get(getLangOfSender(sender)));
         }
-        else sender.sendMessage(Lang.NO_PERMISSION.get(lang));
     }
 
     public void addChild(Command child)

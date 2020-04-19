@@ -4,7 +4,6 @@ import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.command.CommandPermission;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * File <b>Command</b> located on fr.idarkay.minetasia.core.spigot.command.abstraction
@@ -70,23 +70,21 @@ public abstract class Command {
         final String lang = getLangOfSender(sender);
 
         //get already enter cmd
-        final String cmd = "/" + label + " " + concat(args, " ", 0, length - 2);
+        final String cmd = "/" + label + " " + concat(args, " ", 0, Math.max(length - 1, 0));
 
         //add all children command
-        u.add(ChatColor.RED + "-----------" + cmd + "-----------");
+        final String border = Lang.COMMAND_HELP_BORDER.getWithoutPrefix(lang, Lang.Argument.COMMAND.match(cmd));
+        u.add(border);
+        u.add(" ");
+        final String format = Lang.COMMAND_HELP_FORMAT.getWithoutPrefix(lang);
         for (Command v : child) {
             if(sender.hasPermission(v.permission.getPermission()))
             {
-                StringBuilder l = new StringBuilder();
-                l.append(ChatColor.AQUA).append(cmd).append(" ");
-                l.append(v.getLabel());
-                if (v.getDescription() != null) {
-                    l.append(" : ").append(ChatColor.GREEN);
-                    l.append(v.getDescription().getWithoutPrefix(lang));
-                }
-                u.add(l.toString());
+                u.add(format.replace(Lang.Argument.COMMAND.toString(), cmd + v.getLabel()).replace(Lang.Argument.DESCRIPTION.toString(), (v.getDescription() == null ? " " : v.getDescription().getWithoutPrefix(lang))));
             }
         }
+        u.add(" ");
+        u.add(border);
         return u;
     }
 
@@ -102,15 +100,12 @@ public abstract class Command {
         if(sender.hasPermission(permission.getPermission()))
         {
             final List<String> b = new ArrayList<>();
-            getChild().forEach(v -> {
-                if(sender.hasPermission(v.permission.getPermission())){
-                    if (v instanceof FlexibleCommand
-                            || args.length < length
-                            || v.getLabel().equalsIgnoreCase(args[length -1])
-                            || v.getLabel().startsWith(args[length - 1].toLowerCase())  )
-                        b.add(v.getLabel());
-                    if(v instanceof FlexibleCommand && ((FlexibleCommand) v).getPossibilities() != null)
-                        b.addAll(((FlexibleCommand) v).getPossibilities());
+            getChild().forEach(command -> {
+                if(sender.hasPermission(command.permission.getPermission())){
+                    if(command.getLabel().startsWith(args[length - 1].toLowerCase()))
+                        b.add(command.getLabel());
+                    if(command instanceof FlexibleCommand && ((FlexibleCommand) command).getPossibilities() != null)
+                        b.addAll(((FlexibleCommand) command).getPossibilities().stream().filter(s -> s.toLowerCase().startsWith(args[length -1].toLowerCase())).collect(Collectors.toList()));
                 }
             });
             return b;
@@ -122,15 +117,17 @@ public abstract class Command {
     {
         if(sender.hasPermission(permission.getPermission()))
         {
-            final List<String> b = new ArrayList<>();
-            elements.forEach(v -> {
-                if (!filter
-                        || args.length < length
-                        || v.equalsIgnoreCase(args[length -1])
-                        || v.toLowerCase().startsWith(args[length - 1].toLowerCase()))
-                    b.add(v);
-            });
-            return b;
+            if(!filter) return new ArrayList<>(elements);
+            return elements.stream().filter(value -> value.toLowerCase().startsWith(args[length - 1].toLowerCase())).collect(Collectors.toList());
+//            final List<String> b = new ArrayList<>();
+//            elements.forEach(v -> {
+//                if (!filter
+//                        || args.length < length
+//                        || v.equalsIgnoreCase(args[length -1])
+//                        || v.toLowerCase().startsWith(args[length - 1].toLowerCase()))
+//                    b.add(v);
+//            });
+//            return b;
         }
         else return Collections.emptyList();
     }

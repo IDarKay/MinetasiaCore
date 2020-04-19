@@ -49,12 +49,14 @@ public class BoostValidCommand extends SubCommand implements FlexibleCommand
                 if(args[3].equalsIgnoreCase("party"))
                 {
                     g.setPartyBoost(b, f);
-                    sender.sendMessage(Lang.GROUP_BOOST_ADD.get(lang, f, args[3].toLowerCase(), b, g.getName()));
+                    sender.sendMessage(Lang.GROUP_BOOST_ADD.get(lang, Lang.Argument.BOOST_VALUE.match(f), Lang.Argument.BOOST_TYPE.match(args[3].toLowerCase())
+                            , Lang.Argument.MONEY_TYPE.match(b), Lang.Argument.GROUP_NAME.match(g.getName())));
                 }
                 else if(args[3].equalsIgnoreCase("personal"))
                 {
                     g.setPersonalBoost(b ,f);
-                    sender.sendMessage(Lang.GROUP_BOOST_ADD.get(lang, f, args[3].toLowerCase(), b, g.getName()));
+                    sender.sendMessage(Lang.GROUP_BOOST_ADD.get(lang, Lang.Argument.BOOST_VALUE.match(f), Lang.Argument.BOOST_TYPE.match(args[3].toLowerCase())
+                            , Lang.Argument.MONEY_TYPE.match(b), Lang.Argument.GROUP_NAME.match(g.getName())));
                 }
                 else
                 {

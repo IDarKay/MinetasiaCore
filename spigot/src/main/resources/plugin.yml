@@ -8,19 +8,65 @@ load: STARTUP
 commands:
   friends:
     aliases: [friend, f, amis, freunde, amigos]
+    description: mange your friends use /friends help for more information
   lang:
     aliases: [langue, lengua, sprache]
+    description: change your lang
   permission:
-    aliases: [perm, perms, permissions, group, groups]
+    aliases: [perm, perms, permissions]
+    description: mange player permission and groups
   hub:
     aliases: []
+    description: go tu hub
   money:
     aliases: []
+    description: manage player money
   msg:
     aliases: [mp, tell]
+    description: send message to player connected in the network
   r:
     aliases: []
+    description: send message to the laste player who you talked
   socialspy:
     aliases: []
+    description: active the socialspy to see secreate message
   tp:
     aliases: []
+    description: tp to player / server or cordonated
+  party:
+    aliases: [p, partie, parties]
+    description: mange your party
+  help:
+    aliases: [aide, ayuda, hilfe]
+    description: get the hekp
+  settingseditor:
+    description: change general settings of the network
+  ban:
+    description: ban a player with a reason (admin)
+  unban:
+    description: unban a player and remove from history
+  mute:
+    description: mute a player with a reason (admin)
+  unmute:
+    description: unmute a player and remove from history
+  warn:
+    description: wan a plyer with a reason (admin)
+  unwarn:
+    description: unwarn a player and remove from histoyr
+  sanction:
+    description: auto sanction a player
+  report:
+    description: plaer cmd report a player
+  playerdata:
+    description: mange player data
+  broadcast:
+    aliases: [bc]
+    description: send message to one or more server
+  whitelist:
+    description: manage whitilist
+  maintenance:
+    description: manage maintenance
+
+
+
+

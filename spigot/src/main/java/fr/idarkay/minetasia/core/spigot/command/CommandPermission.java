@@ -29,8 +29,6 @@ public enum CommandPermission {
     MONEY_REMOVE("money.remove", ALL_MONEY),
     MONEY_GET("money.get", ALL_MONEY),
 
-    FRIEND("friend", ALL),
-
     LANG("lang", ALL),
     LANG_ADMIN("lang.admin", ALL),
 
@@ -58,6 +56,7 @@ public enum CommandPermission {
     PERMISSION_GROUP_INFO("permission.group.info", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_BOOST("permission.group.boost", ALL_PERMISSION_GROUP),
     PERMISSION_GROUP_SAVE("permission.group.save", ALL_PERMISSION_GROUP),
+    PERMISSION_GROUP_DEFAULT("permission.group.default", ALL_PERMISSION_GROUP),
 
     UTILS_CHAT_COLOR("utils.chat.color", ALL),
     UTILS_CHAT_MAGIC("utils.chat.magic", ALL),
@@ -67,6 +66,35 @@ public enum CommandPermission {
 
     TP("tp", ALL),
     HUB("hub", ALL),
+    PARTY("party", ALL),
+    PARTY_SIZE("party.size"),
+    FRIEND("friend", ALL),
+    MAX_FRIEND("friend.max_size"),
+    REPORT("report", ALL),
+    HELP("help", ALL),
+    HELP_STAFF("help.staff", HELP),
+
+    ADMIN("admin.*", ALL),
+    SETTINGS_EDITOR("admin.settingseditor", ADMIN),
+    PLAYER_DATA_ALL("admin.playerdata.*", ADMIN),
+    PLAYER_DATA("admin.playerdata", PLAYER_DATA_ALL),
+    PLAYER_GET("admin.playerdata.get", PLAYER_DATA_ALL),
+    PLAYER_EDIT("admin.playerdata.edit", PLAYER_DATA_ALL),
+    BROADCAST("admin.broadcast", ADMIN),
+    WHITELIST("admin.whitelist", ADMIN),
+    MAINTENANCE("admin.maintenance", ADMIN),
+
+
+    MODERATION("moderation.*", ALL),
+    SANCTION("moderation.sanction", MODERATION),
+    BAN("moderation.ban", MODERATION),
+    MUTE("moderation.mute", MODERATION),
+    WARN("moderation.warn", MODERATION),
+    UN_BAN("moderation.unban", MODERATION),
+    UN_MUTE("moderation.unmute", MODERATION),
+    UN_WARN("moderation.unwarn", MODERATION),
+    REPORT_VIEWER("moderation.report_viewer", MODERATION),
+
 
     ;
 

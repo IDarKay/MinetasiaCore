@@ -12,15 +12,18 @@ import java.util.stream.Collectors;
  * Copyright (c) 2019 MinetasiaCore.
  * <p>
  *
- * @author Alois. B. (IDarKay),
+ * @author Alois. B. (IDarKay),-
  * Created the 15/11/2019 at 21:20
  * @since 1.0
  */
 public enum Economy {
 
     MINECOINS("minecoins", "&6MineCoins", BoostType.MINECOINS),
+    @Deprecated
     SHOPEX("shopex", "&6Shopex", BoostType.SHOPEX),
     STARS("stars", "&6Stars", BoostType.STARS),
+    BATTLE_XP("battle_xp", "&bBattle Xp", BoostType.BATTLE_XP),
+    FLY_COINS("fly_coins", "&6Fly coins", BoostType.SKYBLOCK)
     ;
 
     public final String name;

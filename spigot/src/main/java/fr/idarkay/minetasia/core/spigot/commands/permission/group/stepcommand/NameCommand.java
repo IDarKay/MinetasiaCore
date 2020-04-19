@@ -8,6 +8,7 @@ import fr.idarkay.minetasia.core.spigot.commands.permission.common.PermissionVal
 import fr.idarkay.minetasia.core.spigot.commands.permission.common.StepAddCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.common.StepPermissionCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.common.StepRemoveCommand;
+import fr.idarkay.minetasia.core.spigot.commands.permission.group.DefaultCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.group.DeleteCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.group.InfoCommand;
 import fr.idarkay.minetasia.core.spigot.commands.permission.group.SaveCommand;
@@ -49,6 +50,7 @@ public final class NameCommand extends StepCommand implements FlexibleCommand {
         child.add(new ParentCommand(plugin));
         child.add(new DeleteCommand(plugin));
         child.add(new BoostCommand(plugin));
+        child.add(new DefaultCommand(plugin));
 
     }
 

@@ -1,6 +1,10 @@
 package fr.idarkay.minetasia.core.spigot.kits;
 
+import com.mongodb.client.model.Filters;
+import fr.idarkay.minetasia.core.api.MongoCollections;
+import fr.idarkay.minetasia.core.api.utils.MainKit;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
+import org.bson.Document;
 
 import java.util.*;
 
@@ -16,47 +20,34 @@ import java.util.*;
  */
 public class KitsManager {
 
-    private Map<String, fr.idarkay.minetasia.core.api.utils.Kit> kits = new HashMap<>();
-    private List<String> kitsName = new ArrayList<>();
+    private Map<String, MainKit> kits = new HashMap<>();
 
     public KitsManager(MinetasiaCore plugin)
     {
-        final List<String> filter = plugin.getConfig().getStringList("kits_load");
+//        final List<String> filter = plugin.getConfig().getStringList("kits_load");
+//        boolean all = filter.size() > 0 && filter.get(0).equals("*");
 
-
-        Collection<String> fields = plugin.getFields("kits");
-        if(filter.size() > 0 && !filter.get(0).equals("*"))
+        for(final Document d : plugin.getMongoDbManager().getCollection(MongoCollections.KITS).find(Filters.regex("_id", plugin.getConfig().getString("kits_load_regex", ".*"))))
         {
-            fields = filterList(fields, filter);
-        }
-
-        for(String f : fields)
-        {
-            Kit k = new Kit(MinetasiaCore.JSON_PARSER.parse(plugin.getValue("kits", f)).getAsJsonObject());
-            kits.put(k.getName() + "_" + k.getIsoLang(), k);
-            if(!kitsName.contains(k.getName())) kitsName.add(k.getName());
+//            if(all || validate(d.getString("_id"), filter))
+//            {
+                kits.put(d.getString("_id"), new KitMain(d, plugin));
+//            }
         }
     }
 
-    public Map<String, fr.idarkay.minetasia.core.api.utils.Kit> getKits() {
+    public Map<String, MainKit> getKits()
+    {
         return kits;
     }
 
-    private Collection<String> filterList(Collection<String> list, Collection<String> filter)
-    {
-        Collection<String> back = new ArrayList<>();
-        for(String a : list)
-        {
-            for(String b : filter)
-            {
-                if(a.startsWith(b))
-                {
-                    back.add(a);
-                    break;
-                }
-            }
-        }
-        return back;
-    }
+//    private boolean validate(String name, List<String> filter)
+//    {
+//        for(String f : filter)
+//        {
+//            if(name.startsWith(f)) return true;
+//        }
+//        return false;
+//    }
 
 }

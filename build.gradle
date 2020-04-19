@@ -53,9 +53,15 @@ allprojects {
             url = 'https://oss.sonatype.org/content/groups/public/'
         }
         maven {
-            name = 'enginehub-maven'
-            url = 'http://maven.enginehub.org/repo/'
+            name =  'CodeMC'
+            url = 'https://repo.codemc.org/repository/maven-public'
         }
+        maven { url 'https://jitpack.io' }
+        maven {
+            name =  'CodeMC'
+            url = 'https://repo.codemc.org/repository/maven-public'
+        }
+        maven { url 'https://jitpack.io' }
         maven {
             url "${artifactory_contextUrl}/${artifactory_repo}"
             credentials {
@@ -67,9 +73,8 @@ allprojects {
     }
 
     dependencies {
-        testCompile group: 'junit', name: 'junit', version: '4.12'
-        compileOnly group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
-        compile group: 'minetasia', name: 'normes', version: '1.0', changing: true
+        compile group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
+
     }
 
 
@@ -92,8 +97,7 @@ project('api') {
                 groupId = group
                 artifactId = 'core-api'
                 version = version
-                from components.java
-
+                artifact file("./build/libs/MinetasiaCore-Api-1.0-all.jar")
             }
         }
     }
@@ -115,7 +119,9 @@ artifactory {
             password = "${artifactory_password}"
         }
         defaults {
-
+            publications('mavenJava')
+            publishArtifacts = true
+            publishPom = true
         }
     }
 }

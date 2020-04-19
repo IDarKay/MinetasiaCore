@@ -1,33 +1,40 @@
-# the type of the server name of the mini game or other
-# Example:
-#  if the server is a hub set : hub
-#   if the server is a sheepwars set : sheepwars
+# =========================================================================================================== #
+# the type of the server name of the mini game or other                                                       #
+# Example:                                                                                                    #
+#  if the server is a hub set : hub                                                                           #
+#   if the server is a sheepwars set : sheepwars                                                              #
+# =========================================================================================================== #
 server_type: "hub"
 
-# host: url of the db (set localhost for local db)
-# login: login for connect need have permission to create and edit table
-# password: password of the login
-# dbname: name of the db need be created always
+# the config name (32 max char);
+# format : {map-name}
+# format : {team-mode}_{map-name}
+# example :
+#   mini games skyblockbattle with 6 team and 2 player per team with hill-island  map : 2-x-6_hill-island
+#   for hub set hub
+config_name: "hub"
+
+# the publish port need be different from server port
+publish-port: 32000
+
+# just for testing if no other plugins
+default-register: false
+# =========================================================================================================== #                                                                 #
+# host: url of the db (set localhost for local db)                                                            #
+# login: login for connect need have permission to create and edit table                                      #
+# password: password of the login                                                                             #
+# dbname: name of the db need be created always                                                               #
 # system: mysql -
-db: # NO value here !
-  host: ''
-  login: ''
-  password: ''
-  dbname: ''
-  system: 'mysql'
-  connexion_args: '?allowMultiQueries=true&useSSL=false'
+# =========================================================================================================== #
+dbm:
+  host: 'mongodb://localhost:27017'
+  dbname: 'minetasia'
 
-# host: url of the frs (set 127.0.0.1 for local db)
-# password: password for log          (def 4514)
-# port:port listening by frs
-# timeout: timeout time (def 5000)
-frs: # NO value Here
-  host: ''
-  port: 4514
-  password: ''
-  timeout: 5000
 
-# user : in MINUTES the time that a user will be save in cache
+
+# =========================================================================================================== #
+# user : in MINUTES the time that a user will be save in cache                                                  #
+# =========================================================================================================== #
 cache: # NO value here !
   user: 5
   friends: 2
@@ -36,6 +43,7 @@ cache: # NO value here !
 # turn on for games will give money turn off for hub
 partyxpboost: true
 
+#think o enable or disable
 commands:
   friends: true
   lang: true
@@ -44,6 +52,8 @@ commands:
   money: true
   msg: true
   tp: true
+  party: true
+  rank_in_tab: true
 
 gui:
   lang:
@@ -62,15 +72,108 @@ gui:
         slot: 15
         iso: 'en'
 
-
+#prefix show before msg for all plugins
 prefix: "&9Mine&6Tasia&7>>"
+# could change
 chat_char: ' > '
+# ip to show in scoreboard and PlayerList
+ip: "play.minetasia.com"
 
 # kit to load set * to first for all else the name of the plugin
-kits_load:
-  - '*'
+kits_load_regex: ".*$"
 
-# Defines if "opped" players should be able to use all LuckPerms commands by default.
-#
-# - Set to false to only allow users who have the permissions access to the commands
-commands-allow-op: true
+# advancement to load (regex) : set .* for all for sbb and minekarttour set ((sbb.*)|(minekarttour.*))
+advancement_load: ".*"
+# all folder COULD contain a world to load data packs
+world_folder_regex: "(world|world_nether|world_the_end)"
+# all load lang need same in gui.lang.X
+advancement_lang:
+  - "fr"
+  - "en"
+
+# javascript regex server type load
+server_type_load: ".*$"
+
+# in phase Game and end add  maxPlayerCount by next number only for admin spectator
+max-player-count-add-admin: 5
+
+# =========================================================================================================== #
+# true = enable false = disable
+# =========================================================================================================== #
+old_combats_module:
+  no_cooldown: true
+
+# =========================================================================================================== #
+# {main_category}:
+#     display:
+#        key: lang_key
+#        default: default msg
+#     args: (can not set)
+#         {args_name}
+#              key: lang_key
+#              default: default msg
+# =========================================================================================================== #
+report:
+  cheat:
+    display:
+      key: REPORTE_CHEAT
+      default: "cheat"
+    args:
+      fly:
+        key: REPORTE_ARGUMENT_FLY
+        default: "fly"
+      killAura:
+        key: REPORTE_ARGUMENT_KILL_AURA
+        default: "killAura"
+      AutoCliker:
+        key: REPORTE_ARGUMENT_AUTO_CLIKER
+        default: "Auto Cliker"
+      Speed:
+        key: REPORTE_ARGUMENT_SPEED
+        default: "speed"
+      AntiKnockback:
+        key: REPORTE_ARGUMENT_ANTI_KNOCKBACK
+        default: "Anti KnockBack"
+      Reach:
+        key: REPORTE_ARGUMENT_REACH
+        default: "reach"
+  public_chat:
+    display:
+      key: REPORTE_PUBLIC_CHAT
+      default: "public chat"
+    args:
+      pub:
+        key: REPORTE_ARGUMENT_PUB
+        default: "pub"
+      insulte:
+        key: REPORTE_ARGUMENT_INSULTE
+        default: "insulte"
+      bad_link:
+        key: REPORTE_ARGUMENT_BAD_LINK
+        default: "bad link"
+  private_chat:
+    display:
+      key: REPORTE_PRIVATE_CHAT
+      default: "private chat"
+    args:
+      pub:
+        key: REPORTE_ARGUMENT_PUB
+        default: "pub"
+      insulte:
+        key: REPORTE_ARGUMENT_INSULTE
+        default: "insulte"
+      bad_link:
+        key: REPORTE_ARGUMENT_BAD_LINK
+        default: "bad link"
+  bad_name:
+    display:
+      key: REPORTE_PBAD_NAME
+      default: "bad name"
+  cross_teaming:
+    display:
+      key: REPORTE_CROSS_TEAMING
+      default: "cross teaming"
+  bad_skin:
+    display:
+      key: REPORTE_BAD_SKIN
+      default: "bad skin"
