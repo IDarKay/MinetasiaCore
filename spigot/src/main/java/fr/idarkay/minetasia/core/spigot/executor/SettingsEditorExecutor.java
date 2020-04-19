@@ -113,7 +113,16 @@ public class SettingsEditorExecutor implements TabExecutor
         }
         else if (String.class.isAssignableFrom(clazz))
         {
-            set.setValue(ChatColor.translateAlternateColorCodes('&',  concat));
+            if(set.equals(SettingsKey.MOTD))
+            {
+//                set.setValue(concat.replaceAll("[^%]%20", " ").replaceAll("[^%]%%[%20]", "%"));
+                set.setValue(concat.replace("%20", " "));
+            }
+            else
+            {
+//                set.setValue(ChatColor.translateAlternateColorCodes('&',  concat.replaceAll("[^%]%20", " ").replaceAll("[^%]%%[%20]", "%")));
+                set.setValue(ChatColor.translateAlternateColorCodes('&',  concat.replace("%20", " ")));
+            }
             isDonne = true;
         }
         if(isDonne) commandSender.sendMessage(Lang.SETTINGS_COMMANDS_END.get(lang, Lang.Argument.SETTINGS.match(key.name()), Lang.Argument.VALUE.match(concat)));

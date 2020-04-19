@@ -2,13 +2,14 @@ package fr.idarkay.minetasia.normes.component;
 
 import net.minecraft.server.v1_15_R1.ChatBaseComponent;
 import net.minecraft.server.v1_15_R1.ChatMessage;
+import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
-import net.minecraft.server.v1_15_R1.NBTTagList;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * File <b>TranslatableComponent</b> located on fr.idarkay.minetasia.normes.component
@@ -24,7 +25,23 @@ public class TranslatableComponent extends BaseComponent
 {
 
     private final String src;
-    private final NBTTagList with = new NBTTagList();
+    private final List<BaseComponent> with = new ArrayList<>();
+//    private final NBTTagList with = new NBTTagList();
+//    private final List<IChatBaseComponent> iChatBaseComponents = new ArrayList<>();
+
+
+    public TranslatableComponent(@NotNull ChatMessage chatBaseComponents)
+    {
+        super(chatBaseComponents);
+        this.src = chatBaseComponents.getKey();
+        for (Object arg : chatBaseComponents.getArgs())
+        {
+            if(arg instanceof IChatBaseComponent)
+            {
+                with.add(BaseComponent.fromIChatBaseComponent((IChatBaseComponent) arg));
+            }
+        }
+    }
 
     /**
      * create Translatable component
@@ -32,6 +49,7 @@ public class TranslatableComponent extends BaseComponent
      */
     public TranslatableComponent(@NotNull String src)
     {
+        super();
         this.src = src;
     }
 
@@ -51,7 +69,8 @@ public class TranslatableComponent extends BaseComponent
      */
     public void with(BaseComponent... component)
     {
-        with.addAll(Arrays.stream(component).map(BaseComponent::toNbtTagCompound).collect(Collectors.toList()));
+        with.addAll(Arrays.asList(component));
+//        with.addAll(Arrays.stream(component).map(BaseComponent::toNbtTagCompound).collect(Collectors.toList()));
     }
 
     /**
@@ -60,7 +79,11 @@ public class TranslatableComponent extends BaseComponent
      */
     public void with(String... component)
     {
-        with.addAll(Arrays.stream(component).map(co -> new TextComponent(co).toNbtTagCompound()).collect(Collectors.toList()));
+        for (String s : component)
+        {
+            with.add(new TextComponent(s));
+        }
+//        with.addAll(Arrays.stream(component).map(co -> new TextComponent(co).toNbtTagCompound()).collect(Collectors.toList()));
     }
 
     @Override
@@ -70,16 +93,15 @@ public class TranslatableComponent extends BaseComponent
         nbtTagCompound.setString("translate", src);
         if(!with.isEmpty())
         {
-            nbtTagCompound.set("with", with);
+            nbtTagCompound.set("with", with.stream().map(BaseComponent::toNbtTagCompound).collect(toNBTTagListCollector()));
         }
-
         return nbtTagCompound;
     }
 
     @Override
     protected @NotNull ChatBaseComponent getBaseChatComponent()
     {
-        return new ChatMessage(src);
+        return new ChatMessage(src, (Object[]) with.stream().map(BaseComponent::toChatBaseComponent).toArray(Object[]::new));
     }
 
 

@@ -23,7 +23,14 @@ public class KeyBindComponent extends BaseComponent
 
     public KeyBindComponent(@NotNull ClientOption clientOption)
     {
+        super();
         this.clientOption = clientOption;
+    }
+
+    public KeyBindComponent(@NotNull ChatComponentKeybind chatBaseComponents)
+    {
+        super(chatBaseComponents);
+        this.clientOption = ClientOption.fromKey(chatBaseComponents.j());
     }
 
     @Override
@@ -35,7 +42,7 @@ public class KeyBindComponent extends BaseComponent
     }
 
     @Override
-    protected  @NotNull ChatBaseComponent getBaseChatComponent()
+    protected @NotNull ChatBaseComponent getBaseChatComponent()
     {
         return new ChatComponentKeybind(clientOption.getKey());
     }

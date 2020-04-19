@@ -53,9 +53,10 @@ allprojects {
             url = 'https://oss.sonatype.org/content/groups/public/'
         }
         maven {
-            name = 'enginehub-maven'
-            url = 'http://maven.enginehub.org/repo/'
+            name =  'CodeMC'
+            url = 'https://repo.codemc.org/repository/maven-public'
         }
+        maven { url 'https://jitpack.io' }
         maven {
             name =  'CodeMC'
             url = 'https://repo.codemc.org/repository/maven-public'
@@ -72,7 +73,6 @@ allprojects {
     }
 
     dependencies {
-        testCompile group: 'junit', name: 'junit', version: '4.12'
         compile group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
 
     }
@@ -119,7 +119,9 @@ artifactory {
             password = "${artifactory_password}"
         }
         defaults {
-
+            publications('mavenJava')
+            publishArtifacts = true
+            publishPom = true
         }
     }
 }

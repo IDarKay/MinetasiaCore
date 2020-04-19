@@ -1,6 +1,8 @@
 package fr.idarkay.minetasia.normes.component.event;
 
 import net.minecraft.server.v1_15_R1.ChatClickable;
+import org.apache.commons.lang.Validate;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * File <b>ClickEvent</b> located on fr.idarkay.minetasia.normes.component
@@ -38,4 +40,16 @@ public enum  ClickEventType
     {
         return key;
     }
+
+    @NotNull
+    public static ClickEventType fromNms(@NotNull ChatClickable.EnumClickAction key)
+    {
+        Validate.notNull(key);
+        for (ClickEventType value : values())
+        {
+            if(value.nms.equals(key)) return value;
+        }
+        throw new IllegalArgumentException();
+    }
+
 }
