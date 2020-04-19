@@ -9,6 +9,7 @@ before_script:
 build-master:
   stage: build
   script:
+    - chmod -Rf 777 .
     - ./gradlew build ArtifactoryPublish
   only:
     - master
