@@ -1,14 +1,6 @@
 package fr.idarkay.minetasia.core.spigot.gui;
 
-import fr.idarkay.minetasia.normes.InventoryFileType;
-import fr.idarkay.minetasia.normes.MinetasiaGUI;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.plugin.Plugin;
-
-import java.util.HashMap;
+import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 
 /**
  * File <b>LangGui</b> located on fr.idarkay.minetasia.core.common.gui
@@ -22,38 +14,29 @@ import java.util.HashMap;
  */
 public final class GUI {
 
-    public final static HashMap<Integer, String> SLOT_LANG = new HashMap<>();
 
-    private final Plugin plugin;
 
-    private Inventory lang;
+    public final LangGui langGui;
+    public final PartyGui partyGui;
+    public final FriendsGui friendsGui;
+    public final SanctionHistoryGUI sanctionHistoryGUI;
 
-    public GUI(Plugin plugin)
+    public GUI(MinetasiaCore plugin)
     {
-        this.plugin = plugin;
+        this.langGui = new LangGui(plugin);
+        this.partyGui = new PartyGui(plugin);
+        this.friendsGui = new FriendsGui(plugin);
+        this.sanctionHistoryGUI = new SanctionHistoryGUI(plugin);
     }
 
-    public void createLangInventory()
-    {
-        //lang
-        lang = MinetasiaGUI.createGUI("lang", plugin.getConfig().getInt("gui.lang.size")
-                , ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("gui.lang.name"))
-                , InventoryFileType.SQUARE, MinetasiaGUI.createItemStack(Material.valueOf(plugin.getConfig().getString("gui.lang.fileMaterial"))
-                        , 1, " "));
 
-        for(String sec : plugin.getConfig().getConfigurationSection("gui.lang.lang").getKeys(false))
-        {
-            int slot = plugin.getConfig().getInt("gui.lang.lang." + sec + ".slot");
-            lang.setItem(slot, MinetasiaGUI.createHead(1
-                    , ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("gui.lang.lang." + sec + ".name"))
-                    , plugin.getConfig().getString("gui.lang.lang." + sec + ".texture")));
-            SLOT_LANG.put(slot, plugin.getConfig().getString("gui.lang.lang." + sec + ".iso"));
-        }
+    public LangGui getLangGui()
+    {
+        return langGui;
     }
 
-    public void openLangInventory(Player player)
+    public PartyGui getPartyGui()
     {
-        player.openInventory(lang);
+        return partyGui;
     }
-
 }

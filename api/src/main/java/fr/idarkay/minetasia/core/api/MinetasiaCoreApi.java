@@ -1,12 +1,22 @@
 package fr.idarkay.minetasia.core.api;
 
+import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
+import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
+import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
 import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
+import fr.idarkay.minetasia.normes.Tuple;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * File <b>MinetasiaCoreApi</b> located on fr.idarkay.minetasia.core.api
@@ -47,20 +57,10 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     /**
      * test function connexion between core and api
-     * @deprecated
      * @return "pong" if connexion work
      * @since 1.0
      */
     public abstract String ping();
-
-    /**
-     * return complete {@link SQLManager} instance  to be use for get The connexion to SQL
-     * don't create self connexion.
-     * @see SQLManager
-     * @return complete {@link SQLManager} instance
-     * @since 1.0
-     */
-    public abstract SQLManager getSqlManager();
 
     /**
      * set a data to a specific player if key already exist this will be replaced by the new values
@@ -70,7 +70,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @throws IllegalStateException if one or more parameter are null
      * @since 1.0
      */
-    public abstract void setPlayerData(@NotNull UUID uuid, @NotNull String key, String value);
+    public abstract void setPlayerData(@NotNull UUID uuid, @NotNull String key, Object value);
 
     /**
      * get a data of a specific player and key
@@ -80,7 +80,19 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @throws IllegalStateException if one or more parameter are null
      * @since 1.0
      */
-    public abstract String getPlayerData(@NotNull UUID uuid, @NotNull String key);
+    public abstract Object getPlayerData(@NotNull UUID uuid, @NotNull String key);
+
+    /**
+     * get a data of a specific player and key
+     * @param uuid {@link NotNull} uuid of the player
+     * @param key  {@link NotNull} String key of the data
+     * @param cast cast type
+     * @param <T> type of return object given in cast
+     * @return String value or {@code null} if player not found or data not found
+     * @throws IllegalStateException if one or more parameter are null
+     * @since 1.0
+     */
+    public abstract <T> T getPlayerData(@NotNull UUID uuid, @NotNull String key, Class<T> cast);
 
     /**
      * get the uuid of a player from user name
@@ -99,7 +111,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @return float amount or -1 if player not found
      * @since 1.0
      */
-    public abstract float getPlayerMoney(UUID uuid, Economy economy);
+    public abstract double getPlayerMoney(UUID uuid, Economy economy);
 
     /**
      * async task
@@ -141,7 +153,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      */
     @NotNull
-    public abstract HashMap<UUID, String> getFriends(@NotNull UUID uuid);
+    public abstract Map<UUID, Tuple<String, String>> getFriends(@NotNull UUID uuid);
 
     /**
      * check if 2 player is friend
@@ -187,53 +199,28 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract boolean isPlayerOnline(@NotNull String name);
 
     /**
-     * publish a message to the redis system
-     * the message will be get by all only server with the {@link fr.idarkay.minetasia.core.api.event.FRSMessageEvent}
      *
-     * @param chanel  {@link NotNull} chanel of the message
+     * @param chanel  chanel of the message
      * @param message  message
+     * @param proxy only when for server create msg
      * @param sync if need be sync or not
-     * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
-     * @since 1.0
      */
-    public abstract void publish(@NotNull String chanel, String message, boolean... sync);
+    public abstract void publishGlobal(@NotNull String chanel, String message, boolean proxy, boolean sync);
 
-    /**
-     * get value of field
-     * @param key - key
-     * @param field - field
-     * @return String data or null
-     */
-    public abstract String getValue(String key, String field);
+    public abstract void publishProxy(@NotNull String chanel, String message, boolean sync);
 
-    /**
-     * get all field of a key
-     * @param key - key
-     * @return list of fields or empty list
-     */
-    public abstract Set<String> getFields(String key);
+    public abstract void publishServerType(@NotNull String chanel, String message, String serverType , boolean sync);
 
-    /**
-     * get all values for key and Set of field
-     * @param key - key
-     * @param fields - fields
-     * @return map of fields - value or empty map
-     */
-    public abstract Map<String, String> getValues(String key, Set<String> fields);
+    public abstract String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync);
 
-    /**
-     * set data value
-     * @param key - key
-     * @param field - field
-     * @param value - data
-     * @param sync to do in sync or async
-     */
-    public abstract void setValue(String key, String field, String value, boolean... sync);
+    public abstract String publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean rep, boolean sync);
+
+    public abstract String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync);
+
 
     /**
      * move a player to random lobby
      * @param player {@link NotNull}  to return to the lobby
-     * @see fr.idarkay.minetasia.core.api.event.FRSMessageEvent
      * @since 1.0
      */
     public abstract void movePlayerToHub(@NotNull Player player);
@@ -245,6 +232,14 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @param server where move player
      */
     public abstract void movePlayerToServer(@NotNull Player player, Server server);
+
+    /**
+     *  move a player to server the player not need to be connect on this server
+     *  use {@link MinetasiaCoreApi#movePlayerToHub(Player)} to move ot hub !
+     * @param player to move
+     * @param server where move player
+     */
+    public abstract void movePlayerToServer(@NotNull UUID player, Server server);
 
     /**
      * get the lang of player in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
@@ -296,6 +291,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract Map<String, Integer> getPlayerKitsLvl(UUID uuid, String gameFilter);
 
+    public abstract void setPlayerKitLvl(UUID uuid, String kitName, int lvl);
+
     /**
      * get the lvl of a kit of a user
      * @param uuid of teh player
@@ -313,12 +310,88 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract Kit getKitKit(String name, String lang);
 
+    public abstract List<MainKit> getMainKits(String prefix);
+
     /**
-     * save a kit in frs if not exist  <br>
+     * get a kit from name no lang her
+     * @param name name of the kit
+     * @return void
+     */
+    public abstract MainKit getMainKit(String name);
+
+    /**
+     * get a kit with a lang in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a> <br>
+     * if not found will be retail with default lang
+     * @param kitName name of the kit
+     * @param lang lang of the kit in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
+     * @return Kit or null
+     */
+    public abstract Kit getKitLang(String kitName, String lang);
+
+    /**
+     * save a kit in database if not exist  <br>
      *  in {@link Kit} please not set color char just {@code '&'}
      * @param kit to save
      */
-    public abstract void saveDefaultKit(Kit kit);
+    public abstract void saveDefaultKit(MainKit kit);
+
+    /**
+     * create a {@link KitType#BASIC} kit, this function is same as {@link MinetasiaCoreApi#createBasicKit(String, String, String, int, int[], Material, String[], String...)}
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param maxLvl the max lvl of the kit
+     * @param price the price for each lvl 0 not count ; price.length = maxLvl
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for each lvl in lan iso lang ; lvlDesc.length = maxLvl
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public abstract MainKit createKit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, Material displayMat, final String[] lvlDesc, final String... desc);
+
+    /**
+     * create a {@link KitType#BASIC} kit, this function is same as {@link MinetasiaCoreApi#createKit(String, String, String, int, int[], Material, String[], String...)}
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param maxLvl the max lvl of the kit
+     * @param price the price for each lvl 0 not count ; price.length = maxLvl
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for each lvl in lan iso lang ; lvlDesc.length = maxLvl
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public MainKit createBasicKit(final String isoLang, final String name, final String displayName, final int maxLvl, final int[] price, Material displayMat, final String[] lvlDesc, final String... desc)
+    {
+        return createKit(isoLang, name, displayName, maxLvl, price, displayMat, lvlDesc, desc);
+    }
+
+    /**
+     * create a {@link KitType#MONO_LVL_MINECOINS} or {@link KitType#MONO_LVL_STARS}  kit, this function is same as {@link MinetasiaCoreApi#createKit(String, String, String, int, int[], Material, String[], String...)}
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param economy the economy for buy this need be {@link Economy#MINECOINS} or {@link Economy#STARS}
+     * @param price the price of the kit
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for lvl locked and unlock statue;
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public abstract MainKit createMonoLvlCoinsKit(final String isoLang, final String name, final String displayName, final Economy economy, final int price, Material displayMat, final String[] lvlDesc, final String... desc);
+
+    /**
+     * create a {@link KitType#MONO_LVL_PERM} kit, this function is same as {@link MinetasiaCoreApi#createKit(String, String, String, int, int[], Material, String[], String...)}
+     * @param isoLang the lang of the default kit
+     * @param name the name of the kit format : {game_name}_{kits_name}
+     * @param displayName the display name in th iso lang
+     * @param perm the permission of the kit not not need register
+     * @param displayMat the material to show in gui
+     * @param lvlDesc tne description for lvl locked and unlock statue;
+     * @param desc description of the kit
+     * @return created kit
+     */
+    public abstract MainKit createMonoLvlPermsKit(final String isoLang, final String name, final String displayName, final String perm, Material displayMat, final String[] lvlDesc, final String... desc);
 
     /**
      * get Stats of a user
@@ -440,8 +513,118 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     @NotNull
     public abstract String getGroupDisplay(UUID player);
 
-//    public abstract int getKitLevelOfUser(UUID player, String kitName);
-//
-//    public abstract void setKitLvlOfUser(UUID player, String kitName, int lvl);
+    /**
+     * can't change phase in hub server
+     * @param phase to set
+     * @see ServerPhase
+     */
+    public abstract void setServerPhase(@NotNull ServerPhase phase);
+
+    /**
+     * get the phase of the server
+     * @return {@link ServerPhase}
+     */
+    @NotNull
+    public abstract ServerPhase getServerPhase();
+
+    /**
+     * need set in {@link ServerPhase#LOAD} set the maximum of player CAN PLAY
+     * @param maxPlayer maximum player can play
+     */
+    public abstract void setMaxPlayerCount(int maxPlayer);
+
+    /**
+     * get the maximum of player CAN player admin place not count
+     * @return maximum player can play
+     */
+    public abstract int getMaxPlayerCount();
+
+    /**
+     * @return true if server is a hub else false
+     */
+    public abstract boolean isHub();
+
+    public abstract void registerGui(MinetasiaGUI gui);
+
+    @NotNull
+    public abstract String getPrefix();
+
+    /**
+     *  the config name (32 max char);
+     *  format : {map-name}
+     *  format : {team-mode}_{map-name}
+     *  example :
+     *    mini games skyblockbattle with 6 team and 2 player per team with hill-island  map : 2-x-6_hill-island
+     * @return config name
+     */
+    @NotNull
+    public abstract String getServerConfig();
+
+    public abstract MinetasiaPlayer getPlayer(UUID uuid);
+
+    public abstract MongoDbManager getMongoDbManager();
+
+    /**
+     * open the party gui to a player
+     * @param player to open gui
+     */
+    public abstract void openPartyGui(@NotNull Player player);
+
+    /**
+     * open the friend gui to a player
+     * @param player to open gui
+     */
+    public abstract void openFriendGui(@NotNull Player player);
+
+    /**
+     * validate a custom advancement to a player (auto give rewards)
+     * @param player to valid advancement
+     * @param namespacedKey the name of the advancement
+     */
+    public abstract void validateAdvancement( @NotNull UUID player, @NotNull NamespacedKey namespacedKey);
+
+    /**
+     * create an advancement
+     * @param namespacedKey the name of the advancement
+     * @param icon the icon
+     * @param frame the frame
+     * @param title the title in lang
+     * @param description the description in lang
+     * @param lang the lang
+     * @return the created advancement
+     */
+    public abstract MinetasiaBaseAdvancement createAdvancement(@NotNull NamespacedKey namespacedKey, @NotNull AdvancementIcon icon, @NotNull AdvancementFrame frame, @NotNull String title, @NotNull String description, @NotNull String lang);
+
+    /**
+     * register an advancement (add to bdd if not exist)
+     * @param advancement the advancement
+     */
+    public abstract void registerAdvancement(@NotNull MinetasiaBaseAdvancement advancement);
+
+    /**
+     * get the settings
+     * @param key the key of the settings
+     * @param <T> the type of the settings
+     * @return the settings
+     */
+    @NotNull
+    public abstract <T> MinetasiaSettings<T> getSettings(@NotNull SettingsKey<T> key);
+
+    /**
+     * get the display ip to show to players
+     * @return ip
+     */
+    public abstract String getIp();
+
+    /**
+     * this function add the consumer in the ip runnable
+     * th runnable it's just for hud (tab or score board) this make a beautiful animation on the ip common in all servers !
+     * just add a consumer that the String input is the ip with de good color !
+     * link this on your scoreboard and it's good :) !
+     * @param ipConsumer the consumer
+     */
+    public abstract void registerIpConsumer(Consumer<String> ipConsumer);
+
+    public abstract boolean isMuted(UUID player);
 
 }

@@ -5,28 +5,18 @@
 # dbname: name of the db need be created always                                                               #
 # system: mysql -
 # =========================================================================================================== #
-db: # NO value here !
-  host: ''
+
+
+dbm:
+  host: 'mongodb://localhost:27017'
+  dbname: 'minetasia'
   login: ''
   password: ''
-  dbname: ''
-  system: 'mysql'
-  connexion_args: '?allowMultiQueries=true&useSSL=false'
 
-# =========================================================================================================== #
-# host: url of the frs (set 127.0.0.1 for local db)                                                            #
-# password: password for log          (def 4514)                                                              #
-# port:port listening by frs                                                                                    #
-# timeout: timeout time (def 5000)                                                                             #
-# =========================================================================================================== #
-frs: # NO value Here
-  host: ''
-  port: 4514
-  password: ''
-  timeout: 5000
+
 
 server_motd: "&9Mine&6Tasia&7>> %s"
-
+publish-port: 32001
 cache:
   user: 2
 
@@ -35,3 +25,9 @@ cache:
 # =========================================================================================================== #
 player_count_update: 30
 
+# lang
+lang:
+  en:
+    BAN_FORMAT: "&c&lYou are banned by {player}@@&c for the reason : {reason}@@&c for {time}",
+  fr:
+    BAN_FORMAT: "&c&lTu as était bannit par {player}@@&c pour la raison: {reason}@@&c pour {time}",

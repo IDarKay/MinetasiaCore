@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * @author alice. B. (IDarKay),
  * Created the 21/12/2019 at 16:40
  */
-public interface Kit {
+public interface Kit  extends MainKit{
 
     /**
      * get the lang of this kit instance in <a href="https://www.data.gouv.fr/fr/datasets/r/b4d4331f-d82c-45ce-92fe-615a1a6adc1b">ISO-3166-1 </a>
@@ -21,14 +21,6 @@ public interface Kit {
      * @since 1.0
      */
     @NotNull String getIsoLang();
-
-    /**
-     * get the generic name of the kit <br>
-     *     (no depend of the {@link Kit#getIsoLang()}) <br>
-     *     need be in format : {@code <plugin_name>_<kits_name>}
-     * @return {@link String} the generic name
-     */
-    @NotNull String getName();
 
     /**
      * get the display name of the kit <br>
@@ -59,22 +51,5 @@ public interface Kit {
      */
     String[] getDescriptionPerLvl();
 
-    /**
-     * @return the max lvl of the kit (no depend of the {@link Kit#getIsoLang()})
-     */
-    int getMaxLevel();
-
-    /**
-     * the element 0 is price for lvl 1
-     * element 1 for lvl 2 etc <br>
-     *  table.length must be equal to {@link Kit#getMaxLevel()}
-     * @return table of int
-     */
-    int[] getPrice();
-
-    /**
-     * @return material wil b show in gui
-     */
-    Material getDisplayMet();
 
 }

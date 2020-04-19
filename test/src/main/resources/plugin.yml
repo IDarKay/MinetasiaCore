@@ -1,0 +1,8 @@
+name: MinetasiaCoreTest
+version: @version@
+main: fr.idarkay.minetasia.test.MinetasiaTest
+api-version: 1.15
+authors: [IDarKay]
+softdepend: [NoteBlockAPI]
+load: POSTWORLD
+description: test plugin

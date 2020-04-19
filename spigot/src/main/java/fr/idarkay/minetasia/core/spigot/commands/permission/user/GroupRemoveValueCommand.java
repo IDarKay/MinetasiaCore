@@ -45,7 +45,7 @@ public class GroupRemoveValueCommand extends SubCommand implements FlexibleComma
             {
                 plugin.getPermissionManager().removeGroup(u, g.getName());
                 plugin.getPermissionManager().removeTempGroup(u, g.getName());
-                sender.sendMessage(Lang.USER_GROUP_REMOVE.get(lang, permission, args[1]));
+                sender.sendMessage(Lang.USER_GROUP_REMOVE.get(lang, Lang.Argument.GROUP_NAME.match(permission), Lang.Argument.PLAYER.match(args[1])));
             }
             else sender.sendMessage(Lang.PLAYER_NOT_EXIST.get(lang));
         }
