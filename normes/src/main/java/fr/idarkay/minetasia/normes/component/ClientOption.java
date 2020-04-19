@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.normes.component;
 
+import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -61,4 +62,16 @@ public enum ClientOption
     {
         return key;
     }
+
+    @NotNull
+    public static ClientOption fromKey(@NotNull String key)
+    {
+        Validate.notNull(key);
+        for (ClientOption value : values())
+        {
+            if(value.getKey().equals(key)) return value;
+        }
+        throw new IllegalArgumentException();
+    }
+
 }

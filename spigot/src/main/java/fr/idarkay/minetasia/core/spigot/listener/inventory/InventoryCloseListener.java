@@ -8,8 +8,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
-import java.util.ArrayList;
-
 /**
  * File <b>InventoryCloseListener</b> located on fr.idarkay.minetasia.core.spigot.listener.inventory
  * InventoryCloseListener is a part of MinetasiaCore.
@@ -23,7 +21,7 @@ import java.util.ArrayList;
 public class InventoryCloseListener implements Listener
 {
 
-    public static final ArrayList<Class<? extends MinetasiaGUI>> blackListClazz = new ArrayList<>();
+//    public static final ArrayList<Class<? extends MinetasiaGUI>> blackListClazz = new ArrayList<>();
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryCloseEvent(InventoryCloseEvent e)
@@ -33,7 +31,7 @@ public class InventoryCloseListener implements Listener
             final MinetasiaGuiHolder holder = (MinetasiaGuiHolder) e.getInventory().getHolder();
             final Player player = (Player) e.getPlayer();
             final MinetasiaGUI gui = holder.getMinetasiaGUI();
-            if(gui != null  && !blackListClazz.contains(gui.getClass()))
+            if(gui != null)
                 gui.close(player, e, holder);
 
         }

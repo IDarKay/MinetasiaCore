@@ -3,17 +3,15 @@ package fr.idarkay.minetasia.normes.component;
 import fr.idarkay.minetasia.normes.component.event.ClickEventType;
 import fr.idarkay.minetasia.normes.component.event.hover.HoverEvent;
 import fr.idarkay.minetasia.normes.utils.GeneralUtils;
-import net.minecraft.server.v1_15_R1.ChatBaseComponent;
-import net.minecraft.server.v1_15_R1.ChatClickable;
-import net.minecraft.server.v1_15_R1.ChatModifier;
-import net.minecraft.server.v1_15_R1.EnumChatFormat;
-import net.minecraft.server.v1_15_R1.IChatBaseComponent;
-import net.minecraft.server.v1_15_R1.NBTTagCompound;
-import net.minecraft.server.v1_15_R1.NBTTagList;
+import net.minecraft.server.v1_15_R1.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collector;
 
 /**
  * File <b>BaseComponent</b> located on fr.idarkay.minetasia.normes.component
@@ -27,55 +25,127 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class BaseComponent
 {
-    private boolean italic = false;
-    private boolean strikethrough = false;
-    private boolean bold = false;
-    private boolean underlined = false;
-    private boolean obfuscated = false;
-    private ChatColor chatColor = null;
-    private ClickEventType clickEventType = null;
-    private String clickEventValue = null;
-    private HoverEvent hoverEvent = null;
-    private BaseComponent[] extra = null;
-    private ChatModifier chatModifier = new ChatModifier();
+
+
+
+//    private boolean italic = false;
+//    private boolean strikethrough = false;
+//    private boolean bold = false;
+//    private boolean underlined = false;
+//    private boolean obfuscated = false;
+    protected ChatColor chatColor = null;
+    protected ClickEventType clickEventType = null;
+    protected String clickEventValue = null;
+    protected HoverEvent hoverEvent = null;
+    protected BaseComponent[] extra = null;
+    protected ChatModifier chatModifier;
+
+    public static BaseComponent fromIChatBaseComponent(IChatBaseComponent iChatBaseComponent)
+    {
+        if(iChatBaseComponent instanceof ChatMessage)
+        {
+            return new TranslatableComponent((ChatMessage) iChatBaseComponent);
+        }
+        else if(iChatBaseComponent instanceof ChatComponentText)
+        {
+            return new TextComponent((ChatComponentText) iChatBaseComponent);
+        }
+        else if(iChatBaseComponent instanceof ChatComponentKeybind)
+        {
+            return new KeyBindComponent((ChatComponentKeybind) iChatBaseComponent);
+        }
+        else
+        {
+            throw new IllegalArgumentException(iChatBaseComponent.getClass().getName() + " not register");
+        }
+    }
+
+    public static BaseComponent fromIChatBaseComponent(String stringValue)
+    {
+        if(stringValue.startsWith(MinetasiaTranslatableComponent.identifier))
+        {
+            String[] split = stringValue.split(";", 2);
+            Validate.isTrue(split.length == 2, "invalidate string value " + stringValue);
+            return new MinetasiaTranslatableComponent(split[1]);
+        }
+        else
+            return fromIChatBaseComponent(IChatBaseComponent.ChatSerializer.a(stringValue));
+    }
+
+    protected BaseComponent(BaseComponent clone)
+    {
+//        this.msg = msg;
+        copyDisplay(clone);
+    }
+
+    protected void copyDisplay(BaseComponent clone)
+    {
+        this.chatModifier = clone.chatModifier;
+        this.extra = clone.extra;
+        this.clickEventValue = clone.clickEventValue;
+        this.clickEventType = clone.clickEventType;
+        this.chatColor = clone.chatColor;
+        this.hoverEvent = clone.hoverEvent;
+    }
 
     public BaseComponent()
     {
 //        this.msg = msg;
+        chatModifier = new ChatModifier();;
         chatModifier.setItalic(false);
+    }
+
+    protected BaseComponent(IChatBaseComponent iChatBaseComponent)
+    {
+        this.chatModifier = iChatBaseComponent.getChatModifier();
+        if(chatModifier.getColor() != null)
+            this.chatColor = ChatColor.getByChar(chatModifier.getColor().character);
+        if(chatModifier.getClickEvent() != null)
+        {
+            clickEventType = ClickEventType.fromNms(chatModifier.getClickEvent().a());
+            clickEventValue = chatModifier.getClickEvent().b();
+        }
+        if(chatModifier.getHoverEvent() != null)
+        {
+//            chatModifier.getHoverEvent();
+            //todo: hover
+        }
+        if(iChatBaseComponent.getSiblings() != null)
+            extra = iChatBaseComponent.getSiblings().stream().map(iChatBaseComponent1 -> fromIChatBaseComponent(iChatBaseComponent)).toArray(BaseComponent[]::new);
+
     }
 
     public BaseComponent setBold(boolean bold)
     {
-        this.bold = bold;
+//        this.bold = bold;
         chatModifier.setBold(true);
         return this;
     }
 
     public BaseComponent setItalic(boolean italic)
     {
-        this.italic = italic;
+//        this.italic = italic;
         chatModifier.setItalic(true);
         return this;
     }
 
     public BaseComponent setStrikethrough(boolean strikethrough)
     {
-        this.strikethrough = strikethrough;
+//        this.strikethrough = strikethrough;
         chatModifier.setStrikethrough(true);
         return this;
     }
 
     public BaseComponent setUnderlined(boolean underlined)
     {
-        this.underlined = underlined;
+//        this.underlined = underlined;
         chatModifier.setUnderline(true);
         return this;
     }
 
     public BaseComponent setObfuscated(boolean obfuscated)
     {
-        this.obfuscated = obfuscated;
+//        this.obfuscated = obfuscated;
         chatModifier.setRandom(true);
         return this;
     }
@@ -120,27 +190,27 @@ public abstract class BaseComponent
 
     public boolean isBold()
     {
-        return bold;
+        return chatModifier.isBold();
     }
 
     public boolean isItalic()
     {
-        return italic;
+        return chatModifier.isItalic();
     }
 
     public boolean isStrikethrough()
     {
-        return strikethrough;
+        return chatModifier.isStrikethrough();
     }
 
     public boolean isUnderlined()
     {
-        return underlined;
+        return chatModifier.isUnderlined();
     }
 
     public boolean isObfuscated()
     {
-        return obfuscated;
+        return chatModifier.isRandom();
     }
 
     public ClickEventType getClickEventType()
@@ -167,7 +237,11 @@ public abstract class BaseComponent
     {
         if(chatColor.isFormat()) throw new IllegalArgumentException("chatcolor can only be a color");
         this.chatColor = chatColor;
-        chatModifier.setColor(EnumChatFormat.valueOf(chatColor.name()));
+
+        for (EnumChatFormat value : EnumChatFormat.values())
+        {
+            if(value.character == chatColor.getChar()) chatModifier.setColor(value);
+        }
         return this;
     }
 
@@ -182,9 +256,10 @@ public abstract class BaseComponent
 
     public NBTTagCompound toNbtTagCompound()
     {
-        final NBTTagCompound nbtTagCompound = new NBTTagCompound();
+        NBTTagCompound nbtTagCompound = new NBTTagCompound();
 
         nbtTagCompound.a(getAddon()); //merge
+
 //        getAddon().forEach(nbtTagCompound::setString);
 
         if(isBold()) nbtTagCompound.setBoolean("bold", true);
@@ -228,13 +303,75 @@ public abstract class BaseComponent
     @NotNull
     public IChatBaseComponent toChatBaseComponent()
     {
+        return toChatBaseComponent(null, null);
+    }
+
+    /**
+     * for skyblock and MinetasiaTranslatableComponent
+     * @param lang lang translate
+     * @return the chat component
+     */
+    public @NotNull <R> IChatBaseComponent toChatBaseComponent(String lang, R argsObject)
+    {
         final IChatBaseComponent iChatBaseComponent = getBaseChatComponent().setChatModifier(chatModifier);
         if(extra != null)
             for (BaseComponent baseComponent : extra)
             {
-                iChatBaseComponent.addSibling(baseComponent.toChatBaseComponent());
+                iChatBaseComponent.addSibling(baseComponent.toChatBaseComponent(lang, argsObject));
             }
         return iChatBaseComponent;
     }
+
+    /**
+     * for skyblock and MinetasiaTranslatableComponent
+     * @param lang lang translate
+     * @return the chat component
+     * not apply on this
+     */
+    public @NotNull <R> IChatBaseComponent[] toChatBaseComponentWithSplit(String lang, R argsObject, int maxChar)
+    {
+        int current = 0;
+        final List<IChatBaseComponent> back = new ArrayList<>();
+//        final IChatBaseComponent iChatBaseComponent = ;
+        back.add(getBaseChatComponent().setChatModifier(chatModifier));
+        if(extra != null)
+            for (BaseComponent baseComponent : extra)
+            {
+                if(baseComponent instanceof MinetasiaTranslatableComponent)
+                {
+                    IChatBaseComponent[] c = baseComponent.toChatBaseComponentWithSplit(lang, argsObject, maxChar);
+                    if(c.length == 0)
+                    {
+                        continue;
+                    }
+                    else if(c.length == 1)
+                    {
+                        back.get(current).addSibling(c[0]);
+                    }
+                    else
+                    {
+                        back.get(current).addSibling(c[0]);
+                        for (int i = 1; i < c.length; i++)
+                        {
+                            current = i;
+                            back.add(c[i]);
+                        }
+                    }
+                }
+                else
+                    back.get(current).addSibling(baseComponent.toChatBaseComponent(lang, argsObject));
+            }
+        return back.toArray(new IChatBaseComponent[0]);
+    }
+
+    public static Collector<NBTBase, NBTTagList, NBTTagList> toNBTTagListCollector()
+    {
+        return Collector.of(NBTTagList::new, NBTTagList::add,  (left, right) ->  { left.addAll(right); return left;});
+    }
+
+//    public static Collector<NBTBase, NBTTagList, NBTTagList> toNBTTagListCollector()
+//    {
+//        return Collector.of(NBTTagList::new, NBTTagList::add,  (left, right) ->  { left.addAll(right); return left;});
+//    }
 
 }

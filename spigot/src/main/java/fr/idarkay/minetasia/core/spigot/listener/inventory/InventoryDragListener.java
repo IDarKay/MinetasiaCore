@@ -9,8 +9,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryDragEvent;
 
-import java.util.ArrayList;
-
 /**
  * File <b>InventoryDragListener</b> located on fr.idarkay.minetasia.core.spigot.listener.inventory
  * InventoryDragListener is a part of MinetasiaCore.
@@ -24,7 +22,7 @@ import java.util.ArrayList;
 public class InventoryDragListener implements Listener
 {
 
-    public static final ArrayList<Class<? extends MinetasiaGUI>> blackListClazz = new ArrayList<>();
+//    public static final ArrayList<Class<? extends MinetasiaGUI>> blackListClazz = new ArrayList<>();
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryDragEvent(InventoryDragEvent e)
@@ -42,7 +40,7 @@ public class InventoryDragListener implements Listener
             }
             final Player player = (Player) e.getWhoClicked();
             final MinetasiaGUI gui = holder.getMinetasiaGUI();
-            if(gui != null  && !blackListClazz.contains(gui.getClass()))
+            if(gui != null)
                 gui.drag(player, e, holder);
         }
     }

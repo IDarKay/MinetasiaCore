@@ -20,9 +20,22 @@ public class TextComponent extends BaseComponent
 
     private final String text;
 
-    public TextComponent(String text)
+    public TextComponent(@NotNull String text)
     {
+        super();
         this.text = text;
+    }
+
+    protected TextComponent(String text, BaseComponent clone)
+    {
+        super(clone);
+        this.text = text;
+   }
+
+    public TextComponent(@NotNull ChatComponentText chatBaseComponents)
+    {
+        super(chatBaseComponents);
+        this.text = chatBaseComponents.getText();
     }
 
     @Override
