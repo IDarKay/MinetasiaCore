@@ -114,7 +114,7 @@ artifactory {
     contextUrl = "${artifactory_contextUrl}"
     publish {
         repository {
-            repoKey = 'gradle-dev-local'
+            repoKey = "${artifactory_repo}"
             username = "${artifactory_user}"
             password = "${artifactory_password}"
         }
