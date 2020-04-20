@@ -2,14 +2,15 @@ image: gradle:5.6-jdk8
 
 before_script:
   - echo "artifactory_contextUrl=$CI_ARTIFACTORY_URL" >> gradle.properties
-  - echo "artifactory_user=$CI_ARTIFACTORY_user" >> gradle.properties
-  - echo "artifactory_password=$CI_ARTIFACTORY_password" >> gradle.properties
+  - echo "artifactory_user=$CI_ARTIFACTORY_USER" >> gradle.properties
+  - echo "artifactory_password=$CI_ARTIFACTORY_PASSWORD" >> gradle.properties
   - echo "artifactory_repo=gradle-dev-local" >> gradle.properties
+  - cat gradle.properties
 
 build-master:
   stage: build
   script:
-    - chmod -Rf 777 .
-    - ./gradlew build ArtifactoryPublish
+    - gradle build ArtifactoryPublish
+    - ls -la
   only:
     - master
