@@ -5,6 +5,7 @@ before_script:
   - echo "artifactory_user=$CI_ARTIFACTORY_user" >> gradle.properties
   - echo "artifactory_password=$CI_ARTIFACTORY_password" >> gradle.properties
   - echo "artifactory_repo=gradle-dev-local" >> gradle.properties
+  - cat gradle.properties
 
 build-master:
   stage: build
