@@ -16,6 +16,8 @@ import java.net.Socket;
 public interface MessageReceiver
 {
 
+
+
     void recived(Socket socket);
 
 }

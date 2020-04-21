@@ -19,6 +19,8 @@ import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
 import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
+import fr.idarkay.minetasia.core.api.message.*;
+import fr.idarkay.minetasia.core.api.message.event.AsyncMinetasiaPacketCombingEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.advancement.AdvancementManager;
 import fr.idarkay.minetasia.core.spigot.advancement.MinetasiaAdvancement;
@@ -40,6 +42,7 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryCloseListene
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
+import fr.idarkay.minetasia.core.spigot.messages.CorePacketManger;
 import fr.idarkay.minetasia.core.spigot.messages.SanctionMessage;
 import fr.idarkay.minetasia.core.spigot.messages.ServerMessage;
 import fr.idarkay.minetasia.core.spigot.moderation.PlayerSanction;
@@ -215,6 +218,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     public void initClientReceiver()
     {
+        final JsonParser packetJsonParser = new JsonParser();
         MessageClient.setReceiver(socket -> {
             if(this.isEnabled())
             {
@@ -236,6 +240,24 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                             return;
                         }
 
+                        String channel = split[0];
+
+                        if(split.length == 2 && channel.startsWith(MinetasiaPacketManager.channelPrefix))
+                        {
+                            MessageOutChanel<?, ?> messageInChanel = MinetasiaPacketManager.getMessageOutChanel(channel);
+                            if(messageInChanel != null)
+                            {
+                                MinetasiaPacket packet = messageInChanel.getPacketSerializer().read(packetJsonParser.parse(split[1]).getAsJsonObject());
+                                final AsyncMinetasiaPacketCombingEvent event = new AsyncMinetasiaPacketCombingEvent(packet);
+                                if(event.isNeedRep() && event.getRep() != null)
+                                {
+                                    MessageClient.send(socket, event.getRep().write().toString());
+                                }
+                                socket.close();
+                                return;
+
+                            }
+                        }
 
                         final SocketPrePossesEvent e = new SocketPrePossesEvent(socket, split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]);
                         Bukkit.getPluginManager().callEvent(e);
@@ -397,7 +419,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         //register Listener
         registerListener();
 
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "start player count schedule");
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init messaging");
+        CorePacketManger.init();
         initClientReceiver();
 
 
@@ -760,6 +783,49 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync)
     {
         return publishTarget(chanel, message, target.getServer(), rep, sync);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketGlobal(@NotNull MinetasiaPacketOut packetOut, boolean proxy, boolean sync)
+    {
+        publishGlobal(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), proxy, sync);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketProxy(@NotNull MinetasiaPacketOut packetOut, boolean sync)
+    {
+        publishProxy(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), sync);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketType(@NotNull MinetasiaPacketOut packetOut, String serverType, boolean sync)
+    {
+        publishServerType(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), serverType, sync);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> MinetasiaPacketIn sendPacketToServer(@NotNull MinetasiaPacketOut packetOut, Server server, boolean sync)
+    {
+        String back = publishTarget(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), server, packetOut.isNeedRep(), sync);
+        return back == null ? null : minetasiaPacketInFromString(MinetasiaPacketManager.channelPrefix + packetOut.name(), back);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> MinetasiaPacketIn publishTargetPlayer(@NotNull MinetasiaPacketOut packetOut, PlayerStatueFix player, boolean sync)
+    {
+        String back = publishTargetPlayer(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), player, packetOut.isNeedRep(), sync);
+        return back == null ? null : minetasiaPacketInFromString(MinetasiaPacketManager.channelPrefix + packetOut.name(), back);
+    }
+
+    private MinetasiaPacketIn minetasiaPacketInFromString(String channel, String s)
+    {
+
+        MessageInChanel<?, ?> messageInChanel = MinetasiaPacketManager.getMessageInChanel(channel);
+        if(messageInChanel != null)
+        {
+            return messageInChanel.getPacketSerializer().read(JSON_PARSER.parse(s).getAsJsonObject());
+        }
+        return null;
     }
 
     public String publishTarget(@NotNull String chanel, String message, @NotNull String ip, int port, boolean rep, boolean sync)
