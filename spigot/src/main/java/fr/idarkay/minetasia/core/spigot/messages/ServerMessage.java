@@ -1,9 +1,7 @@
 package fr.idarkay.minetasia.core.spigot.messages;
 
 import fr.idarkay.minetasia.core.api.ServerPhase;
-import fr.idarkay.minetasia.core.api.event.ServerPlayerCountUpdateEvent;
-import fr.idarkay.minetasia.core.api.event.ServerRegisterEvent;
-import fr.idarkay.minetasia.core.api.event.ServerUnregisterEvent;
+import fr.idarkay.minetasia.core.api.event.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import org.bukkit.Bukkit;
@@ -22,11 +20,17 @@ import org.jetbrains.annotations.NotNull;
 public class ServerMessage extends CoreMessage
 {
 
+    @Deprecated
     public static final String CREATE = "create";
+
+    public static final String SERVER_ON = "server_on";
+    public static final String SET_INFORMATION = "set_information";
+    public static final String ASK_CONFIG = "ask_config";
+    public static final String HUB_ASK_CONFIG = "hub_ask_config";
+
     public static final String REMOVE = "remove";
     public static final String PLAYER_COUNT = "playerCount";
     public static final String SERVER_STATUE = "serverStatue";
-    public static final String SERVER_MAX_PLAYER = "serverMaxPlayer";
 
     public ServerMessage()
     {
@@ -36,9 +40,37 @@ public class ServerMessage extends CoreMessage
     @Override
     public void actionOnGet(MinetasiaCore plugin, String... args)
     {
+        System.out.println(concat(args, " ", 0));
         if (args.length > 2)
         {
-            if (args[1].equals(CREATE))
+            if(args[1].equals(HUB_ASK_CONFIG))
+            {
+                final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(args[2]);
+                if(server != null)
+                    Bukkit.getPluginManager().callEvent(new ServerAskedConfigEvent(server));
+            }
+            else if(args[1].equals(SERVER_ON))
+            {
+                final MineServer server = MineServer.getServerFromJson(CoreMessage.concat(args, ";", 2));
+                plugin.getServerManager().addServer(server);
+                Bukkit.getPluginManager().callEvent(new ServerRegisterEvent(server));
+            }
+            else if(args[1].equals(SET_INFORMATION))
+            {
+                final fr.idarkay.minetasia.core.api.utils.Server server = plugin.getServer(args[2]);
+                if(server == null) return;
+                String cfg = args[2];
+                int maxPlayer = Integer.parseInt(args[3]);
+                server.setServerConfig(cfg);;
+                server.setMaxPlayerCount(maxPlayer);
+                Bukkit.getPluginManager().callEvent(new ServerInformationUpdateEvent(server, cfg, maxPlayer));
+            }
+            else if(args[1].equals(ASK_CONFIG))
+            {
+                System.out.println("ask " + args[2]);
+                plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new ServerModeRequestEvent(args[2])));
+            }
+            else if (args[1].equals(CREATE))
             {
                 final MineServer server = MineServer.getServerFromJson(CoreMessage.concat(args, ";", 2));
                 plugin.getServerManager().addServer(server);
@@ -77,14 +109,6 @@ public class ServerMessage extends CoreMessage
                 } catch (Exception ignore)
                 {
                 }
-            } else if(args[1].equals(SERVER_MAX_PLAYER))
-            {
-                try
-                {
-                    plugin.getServer(args[2]).setMaxPlayerCount(Integer.parseInt(args[3]));
-                } catch (Exception ignore)
-                {
-                }
             }
         }
     }
@@ -97,7 +121,8 @@ public class ServerMessage extends CoreMessage
 
     public static boolean goodObject(Object... args)
     {
-        return args.length > 1 && (args[0].equals(CREATE) || args[0].equals(REMOVE) || args[0].equals(PLAYER_COUNT) || args[0].equals(SERVER_STATUE) || args[0].equals(SERVER_MAX_PLAYER));
+        return true;
+//        return args.length > 1 && (args[0].equals(CREATE) || args[0].equals(REMOVE) || args[0].equals(ASK_CONFIG) || args[0].equals(PLAYER_COUNT) || args[0].equals(SERVER_STATUE) || args[0].equals(SERVER_ON) || args[0].equals(SET_INFORMATION));
     }
 
     public static  @NotNull String getIdentifier()

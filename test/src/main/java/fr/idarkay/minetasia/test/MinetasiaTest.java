@@ -139,6 +139,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         }
 
         @Override
+        public void setServerConfig(String serverConfig)
+        {
+
+        }
+
+        @Override
         public int compareTo(@NotNull fr.idarkay.minetasia.core.api.utils.Server server)
         {
             return  server.getServerPhase().ordinal() - getServerPhase().ordinal();
@@ -620,6 +626,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public void setServerInformation(int maxPlayer, String serverConfig)
+    {
+
+    }
+
+    @Override
     public int getMaxPlayerCount()
     {
         return serverPhase == ServerPhase.GAME || serverPhase == ServerPhase.END ? maxPlayerCount -2 : maxPlayerCount;
@@ -840,6 +852,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     public boolean isMuted(UUID player)
     {
         return false;
+    }
+
+    @Override
+    public void askServerToSetMode(@NotNull Server server, @NotNull String serverConfig)
+    {
+
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)

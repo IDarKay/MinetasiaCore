@@ -6,6 +6,7 @@ import fr.idarkay.minetasia.core.api.ServerPhase;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -22,10 +23,11 @@ public final class MineServer implements fr.idarkay.minetasia.core.api.utils.Ser
 
     private final long creatTime;
     private final UUID uuid;
-    private final String ip, type, serverConfig;
+    private final String ip, type;
     private final int port, publishPort;
     private int playerCount = 0, maxPlayerCount = -1;
     private ServerPhase serverPhase = ServerPhase.LOAD;
+    private String serverConfig;
 
     public MineServer(@NotNull String ip, int port, int publishPort , String type, String serverConfig)
     {
@@ -147,6 +149,12 @@ public final class MineServer implements fr.idarkay.minetasia.core.api.utils.Ser
     }
 
     @Override
+    public void setServerConfig(String serverConfig)
+    {
+        this.serverConfig = serverConfig;
+    }
+
+    @Override
     public void setPhase(ServerPhase phase)
     {
         this.serverPhase = phase;
@@ -180,6 +188,23 @@ public final class MineServer implements fr.idarkay.minetasia.core.api.utils.Ser
                 .append("publish_port", publishPort)
                 .append("port", port)
                 .append("ip", ip);
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        MineServer that = (MineServer) o;
+        return uuid.equals(that.uuid) && type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(uuid, type);
     }
 
     @Override
