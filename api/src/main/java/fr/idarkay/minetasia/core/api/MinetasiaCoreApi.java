@@ -3,6 +3,8 @@ package fr.idarkay.minetasia.core.api;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
+import fr.idarkay.minetasia.core.api.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.core.api.message.MinetasiaPacketOut;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
@@ -217,6 +219,15 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync);
 
+    public abstract <T extends MinetasiaPacketOut> void sendPacketGlobal(@NotNull MinetasiaPacketOut packetOut, boolean proxy, boolean sync);
+
+    public abstract <T extends MinetasiaPacketOut> void sendPacketProxy(@NotNull MinetasiaPacketOut packetOut, boolean sync);
+
+    public abstract <T extends MinetasiaPacketOut> void sendPacketType(@NotNull MinetasiaPacketOut packetOut, String serverType , boolean sync);
+
+    public abstract <T extends MinetasiaPacketOut> MinetasiaPacketIn sendPacketToServer(@NotNull MinetasiaPacketOut packetOut, Server server, boolean sync);
+
+    public abstract <T extends MinetasiaPacketOut> MinetasiaPacketIn publishTargetPlayer(@NotNull MinetasiaPacketOut packetOut, PlayerStatueFix server, boolean sync);
 
     /**
      * move a player to random lobby

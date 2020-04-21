@@ -3,6 +3,8 @@ package fr.idarkay.minetasia.test;
 import com.google.gson.JsonObject;
 import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.advancement.*;
+import fr.idarkay.minetasia.core.api.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.core.api.message.MinetasiaPacketOut;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
@@ -325,10 +327,37 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return null;
     }
 
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketGlobal(@NotNull MinetasiaPacketOut packetOut, boolean proxy, boolean sync)
+    {
+
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketProxy(@NotNull MinetasiaPacketOut packetOut, boolean sync)
+    {
+
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketType(@NotNull MinetasiaPacketOut packetOut, String serverType, boolean sync)
+    {
+
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> MinetasiaPacketIn sendPacketToServer(@NotNull MinetasiaPacketOut packetOut, Server server, boolean sync)
+    {
+        return null;
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> MinetasiaPacketIn publishTargetPlayer(@NotNull MinetasiaPacketOut packetOut, PlayerStatueFix server, boolean sync)
+    {
+        return null;
+    }
 
     HashMap<String, HashMap<String, String>> values = new HashMap<>();
-
-
 
     @Override
     public void movePlayerToHub(@NotNull org.bukkit.entity.Player player) {
