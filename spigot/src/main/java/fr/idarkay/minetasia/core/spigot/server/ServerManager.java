@@ -37,7 +37,10 @@ public final class ServerManager {
         if(ip.equals("")) ip = "127.0.0.1";
         int port = Bukkit.getPort();
 
-        this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(), plugin.getServerConfig());
+        boolean old_server_fromat = plugin.getConfig().getBoolean("old_server_format");
+        System.out.println(old_server_fromat);
+
+        this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(), old_server_fromat ? plugin.getServerConfig() : "not_set");
         servers.put(server.getName(), server);
 
         plugin.getMongoDbManager().getCollection(MongoCollections.SERVERS).find(Filters.regex("type", Objects.requireNonNull(plugin.getConfig().getString("server_type_load")))).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
@@ -45,6 +48,36 @@ public final class ServerManager {
 
     private boolean register = false;
 
+    public void setServerIsOn()
+    {
+        if(!register)
+        {
+            register = true;
+            plugin.getMongoDbManager().insert(MongoCollections.SERVERS, server.toDocument());
+            if(server.getType().equalsIgnoreCase("hub"))
+            {
+                plugin.publishGlobal(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_ON,  server.toJson()), true, true);
+            }
+            else
+            {
+                plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_ON,  server.toJson()), true);
+                plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_ON,  server.toJson()), true);
+            }
+
+        }
+    }
+
+    public void updateInformation(int maxPlayer, String serverCfg)
+    {
+        server.setServerConfig(serverCfg);
+        server.setMaxPlayerCount(maxPlayer);
+        plugin.getMongoDbManager().getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(server.getName()),  new Document("$set", new Document("server_config", serverCfg).append("max_player_count", maxPlayer)));
+
+        //don't care other server and poxy
+        plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SET_INFORMATION, server.getName(), serverCfg, maxPlayer), false);
+    }
+
+    @Deprecated
     public void registerServer()
     {
         if(!register)
@@ -138,4 +171,9 @@ public final class ServerManager {
         }
     }
 
+    public void askServerToSetMode(Server server, String serverConfig)
+    {
+        plugin.publishTarget(CoreMessage.CHANNEL,  ServerMessage.getMessage(ServerMessage.ASK_CONFIG, serverConfig), server, false, false);
+        plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.HUB_ASK_CONFIG, server.getName()), false);
+    }
 }

@@ -531,7 +531,15 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * need set in {@link ServerPhase#LOAD} set the maximum of player CAN PLAY
      * @param maxPlayer maximum player can play
      */
+    @Deprecated
     public abstract void setMaxPlayerCount(int maxPlayer);
+
+    /**
+     * setup the information of the server
+     * @param maxPlayer - maxPlayer
+     * @param serverConfig - the config load of the server get in {@link fr.idarkay.minetasia.core.api.event.ServerModeRequestEvent}
+     */
+    public abstract void setServerInformation(int maxPlayer, String serverConfig);
 
     /**
      * get the maximum of player CAN player admin place not count
@@ -626,5 +634,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract void registerIpConsumer(Consumer<String> ipConsumer);
 
     public abstract boolean isMuted(UUID player);
+
+    public abstract void askServerToSetMode(@NotNull Server server, @NotNull String serverConfig);
 
 }

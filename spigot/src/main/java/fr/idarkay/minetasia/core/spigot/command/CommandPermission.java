@@ -83,6 +83,7 @@ public enum CommandPermission {
     BROADCAST("admin.broadcast", ADMIN),
     WHITELIST("admin.whitelist", ADMIN),
     MAINTENANCE("admin.maintenance", ADMIN),
+    STOP("admin.stop", ADMIN),
 
 
     MODERATION("moderation.*", ALL),

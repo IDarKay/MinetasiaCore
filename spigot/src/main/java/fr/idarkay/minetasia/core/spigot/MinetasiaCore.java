@@ -388,6 +388,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Objects.requireNonNull(getCommand("unwarn")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_WARN, SanctionType.WARN));
 
         Objects.requireNonNull(getCommand("report")).setExecutor(new ReportExecutor(this));
+        Objects.requireNonNull(getCommand("stop")).setExecutor(new StopExecutor());
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "register events");
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -414,6 +415,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         {
            Bukkit.getScheduler().runTaskLater(this, this.permissionManager::loadTabGroup, 1L);
         }
+
+        messageServer.open();
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
             if(getConfig().getBoolean("default-register"))
@@ -1060,6 +1063,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return sanction != null && !sanction.isEnd();
     }
 
+    @Override
+    public void askServerToSetMode(Server server, String serverConfig)
+    {
+        Validate.isTrue(server.getServerConfig().equals("not_set"), "server already set config !");
+        serverManager.askServerToSetMode(server, serverConfig);
+    }
+
     private void addGameWonMoneyToOfflinePlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
     {
         if(moneyUpdater.getUpdateMoney().isEmpty()) return;
@@ -1183,13 +1193,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         Validate.notNull(phase);
         //check if max player is not -1
-        if(phase != ServerPhase.LOAD && getThisServer().getMaxPlayerCount() < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
+        if(phase != ServerPhase.LOAD && phase != ServerPhase.SERVER_ON && getThisServer().getMaxPlayerCount() < 0) throw new IllegalArgumentException("can't change phase without set maxPlayerCount !");
         getThisServer().setPhase(phase);
+
+        if(phase == ServerPhase.SERVER_ON)
+        {
+            serverManager.setServerIsOn();
+        }
+
         if(phase == ServerPhase.STARTUP)
         {
             serverManager.registerServer();
-            messageServer.open();
         }
+
         else
         {
             //add place for admin
@@ -1211,11 +1227,19 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    @Deprecated
     public void setMaxPlayerCount(int maxPlayer)
     {
         setMaxPlayerCount(maxPlayer, true);
         getThisServer().setMaxPlayerCount(maxPlayer);
     }
+
+    @Override
+    public void setServerInformation(int maxPlayer, String serverConfig)
+    {
+        getServerManager().updateInformation(maxPlayer, serverConfig);
+    }
+
 
     @Override
     public int getMaxPlayerCount()
@@ -1528,4 +1552,15 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         return oldCombatsManger;
     }
+
+    public void doAsync(Runnable runnable)
+    {
+        Bukkit.getScheduler().runTaskAsynchronously(this, runnable);
+    }
+
+    public void doSync(Runnable runnable)
+    {
+        Bukkit.getScheduler().runTask(this, runnable);
+    }
+
 }

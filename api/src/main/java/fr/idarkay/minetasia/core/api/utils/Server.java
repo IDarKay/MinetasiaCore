@@ -104,4 +104,6 @@ public interface Server extends Comparable<Server> {
      */
     String getServerConfig();
 
+    void setServerConfig(String serverConfig);
+
 }
