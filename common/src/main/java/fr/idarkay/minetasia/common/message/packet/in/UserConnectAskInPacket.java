@@ -1,13 +1,12 @@
-package fr.idarkay.minetasia.core.spigot.messages.packet.in;
+package fr.idarkay.minetasia.common.message.packet.in;
 
 import com.google.gson.JsonObject;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketIn;
-import fr.idarkay.minetasia.core.spigot.messages.serializer.in.UserConnectAskInSerializer;
-import org.apache.commons.lang.Validate;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.common.message.serializer.in.UserConnectAskInSerializer;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * File <b>UserConnectAskInPacket</b> located on fr.idarkay.minetasia.core.spigot.messages.packet.out
+ * File <b>UserConnectAskInPacket</b> located on fr.idarkay.minetasia.common.message.packet.out
  * UserConnectAskInPacket is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
@@ -26,7 +25,6 @@ public class UserConnectAskInPacket extends MinetasiaPacketIn
     {
         super(code, repMessage);
         this.serializer = serializer;
-        Validate.isTrue(server != null || code > 299);
         this.server = server;
     }
 

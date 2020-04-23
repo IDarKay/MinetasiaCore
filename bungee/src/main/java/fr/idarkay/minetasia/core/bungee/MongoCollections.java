@@ -1,6 +1,4 @@
-package fr.idarkay.minetasia.core.bungee;
-
-/**
+/*
  * File <b>MongoCollections</b> located on fr.idarkay.minetasia.core.spigot.utils
  * MongoCollections is a part of MinetasiaCore.
  * <p>
@@ -10,6 +8,13 @@ package fr.idarkay.minetasia.core.bungee;
  * @author Alois. B. (IDarKay),
  * Created the 09/02/2020 at 20:49
  */
+package fr.idarkay.minetasia.core.bungee;
+
+
+/**
+ * @deprecated use {@link fr.idarkay.minetasia.common.MongoCollections}
+ */
+@Deprecated
 public enum MongoCollections
 {
     USERS("users"),

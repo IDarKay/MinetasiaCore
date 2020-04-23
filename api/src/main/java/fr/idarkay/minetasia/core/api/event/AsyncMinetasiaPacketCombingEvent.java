@@ -1,15 +1,15 @@
-package fr.idarkay.minetasia.core.api.message.event;
+package fr.idarkay.minetasia.core.api.event;
 
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacket;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketIn;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketOut;
+import fr.idarkay.minetasia.common.message.MinetasiaPacket;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * File <b>MinetasiaPacketCommingEvent</b> located on fr.idarkay.minetasia.core.api.message.event
+ * File <b>MinetasiaPacketCommingEvent</b> located on fr.idarkay.minetasia.common.message.event
  * MinetasiaPacketCommingEvent is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.

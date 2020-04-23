@@ -3,8 +3,8 @@ package fr.idarkay.minetasia.core.api;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketIn;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketOut;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
@@ -525,13 +525,6 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract String getGroupDisplay(UUID player);
 
     /**
-     * can't change phase in hub server
-     * @param phase to set
-     * @see ServerPhase
-     */
-    public abstract void setServerPhase(@NotNull ServerPhase phase);
-
-    /**
      * get the phase of the server
      * @return {@link ServerPhase}
      */
@@ -542,15 +535,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * need set in {@link ServerPhase#LOAD} set the maximum of player CAN PLAY
      * @param maxPlayer maximum player can play
      */
-    @Deprecated
     public abstract void setMaxPlayerCount(int maxPlayer);
-
-    /**
-     * setup the information of the server
-     * @param maxPlayer - maxPlayer
-     * @param serverConfig - the config load of the server get in {@link fr.idarkay.minetasia.core.api.event.ServerModeRequestEvent}
-     */
-    public abstract void setServerInformation(int maxPlayer, String serverConfig);
 
     /**
      * get the maximum of player CAN player admin place not count
@@ -646,6 +631,6 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract boolean isMuted(UUID player);
 
-    public abstract void askServerToSetMode(@NotNull Server server, @NotNull String serverConfig);
+    public abstract void setServerPhase(@NotNull ServerPhase phase);
 
 }

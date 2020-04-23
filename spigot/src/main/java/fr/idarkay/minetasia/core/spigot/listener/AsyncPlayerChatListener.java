@@ -7,6 +7,7 @@ import fr.idarkay.minetasia.core.spigot.moderation.SanctionType;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.utils.GeneralUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -72,6 +73,7 @@ public class AsyncPlayerChatListener implements Listener {
         if(p.hasPermission(CommandPermission.UTILS_CHAT_MAGIC.getPermission())) msg = translateColorCodes(msg, false);
         e.setFormat(format.toString());
         e.setMessage(msg);
+        Bukkit.getLogger().info(String.format(format.toString(), e.getPlayer().getName(), msg));
     }
 
 

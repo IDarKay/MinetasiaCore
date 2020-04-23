@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.api.message;
+package fr.idarkay.minetasia.common.message;
 
 /**
  * File <b>MessageChanel</b> located on fr.minetasia.skyblock.core.message

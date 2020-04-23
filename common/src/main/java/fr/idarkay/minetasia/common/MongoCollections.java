@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.api;
+package fr.idarkay.minetasia.common;
 
 /**
  * File <b>MongoCollections</b> located on fr.idarkay.minetasia.core.spigot.utils
@@ -10,7 +10,6 @@ package fr.idarkay.minetasia.core.api;
  * @author Alois. B. (IDarKay),
  * Created the 09/02/2020 at 20:49
  */
-@Deprecated
 public enum MongoCollections
 {
     USERS("users"),

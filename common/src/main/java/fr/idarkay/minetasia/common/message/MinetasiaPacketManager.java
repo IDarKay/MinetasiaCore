@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.api.message;
+package fr.idarkay.minetasia.common.message;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * File <b>MinetasiaPacketManager</b> located on fr.idarkay.minetasia.core.api.message
+ * File <b>MinetasiaPacketManager</b> located on fr.idarkay.minetasia.common.message
  * MinetasiaPacketManager is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
@@ -41,6 +41,11 @@ public abstract class MinetasiaPacketManager
     public static MessageInChanel<?,?> getMessageInChanel(@NotNull String name)
     {
         return registeredInPacket.get(name);
+    }
+
+    public static MinetasiaPacketInSerializer<?> getInFromOut(@NotNull MinetasiaPacketOut packetOut)
+    {
+        return getMessageInChanel(channelPrefix + packetOut.name()).getPacketSerializer();
     }
 
 }

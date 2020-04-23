@@ -3,8 +3,8 @@ package fr.idarkay.minetasia.test;
 import com.google.gson.JsonObject;
 import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.advancement.*;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketIn;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketOut;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
@@ -140,11 +140,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
             return serverConfig;
         }
 
-        @Override
-        public void setServerConfig(String serverConfig)
-        {
-
-        }
 
         @Override
         public int compareTo(@NotNull fr.idarkay.minetasia.core.api.utils.Server server)
@@ -654,11 +649,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
         setMaxPlayerCount(maxPlayer, true);
     }
 
-    @Override
-    public void setServerInformation(int maxPlayer, String serverConfig)
-    {
-
-    }
 
     @Override
     public int getMaxPlayerCount()
@@ -883,11 +873,6 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return false;
     }
 
-    @Override
-    public void askServerToSetMode(@NotNull Server server, @NotNull String serverConfig)
-    {
-
-    }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {

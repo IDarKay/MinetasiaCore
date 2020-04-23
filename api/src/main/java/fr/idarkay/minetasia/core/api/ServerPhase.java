@@ -21,7 +21,6 @@ public enum ServerPhase
     /**
      * STARTUP {@code =>} player can join, and leave the lobby waiting the game doesn't started
      */
-    @Deprecated
     STARTUP,
     /**
      * GAME {@code =>} if player join game need set spectator if server full go back lobby
@@ -31,8 +30,4 @@ public enum ServerPhase
      * END {@code =>} end of the game redirection player ton hb and stop server
      */
     END,
-    /**
-     * STARTUP {@code =>}  when server is ready to laod mode
-     */
-    SERVER_ON
 }

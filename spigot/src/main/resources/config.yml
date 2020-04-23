@@ -103,8 +103,6 @@ max-player-count-add-admin: 5
 old_combats_module:
   no_cooldown: true
 
-old_server_format: true
-
 # =========================================================================================================== #
 # {main_category}:
 #     display:

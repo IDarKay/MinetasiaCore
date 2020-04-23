@@ -1,7 +1,7 @@
-package fr.idarkay.minetasia.core.api.message;
+package fr.idarkay.minetasia.common.message;
 
 /**
- * File <b>MinetasiaPacketIn</b> located on fr.idarkay.minetasia.core.api.message
+ * File <b>MinetasiaPacketIn</b> located on fr.idarkay.minetasia.common.message
  * MinetasiaPacketIn is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
