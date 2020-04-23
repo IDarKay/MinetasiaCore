@@ -1,4 +1,6 @@
-/*
+package fr.idarkay.minetasia.common;
+
+/**
  * File <b>MongoCollections</b> located on fr.idarkay.minetasia.core.spigot.utils
  * MongoCollections is a part of MinetasiaCore.
  * <p>
@@ -8,13 +10,6 @@
  * @author alice. B. (IDarKay),
  * Created the 09/02/2020 at 20:49
  */
-package fr.idarkay.minetasia.core.bungee;
-
-
-/**
- * @deprecated use {@link fr.idarkay.minetasia.common.MongoCollections}
- */
-@Deprecated
 public enum MongoCollections
 {
     USERS("users"),
@@ -24,11 +19,13 @@ public enum MongoCollections
     KITS("kits"),
     PROXY("proxy"),
     PARTY("party"),
+    ADVANCEMENT("advancement"),
     SETTINGS("settings"),
 
     SKYBLOCK_SHOP_ITEM("skyblock_shop_item"),
-    SKYBLOCK_HDV("skyblock_hdv")
-
+    SKYBLOCK_HDV("skyblock_hdv"),
+    SKYBLOCK_ISLAND("skyblock_island"),
+    SKYBLOCK_ONLINE_ISLAND("skyblock_online_island")
     ;
     public final String name;
 

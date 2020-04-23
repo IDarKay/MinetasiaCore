@@ -1,16 +1,16 @@
-package fr.idarkay.minetasia.core.api.message;
+package fr.idarkay.minetasia.common.message;
 
 import com.google.gson.JsonObject;
 
 /**
- * File <b>MinetasiaPacket</b> located on fr.idarkay.minetasia.core.api.message
+ * File <b>MinetasiaPacket</b> located on fr.idarkay.minetasia.common.message
  * MinetasiaPacket is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
  * <p>
  *
  * @author alice. B. (IDarKay),
- * Created the 21/04/2020 at 21:36
+ * Created the 22/04/2020 at 14:24
  */
 public interface MinetasiaPacket
 {

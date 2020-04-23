@@ -1,4 +1,4 @@
-package fr.idarkay.minetasia.core.api.message;
+package fr.idarkay.minetasia.common.message;
 
 /**
  * File <b>MessageChanel</b> located on fr.minetasia.skyblock.core.message
@@ -10,12 +10,12 @@ package fr.idarkay.minetasia.core.api.message;
  * @author alice. B. (IDarKay),
  * Created the 21/04/2020 at 21:07
  */
-public class MessageOutChanel<T extends MinetasiaPacketOutSerializer<R>, R extends MinetasiaPacketOut>
+public class MessageInChanel<T extends MinetasiaPacketInSerializer<R>, R extends MinetasiaPacketIn>
 {
     private final T packetSerializer;
     private final Class<R> packetClass;
 
-    public MessageOutChanel(T packetSerializer, Class<R> packetClass)
+    public MessageInChanel(T packetSerializer, Class<R> packetClass)
     {
         this.packetSerializer = packetSerializer;
         this.packetClass = packetClass;

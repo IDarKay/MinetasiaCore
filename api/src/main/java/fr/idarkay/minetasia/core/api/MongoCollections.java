@@ -10,6 +10,7 @@ package fr.idarkay.minetasia.core.api;
  * @author alice. B. (IDarKay),
  * Created the 09/02/2020 at 20:49
  */
+@Deprecated
 public enum MongoCollections
 {
     USERS("users"),

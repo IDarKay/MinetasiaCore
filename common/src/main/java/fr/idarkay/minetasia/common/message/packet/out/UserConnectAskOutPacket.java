@@ -1,15 +1,15 @@
-package fr.idarkay.minetasia.core.spigot.messages.packet.out;
+package fr.idarkay.minetasia.common.message.packet.out;
 
 import com.google.gson.JsonObject;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketOut;
-import fr.idarkay.minetasia.core.spigot.messages.serializer.out.UserConnectAskOutSerializer;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
+import fr.idarkay.minetasia.common.message.serializer.out.UserConnectAskOutSerializer;
 import org.bson.Document;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
 /**
- * File <b>UserConnectAskOutPacket</b> located on fr.idarkay.minetasia.core.spigot.messages.packet.out
+ * File <b>UserConnectAskOutPacket</b> located on fr.idarkay.minetasia.common.message.packet.out
  * UserConnectAskOutPacket is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.

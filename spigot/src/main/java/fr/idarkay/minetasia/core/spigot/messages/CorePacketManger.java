@@ -1,12 +1,12 @@
 package fr.idarkay.minetasia.core.spigot.messages;
 
-import fr.idarkay.minetasia.core.api.message.MessageInChanel;
-import fr.idarkay.minetasia.core.api.message.MessageOutChanel;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketManager;
-import fr.idarkay.minetasia.core.spigot.messages.packet.in.UserConnectAskInPacket;
-import fr.idarkay.minetasia.core.spigot.messages.packet.out.UserConnectAskOutPacket;
-import fr.idarkay.minetasia.core.spigot.messages.serializer.in.UserConnectAskInSerializer;
-import fr.idarkay.minetasia.core.spigot.messages.serializer.out.UserConnectAskOutSerializer;
+import fr.idarkay.minetasia.common.message.MessageInChanel;
+import fr.idarkay.minetasia.common.message.MessageOutChanel;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketManager;
+import fr.idarkay.minetasia.common.message.packet.in.UserConnectAskInPacket;
+import fr.idarkay.minetasia.common.message.packet.out.UserConnectAskOutPacket;
+import fr.idarkay.minetasia.common.message.serializer.in.UserConnectAskInSerializer;
+import fr.idarkay.minetasia.common.message.serializer.out.UserConnectAskOutSerializer;
 
 /**
  * File <b>CorePacketManger</b> located on fr.idarkay.minetasia.core.spigot.messages

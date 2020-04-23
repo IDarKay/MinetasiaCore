@@ -1,10 +1,10 @@
-package fr.idarkay.minetasia.core.api.message;
+package fr.idarkay.minetasia.common.message;
 
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * File <b>MinetasiaPacktOutSerializer</b> located on fr.idarkay.minetasia.core.api.message
+ * File <b>MinetasiaPacktOutSerializer</b> located on fr.idarkay.minetasia.common.message
  * MinetasiaPacktOutSerializer is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.

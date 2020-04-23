@@ -35,7 +35,7 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'groovy'
 
-    group 'minetasia'
+    group = 'minetasia'
     version = '1.0'
 
     sourceCompatibility = '1.8'
@@ -100,6 +100,31 @@ project('api') {
         publishArtifacts = true
         publishPom = false
     }
+}
+
+project('common') {
+
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.artifactory'
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = group
+                artifactId = 'core-common-api'
+                version = version
+                artifact file("./build/libs/MinetasiaCore-common-1.0-all.jar")
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications('mavenJava')
+
+        publishArtifacts = true
+        publishPom = false
+    }
+
 }
 
 artifactory {

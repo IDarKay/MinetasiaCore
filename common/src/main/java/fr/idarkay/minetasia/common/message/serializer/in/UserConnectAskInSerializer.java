@@ -1,13 +1,13 @@
-package fr.idarkay.minetasia.core.spigot.messages.serializer.in;
+package fr.idarkay.minetasia.common.message.serializer.in;
 
 import com.google.gson.JsonObject;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacket;
-import fr.idarkay.minetasia.core.api.message.MinetasiaPacketInSerializer;
-import fr.idarkay.minetasia.core.spigot.messages.packet.in.UserConnectAskInPacket;
+import fr.idarkay.minetasia.common.message.MinetasiaPacket;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketInSerializer;
+import fr.idarkay.minetasia.common.message.packet.in.UserConnectAskInPacket;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * File <b>UserConnectAskInSerializer</b> located on fr.idarkay.minetasia.core.spigot.messages.serializer.in
+ * File <b>UserConnectAskInSerializer</b> located on fr.idarkay.minetasia.common.message.serializer.in
  * UserConnectAskInSerializer is a part of MinetasiaCore.
  * <p>
  * Copyright (c) 2020 MinetasiaCore.
@@ -23,6 +23,7 @@ public class UserConnectAskInSerializer extends MinetasiaPacketInSerializer<User
     {
         super("userConnectAsk");
     }
+
 
     @Override
     public JsonObject write(MinetasiaPacket packet)

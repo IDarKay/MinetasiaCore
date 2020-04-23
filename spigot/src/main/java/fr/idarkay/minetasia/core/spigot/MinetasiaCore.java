@@ -9,18 +9,24 @@ import com.google.gson.JsonParser;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import fr.idarkay.minetasia.common.MongoCollections;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
 import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
-import fr.idarkay.minetasia.core.api.*;
+import fr.idarkay.minetasia.common.message.*;
+import fr.idarkay.minetasia.core.api.BoostType;
+import fr.idarkay.minetasia.core.api.Command;
+import fr.idarkay.minetasia.core.api.Economy;
+import fr.idarkay.minetasia.core.api.GeneralPermission;
+import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
+import fr.idarkay.minetasia.core.api.ServerPhase;
+import fr.idarkay.minetasia.core.api.SettingsKey;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
+import fr.idarkay.minetasia.core.api.event.AsyncMinetasiaPacketCombingEvent;
 import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
-import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
-import fr.idarkay.minetasia.core.api.message.*;
-import fr.idarkay.minetasia.core.api.message.event.AsyncMinetasiaPacketCombingEvent;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.core.spigot.advancement.AdvancementManager;
 import fr.idarkay.minetasia.core.spigot.advancement.MinetasiaAdvancement;
@@ -422,7 +428,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init messaging");
         CorePacketManger.init();
         initClientReceiver();
-
+        messageServer.open();
 
 
         //for sign
@@ -439,7 +445,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
            Bukkit.getScheduler().runTaskLater(this, this.permissionManager::loadTabGroup, 1L);
         }
 
-        messageServer.open();
+
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
             if(getConfig().getBoolean("default-register"))
@@ -847,23 +853,11 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void movePlayerToHub(@NotNull org.bukkit.entity.Player player)
     {
+        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+        output.writeUTF("ConnectType");
+        output.writeUTF("hub");
 
-        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
-        {
-            Bukkit.getPluginManager().callEvent(new PlayerMoveToHubEvent(player));
-            int i = -1;
-            Server sr = null;
-
-            for(Server s : getServers(HUB_NAME).values())
-            {
-                if(sr == null || i == -1 || s.getPlayerCount() < i) {
-                    sr = s;
-                    i = s.getPlayerCount();
-                }
-            }
-            if(sr == null) Bukkit.getScheduler().runTask(this, () -> player.kickPlayer("No valid hub"));
-            else  movePlayerToServer(player, sr);
-        });
+        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
 
     @Override
@@ -1129,13 +1123,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return sanction != null && !sanction.isEnd();
     }
 
-    @Override
-    public void askServerToSetMode(Server server, String serverConfig)
-    {
-        Validate.isTrue(server.getServerConfig().equals("not_set"), "server already set config !");
-        serverManager.askServerToSetMode(server, serverConfig);
-    }
-
     private void addGameWonMoneyToOfflinePlayer(@NotNull UUID uuid, @NotNull MoneyUpdater moneyUpdater, boolean boost, boolean async)
     {
         if(moneyUpdater.getUpdateMoney().isEmpty()) return;
@@ -1259,19 +1246,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         Validate.notNull(phase);
         //check if max player is not -1
-        if(phase != ServerPhase.LOAD && phase != ServerPhase.SERVER_ON && getThisServer().getMaxPlayerCount() < 0) throw new IllegalArgumentException("can't change phase without set maxPlayerCount !");
+        if(phase != ServerPhase.LOAD && getThisServer().getMaxPlayerCount() < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
         getThisServer().setPhase(phase);
-
-        if(phase == ServerPhase.SERVER_ON)
-        {
-            serverManager.setServerIsOn();
-        }
-
         if(phase == ServerPhase.STARTUP)
         {
             serverManager.registerServer();
         }
-
         else
         {
             //add place for admin
@@ -1284,6 +1264,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                 publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_STATUE, getThisServer().getName(), phase.name()), true);
             });
         }
+
     }
 
     @Override
@@ -1298,12 +1279,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         setMaxPlayerCount(maxPlayer, true);
         getThisServer().setMaxPlayerCount(maxPlayer);
-    }
-
-    @Override
-    public void setServerInformation(int maxPlayer, String serverConfig)
-    {
-        getServerManager().updateInformation(maxPlayer, serverConfig);
     }
 
 
