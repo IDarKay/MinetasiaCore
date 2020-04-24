@@ -360,6 +360,18 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public void movePlayerToSkyblockHub(@NotNull Player player)
+    {
+
+    }
+
+    @Override
+    public void movePlayerToSkyblockIsland(@NotNull Player player)
+    {
+
+    }
+
+    @Override
     public void movePlayerToServer(@NotNull Player player, Server server)
     {
         player.kickPlayer("Disconnect move function not set (test core version)");

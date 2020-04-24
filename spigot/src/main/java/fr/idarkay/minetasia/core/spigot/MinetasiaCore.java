@@ -861,6 +861,27 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public void movePlayerToSkyblockHub(@NotNull org.bukkit.entity.Player player)
+    {
+        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+        output.writeUTF("ConnectType");
+        output.writeUTF("skyblock-hub");
+
+        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
+    }
+
+    @Override
+    public void movePlayerToSkyblockIsland(@NotNull org.bukkit.entity.Player player)
+    {
+        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+        output.writeUTF("ConnectSkyblockIsland");
+        Document doc = getPlayer(player.getUniqueId()).getData("skyblock", Document.class);
+        output.writeUTF(doc == null ? "" : doc.toJson());
+
+        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
+    }
+
+    @Override
     public void movePlayerToServer(@NotNull org.bukkit.entity.Player player, Server server) {
         ByteArrayDataOutput output = ByteStreams.newDataOutput();
         output.writeUTF("Connect");
