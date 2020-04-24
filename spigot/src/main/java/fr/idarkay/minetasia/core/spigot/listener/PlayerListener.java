@@ -47,8 +47,9 @@ public class PlayerListener implements Listener {
     {
         e.setJoinMessage(null);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
+            final MinePlayer minePlayer = plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
             plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
+            Bukkit.getPluginManager().callEvent(new fr.idarkay.minetasia.core.api.event.PlayerJoinEvent(minePlayer, e.getPlayer()));
             long i = plugin.getPlayer(e.getPlayer().getUniqueId()).getStatus();
             plugin.getPlayerListManager().updatePlayer(e.getPlayer());
 
