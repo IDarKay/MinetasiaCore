@@ -1,6 +1,5 @@
 package fr.idarkay.minetasia.normes.utils;
 
-import com.google.gson.JsonArray;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -299,6 +298,27 @@ public class BukkitUtils
         Validate.notNull(itemStack);
         final NBTTagCompound tag = CraftItemStack.asNMSCopy(itemStack).getTag();
         return tag == null ? null : tag.toString();
+    }
+
+    @NotNull
+    public static String locationToString(@NotNull Location location)
+    {
+        return location.getX() + ";" + location.getY() + ";" + location.getZ() + ";" + location.getYaw() + ";" + location.getPitch();
+    }
+
+    @NotNull
+    public static Location locationFromString(@NotNull String location)
+    {
+        String[] split = location.split(";", 5);
+        if(split.length == 3)
+        {
+            return new Location(null, Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
+        }
+        else if(split.length == 5)
+        {
+            return new Location(null, Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]), Float.parseFloat(split[3]), Float.parseFloat(split[4]));
+        }
+        else throw new IllegalArgumentException("invalid location format");
     }
 
 }
