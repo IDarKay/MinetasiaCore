@@ -236,6 +236,10 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract void movePlayerToHub(@NotNull Player player);
 
+    public abstract void movePlayerToSkyblockHub(@NotNull Player player);
+
+    public abstract void movePlayerToSkyblockIsland(@NotNull Player player);
+
     /**
      *  move a player to server
      *  use {@link MinetasiaCoreApi#movePlayerToHub(Player)} to move ot hub !
