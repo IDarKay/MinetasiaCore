@@ -1,7 +1,9 @@
 package fr.idarkay.minetasia.core.spigot.listener;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.GeneralPermission;
+import fr.idarkay.minetasia.core.spigot.utils.InventorySyncType;
 import fr.idarkay.minetasia.core.api.PlayerStatue;
 import fr.idarkay.minetasia.core.api.ServerPhase;
 import fr.idarkay.minetasia.core.api.event.PlayerPermissionLoadEndEvent;
@@ -9,8 +11,13 @@ import fr.idarkay.minetasia.core.api.utils.Boost;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.CorePlayer;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
+import fr.idarkay.minetasia.core.spigot.utils.InventorySyncTools;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
+import fr.idarkay.minetasia.normes.Tuple;
+import net.minecraft.server.v1_15_R1.MojangsonParser;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -48,6 +55,34 @@ public class PlayerListener implements Listener {
         e.setJoinMessage(null);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             final MinePlayer minePlayer = plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
+            Tuple<InventorySyncType, String> syncInv = InventorySyncTools.pendingSync.remove(e.getPlayer().getUniqueId());
+            if(syncInv != null)
+            {
+                NBTTagCompound data = null;
+                try
+                {
+                    if ( syncInv.a() == InventorySyncType.BDD )
+                    {
+                        String invData = minePlayer.getData(syncInv.b(), String.class);
+                        if(invData != null)
+                        {
+                            data = MojangsonParser.parse(invData);
+                        }
+                    }
+                    else if (syncInv.a() == InventorySyncType.DAT)
+                    {
+                        data = MojangsonParser.parse(syncInv.b());
+                    }
+                }
+                catch (CommandSyntaxException exception)
+                {
+                    exception.printStackTrace();
+                }
+                if (data != null)
+                {
+                    ((CraftPlayer) e.getPlayer()).getHandle().f(data);
+                }
+            }
             plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
             Bukkit.getPluginManager().callEvent(new fr.idarkay.minetasia.core.api.event.PlayerJoinEvent(minePlayer, e.getPlayer()));
             long i = plugin.getPlayer(e.getPlayer().getUniqueId()).getStatus();

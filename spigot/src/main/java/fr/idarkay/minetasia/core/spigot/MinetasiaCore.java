@@ -13,13 +13,7 @@ import fr.idarkay.minetasia.common.MongoCollections;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
 import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
 import fr.idarkay.minetasia.common.message.*;
-import fr.idarkay.minetasia.core.api.BoostType;
-import fr.idarkay.minetasia.core.api.Command;
-import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.GeneralPermission;
-import fr.idarkay.minetasia.core.api.MinetasiaCoreApi;
-import fr.idarkay.minetasia.core.api.ServerPhase;
-import fr.idarkay.minetasia.core.api.SettingsKey;
+import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
@@ -65,10 +59,7 @@ import fr.idarkay.minetasia.core.spigot.user.CorePlayer;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PartyManager;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
-import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.core.spigot.utils.MongoDBManager;
-import fr.idarkay.minetasia.core.spigot.utils.PlayerListManager;
-import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
+import fr.idarkay.minetasia.core.spigot.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.Tuple;
@@ -90,7 +81,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -871,19 +869,23 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void movePlayerToHub(@NotNull org.bukkit.entity.Player player)
     {
-        ByteArrayDataOutput output = ByteStreams.newDataOutput();
-        output.writeUTF("ConnectType");
-        output.writeUTF("hub");
-
-        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
+       movePlayerToType(player, "hub");
     }
 
     @Override
     public void movePlayerToSkyblockHub(@NotNull org.bukkit.entity.Player player)
     {
+        movePlayerToType(player, "skyblock-hub");
+    }
+
+    public void movePlayerToType(@NotNull org.bukkit.entity.Player player, String type)
+    {
+        Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), type);
         ByteArrayDataOutput output = ByteStreams.newDataOutput();
         output.writeUTF("ConnectType");
-        output.writeUTF("skyblock-hub");
+        output.writeUTF(type);
+        output.writeUTF(map.a().name());
+        output.writeUTF(map.b());
 
         player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
@@ -891,10 +893,13 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void movePlayerToSkyblockIsland(@NotNull org.bukkit.entity.Player player)
     {
+        Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), "skyblock-island");
         ByteArrayDataOutput output = ByteStreams.newDataOutput();
         output.writeUTF("ConnectSkyblockIsland");
         Document doc = getPlayer(player.getUniqueId()).getData("skyblock", Document.class);
         output.writeUTF(doc == null ? "" : doc.toJson());
+        output.writeUTF(map.a().name());
+        output.writeUTF(map.b());
 
         System.out.println("send");
 
@@ -903,9 +908,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     @Override
     public void movePlayerToServer(@NotNull org.bukkit.entity.Player player, Server server) {
+        Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), server.getType());
         ByteArrayDataOutput output = ByteStreams.newDataOutput();
         output.writeUTF("Connect");
         output.writeUTF(server.getName());
+        output.writeUTF(map.a().name());
+        output.writeUTF(map.b());
 
         player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
