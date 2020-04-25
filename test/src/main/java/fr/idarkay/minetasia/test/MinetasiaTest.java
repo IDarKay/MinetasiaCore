@@ -305,6 +305,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public void publishServerTypeRegex(@NotNull String chanel, String message, String regex, boolean sync)
+    {
+
+    }
+
+    @Override
     public String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync)
     {
         return null;
