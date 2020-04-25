@@ -5,7 +5,17 @@ import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
 import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
 import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
-import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.core.api.utils.Boost;
+import fr.idarkay.minetasia.core.api.utils.Kit;
+import fr.idarkay.minetasia.core.api.utils.MainKit;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaSettings;
+import fr.idarkay.minetasia.core.api.utils.MoneyUpdater;
+import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
+import fr.idarkay.minetasia.core.api.utils.PlayerStats;
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
+import fr.idarkay.minetasia.core.api.utils.Server;
+import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import fr.idarkay.minetasia.normes.Tuple;
@@ -212,6 +222,8 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract void publishProxy(@NotNull String chanel, String message, boolean sync);
 
     public abstract void publishServerType(@NotNull String chanel, String message, String serverType , boolean sync);
+
+    public abstract void publishServerTypeRegex(@NotNull String chanel, String message, String regex, boolean sync);
 
     public abstract String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync);
 
@@ -552,6 +564,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract boolean isHub();
 
+    @Deprecated
     public abstract void registerGui(MinetasiaGUI gui);
 
     @NotNull

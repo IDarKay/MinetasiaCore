@@ -81,18 +81,19 @@ ip: "play.minetasia.com"
 
 # kit to load set * to first for all else the name of the plugin
 kits_load_regex: ".*$"
-
 # advancement to load (regex) : set .* for all for sbb and minekarttour set ((sbb.*)|(minekarttour.*))
 advancement_load: ".*"
+# javascript regex server type load
+server_type_load: ".*$"
+# javascript regex for server to send message when update
+update_say: "^hub$"
+
 # all folder COULD contain a world to load data packs
 world_folder_regex: "(world|world_nether|world_the_end)"
 # all load lang need same in gui.lang.X
 advancement_lang:
   - "fr"
   - "en"
-
-# javascript regex server type load
-server_type_load: ".*$"
 
 # in phase Game and end add  maxPlayerCount by next number only for admin spectator
 max-player-count-add-admin: 5

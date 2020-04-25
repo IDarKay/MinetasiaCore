@@ -28,6 +28,7 @@ public final class ServerManager {
     private final HashMap<String, fr.idarkay.minetasia.core.api.utils.Server> servers = new HashMap<>();
     private final MineServer server;
     private final MinetasiaCore plugin;
+    private final String updateSay;
 
     public ServerManager(MinetasiaCore plugin)
     {
@@ -39,6 +40,7 @@ public final class ServerManager {
         this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(),  plugin.getServerConfig());
         servers.put(server.getName(), server);
         String serverTypeLoad = plugin.getConfig().getString("server_type_load");
+        this.updateSay = plugin.getConfig().getString("update_say");
 
         if(serverTypeLoad == null || serverTypeLoad.isEmpty() || serverTypeLoad.equals("none"))
         {
@@ -57,34 +59,30 @@ public final class ServerManager {
         {
             plugin.getMongoDbManager().insert(MongoCollections.SERVERS, server.toDocument());
 
-            if(server.getType().equalsIgnoreCase("hub"))
-            {
-                plugin.publishGlobal(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true, true);
-            }
-            else
-            {
-                plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
-                plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
-            }
+            String message = ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson());
+            boolean isSync = !Bukkit.isPrimaryThread();
+
+            plugin.publishProxy(CoreMessage.CHANNEL, message, isSync);
+            plugin.publishServerTypeRegex(CoreMessage.CHANNEL, message, updateSay, isSync);
+
             register = true;
         }
+    }
+
+    public void sayServerUpdate(String channel, String message, boolean sync)
+    {
+        plugin.publishProxy(channel, message, sync);
+        plugin.publishServerTypeRegex(channel, message, updateSay, sync);
     }
 
     public void disable()
     {
         plugin.getMongoDbManager().delete(MongoCollections.SERVERS, server.getName());
-        if(server.getType().equalsIgnoreCase("hub"))
-        {
-            plugin.publishGlobal(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true, true);
-        }
-        else
-        {
-            plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
-            plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
-        }
+        String message = ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName());
+
+        plugin.publishProxy(CoreMessage.CHANNEL, message, true);
+        plugin.publishServerTypeRegex(CoreMessage.CHANNEL, message, updateSay, true);
         register = true;
-
-
     }
 
     public MineServer getServer()
