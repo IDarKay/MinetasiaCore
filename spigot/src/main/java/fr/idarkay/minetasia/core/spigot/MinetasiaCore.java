@@ -131,7 +131,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             .put(BoostType.STARS, 10F)
             .build()
             ;
-    public class PartyServerBoost implements Boost
+
+    public static class PartyServerBoost implements Boost
     {
 
         private final Map<BoostType, Float> boost = new HashMap<>();
@@ -167,7 +168,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         }
     }
 
-    private PartyServerBoost partyServerBoost = new PartyServerBoost();
+    private final PartyServerBoost partyServerBoost = new PartyServerBoost();
 
     private MongoDBManager mongoDBManager;
     private PlayerManager playerManager;
@@ -266,6 +267,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                         }
 
                         final SocketPrePossesEvent e = new SocketPrePossesEvent(socket, split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]);
+                        System.out.println("event call !" + e.getChanel() + " " + e.getValue());
                         Bukkit.getPluginManager().callEvent(e);
 
                         if(e.getAnswer() != null)
@@ -480,7 +482,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             if(c != lastPlayerCount)
             {
                 lastPlayerCount = c;
-                MinetasiaCore.this.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.PLAYER_COUNT, MinetasiaCore.this.getThisServer().getName(), c), true);
+                serverManager.sayServerUpdate(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.PLAYER_COUNT, MinetasiaCore.this.getThisServer().getName(), c), true);
             }
         }
     }
@@ -757,6 +759,22 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public void publishServerTypeRegex(@NotNull String chanel, String message, String regex, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            mongoDBManager.getCollection(MongoCollections.SERVERS).find(Filters.regex("type", regex, "i")).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
+
+        };
+
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
+    }
+
+    @Override
     public String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync)
     {
         Validate.notNull(chanel);
@@ -877,6 +895,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         output.writeUTF("ConnectSkyblockIsland");
         Document doc = getPlayer(player.getUniqueId()).getData("skyblock", Document.class);
         output.writeUTF(doc == null ? "" : doc.toJson());
+
+        System.out.println("send");
 
         player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
@@ -1282,7 +1302,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             }
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
                 mongoDBManager.getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(getThisServer().getName()), Updates.set("phase", phase.ordinal()));
-                publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_STATUE, getThisServer().getName(), phase.name()), true);
+                serverManager.sayServerUpdate(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_STATUE, getThisServer().getName(), phase.name()), true);
             });
         }
 
@@ -1295,7 +1315,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
-    @Deprecated
     public void setMaxPlayerCount(int maxPlayer)
     {
         setMaxPlayerCount(maxPlayer, true);
@@ -1322,31 +1341,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private final static String DRAG_METHODS_NAME = "drag";
 
     @Override
+    @Deprecated
     public void registerGui(MinetasiaGUI gui)
     {
-//        final Class<? extends MinetasiaGUI> clazz = gui.getClass();
-//        for(Method method : clazz.getDeclaredMethods())
-//        {
-//            if(method.getDeclaredAnnotation(MinetasiaGuiNoCallEvent.class) != null)
-//            {
-//                final String name = method.getName();
-//                switch (name)
-//                {
-//                    case OPEN_METHODS_NAME:
-//                        InventoryOpenListener.blackListClazz.add(clazz);
-//                        break;
-//                    case CLOSE_METHODS_NAME:
-//                        InventoryCloseListener.blackListClazz.add(clazz);
-//                        break;
-//                    case CLICK_METHODS_NAME:
-//                        InventoryClickListener.blackListClazz.add(clazz);
-//                        break;
-//                    case DRAG_METHODS_NAME:
-//                        InventoryDragListener.blackListClazz.add(clazz);
-//                        break;
-//                }
-//            }
-//        }
     }
 
     @Override
