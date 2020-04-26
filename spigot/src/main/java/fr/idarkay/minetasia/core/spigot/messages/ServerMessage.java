@@ -36,7 +36,6 @@ public class ServerMessage extends CoreMessage
     @Override
     public void actionOnGet(MinetasiaCore plugin, String... args)
     {
-        System.out.println(concat(args, " ", 0));
         if (args.length > 2)
         {
             if (args[1].equals(CREATE))

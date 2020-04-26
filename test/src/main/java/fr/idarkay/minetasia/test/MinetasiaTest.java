@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -653,6 +654,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
         if(phase != ServerPhase.LOAD && maxPlayerCount < 0) throw new IllegalArgumentException("cant change phase without set maxPlayerCount !");
         //add place for admin
         if(phase == ServerPhase.GAME) setMaxPlayerCount(maxPlayerCount + 2, false);
+    }
+
+    @Override
+    public void setInventorySyncGetter(Function<Player, InventorySyncPlayer> func)
+    {
+
     }
 
     @Override

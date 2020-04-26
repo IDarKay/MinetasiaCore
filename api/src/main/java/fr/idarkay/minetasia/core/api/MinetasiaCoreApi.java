@@ -5,17 +5,7 @@ import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
 import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
 import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
-import fr.idarkay.minetasia.core.api.utils.Boost;
-import fr.idarkay.minetasia.core.api.utils.Kit;
-import fr.idarkay.minetasia.core.api.utils.MainKit;
-import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
-import fr.idarkay.minetasia.core.api.utils.MinetasiaSettings;
-import fr.idarkay.minetasia.core.api.utils.MoneyUpdater;
-import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
-import fr.idarkay.minetasia.core.api.utils.PlayerStats;
-import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
-import fr.idarkay.minetasia.core.api.utils.Server;
-import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
+import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import fr.idarkay.minetasia.normes.Tuple;
@@ -29,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * File <b>MinetasiaCoreApi</b> located on fr.idarkay.minetasia.core.api
@@ -650,4 +641,5 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract void setServerPhase(@NotNull ServerPhase phase);
 
+    public abstract void setInventorySyncGetter(Function<Player, InventorySyncPlayer> func);
 }
