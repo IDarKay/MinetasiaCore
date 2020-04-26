@@ -52,9 +52,11 @@ public final class MineServer implements fr.idarkay.minetasia.core.api.utils.Ser
         this.publishPort = publishPort;
     }
 
+    private static final JsonParser JSON_PARSER = new JsonParser();
+
     public static MineServer getServerFromJson(String json)
     {
-        JsonObject server = new JsonParser().parse(json).getAsJsonObject();
+        JsonObject server = JSON_PARSER.parse(json).getAsJsonObject();
         return new MineServer(server.get("ip").getAsString(), server.get("port").getAsInt(), server.get("publish_port").getAsInt(), server.get("type").getAsString()
                 ,server.get("server_config").getAsString() , UUID.fromString(server.get("_id").getAsString().split("#", 2)[1]), server.get("create_time").getAsLong(),
                 server.get("phase").getAsInt(), server.get("max_player_count").getAsInt());

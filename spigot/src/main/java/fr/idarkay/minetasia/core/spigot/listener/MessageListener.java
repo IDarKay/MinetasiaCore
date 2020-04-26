@@ -125,6 +125,7 @@ public final class MessageListener implements Listener {
                 {
                     InventorySyncTools.pendingSync.put(playerUUID, new Tuple<>(inventorySyncType, value));
                 }
+                event.setAnswer("done");
             } catch (Exception e)
             {
                 e.printStackTrace();

@@ -16,7 +16,7 @@ commands:
     aliases: [perm, perms, permissions]
     description: mange player permission and groups
   hub:
-    aliases: []
+    aliases: [lobby]
     description: go tu hub
   money:
     aliases: []

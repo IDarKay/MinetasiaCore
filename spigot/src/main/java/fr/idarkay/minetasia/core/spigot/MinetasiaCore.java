@@ -3,8 +3,6 @@ package fr.idarkay.minetasia.core.spigot;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.google.gson.JsonParser;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
@@ -81,14 +79,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -231,8 +222,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                     try
                     {
                         final String msg = MessageClient.read(socket);
-
-                        if(msg == null)
+                        if(msg == null || msg.isEmpty())
                         {
                             socket.close();
                             return;
@@ -265,7 +255,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                         }
 
                         final SocketPrePossesEvent e = new SocketPrePossesEvent(socket, split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]);
-                        System.out.println("event call !" + e.getChanel() + " " + e.getValue());
                         Bukkit.getPluginManager().callEvent(e);
 
                         if(e.getAnswer() != null)
@@ -881,41 +870,63 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void movePlayerToType(@NotNull org.bukkit.entity.Player player, String type)
     {
         Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), type);
-        ByteArrayDataOutput output = ByteStreams.newDataOutput();
-        output.writeUTF("ConnectType");
-        output.writeUTF(type);
-        output.writeUTF(map.a().name());
-        output.writeUTF(map.b());
 
-        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
+        String msg = player.getUniqueId() + ";" + type + ";" + map.a().name() + ";" + map.b();
+
+        MinePlayer minePlayer = playerManager.getOnlyInCache(player.getUniqueId());;
+        if(minePlayer == null) return;
+        publishTarget("connect-type", msg, minePlayer.getProxyIp(), minePlayer.getProxyPublishPort(), false, false);
+
+//        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+//        output.writeUTF("ConnectType");
+//        output.writeUTF(type);
+//        output.writeUTF(map.a().name());
+//        output.writeUTF(map.b());
+//
+//        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
 
     @Override
     public void movePlayerToSkyblockIsland(@NotNull org.bukkit.entity.Player player)
     {
         Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), "skyblock-island");
-        ByteArrayDataOutput output = ByteStreams.newDataOutput();
-        output.writeUTF("ConnectSkyblockIsland");
         Document doc = getPlayer(player.getUniqueId()).getData("skyblock", Document.class);
-        output.writeUTF(doc == null ? "" : doc.toJson());
-        output.writeUTF(map.a().name());
-        output.writeUTF(map.b());
 
-        System.out.println("send");
+        String msg = player.getUniqueId() + ";" + (doc == null || !doc.containsKey("island") ? "" : doc.getString("island")) + ";" +  (doc == null ? 1 : doc.getInteger("island_weight", 1)) + ";" + map.a().name() + ";" + map.b();
 
-        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
+        MinePlayer minePlayer = playerManager.getOnlyInCache(player.getUniqueId());;
+        if(minePlayer == null) return;
+        publishTarget("connect-skyblock-island", msg, minePlayer.getProxyIp(), minePlayer.getProxyPublishPort(), false, false);
+
+//        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+//        output.writeUTF("ConnectSkyblockIsland");
+//
+//        output.writeUTF(doc == null ? "" : doc.containsKey("island") ? doc.getString("island") : "");
+//        output.writeInt();
+//        output.writeUTF(map.a().name());
+//        output.writeUTF(map.b());
+//
+//        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
 
     @Override
     public void movePlayerToServer(@NotNull org.bukkit.entity.Player player, Server server) {
-        Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), server.getType());
-        ByteArrayDataOutput output = ByteStreams.newDataOutput();
-        output.writeUTF("Connect");
-        output.writeUTF(server.getName());
-        output.writeUTF(map.a().name());
-        output.writeUTF(map.b());
 
-        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
+        Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), server.getType());
+
+        String msg = player.getUniqueId() + ";" + server.getName() + ";" + map.a().name() + ";" + map.b();
+
+        MinePlayer minePlayer = playerManager.getOnlyInCache(player.getUniqueId());;
+        if(minePlayer == null) return;
+        publishTarget("connect-player", msg, minePlayer.getProxyIp(), minePlayer.getProxyPublishPort(), false, false);
+
+//        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+//        output.writeUTF("Connect");
+//        output.writeUTF(server.getName());
+//        output.writeUTF(map.a().name());
+//        output.writeUTF(map.b());
+//
+//        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
 
     @Override
@@ -1430,6 +1441,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void registerIpConsumer(Consumer<String> ipConsumer)
     {
         this.ipRunnable.addConsumer(ipConsumer);
+    }
+
+    @Override
+    public void setInventorySyncGetter(Function<Player, InventorySyncPlayer> func)
+    {
+        InventorySyncTools.function = func;
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
