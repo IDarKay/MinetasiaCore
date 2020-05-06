@@ -1,3 +1,8 @@
+dependencies {
+    compile 'org.mongodb:mongodb-driver-sync:4.0.0-rc0'
+    compile 'com.google.code.gson:gson:2.8.0'
+}
+
 shadowJar {
     setArchivesBaseName("MinetasiaCore-common")
 }

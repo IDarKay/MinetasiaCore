@@ -12,11 +12,12 @@ package fr.idarkay.minetasia.core.api;
  */
 public enum ServerPhase
 {
-    /**
+    /**--
      * LOAD {@code =>} startup of server load map ; player can't connect <br>
      * <b> this phase is default phase </b>
      */
     LOAD,
+
     /**
      * STARTUP {@code =>} player can join, and leave the lobby waiting the game doesn't started
      */
@@ -28,5 +29,5 @@ public enum ServerPhase
     /**
      * END {@code =>} end of the game redirection player ton hb and stop server
      */
-    END
+    END,
 }

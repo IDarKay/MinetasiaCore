@@ -88,6 +88,7 @@ public class PlayerManager {
         for (String gs : groupsOfUser)
         {
             Group group = plugin.getPermissionManager().groups.get(gs);
+            if(group == null) continue;
             byte i = group.getPriority();
             if (g == null || i > p)
             {

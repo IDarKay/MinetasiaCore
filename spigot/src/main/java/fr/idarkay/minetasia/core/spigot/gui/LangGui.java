@@ -1,6 +1,7 @@
 package fr.idarkay.minetasia.core.spigot.gui;
 
 import fr.idarkay.minetasia.core.api.event.PlayerLangChangeEvent;
+import fr.idarkay.minetasia.core.api.utils.GuiLang;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
 import fr.idarkay.minetasia.normes.*;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 public class LangGui extends MinetasiaGUI<MinetasiaCore>
 {
     public final static HashMap<Integer, String> SLOT_LANG = new HashMap<>();
+    public final static HashMap<String, GuiLang> LANG_TEXTURE = new HashMap<>();
     private final Inventory gui;
 
     /**
@@ -45,11 +47,12 @@ public class LangGui extends MinetasiaGUI<MinetasiaCore>
 
         for(String sec : plugin.getConfig().getConfigurationSection("gui.lang.lang").getKeys(false))
         {
-            final int slot = plugin.getConfig().getInt("gui.lang.lang." + sec + ".slot");
-            gui.setItem(slot, MinetasiaGUI.createHead(1
-                    , ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("gui.lang.lang." + sec + ".name"))
-                    , plugin.getConfig().getString("gui.lang.lang." + sec + ".texture")));
-            SLOT_LANG.put(slot, plugin.getConfig().getString("gui.lang.lang." + sec + ".iso"));
+
+            GuiLang guiLang = new GuiLang(plugin.getConfig().getString("gui.lang.lang." + sec + ".iso"), plugin.getConfig().getString("gui.lang.lang." + sec + ".name"), plugin.getConfig().getString("gui.lang.lang." + sec + ".lore"), plugin.getConfig().getInt("gui.lang.lang." + sec + ".slot"), plugin.getConfig().getString("gui.lang.lang." + sec + ".texture"));
+            LANG_TEXTURE.put(guiLang.getIso(), guiLang);
+            gui.setItem(guiLang.getSlot(), MinetasiaGUI.createHead(1, guiLang.getName(), guiLang.getTexture(), guiLang.getLore().split("@@")));
+            SLOT_LANG.put(guiLang.getSlot(), guiLang.getIso());
+
         }
 
 

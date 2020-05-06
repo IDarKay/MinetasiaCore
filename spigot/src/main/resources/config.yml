@@ -63,11 +63,13 @@ gui:
     lang:
       fr:
         name: '&9Français'
+        lore: 'a faire'
         texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTEyNjlhMDY3ZWUzN2U2MzYzNWNhMWU3MjNiNjc2ZjEzOWRjMmRiZGRmZjk2YmJmZWY5OWQ4YjM1Yzk5NmJjIn19fQ=='
         slot: 11
         iso: 'fr'
       en:
         name: '&9English'
+        lore: 'todo'
         texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGNhYzk3NzRkYTEyMTcyNDg1MzJjZTE0N2Y3ODMxZjY3YTEyZmRjY2ExY2YwY2I0YjM4NDhkZTZiYzk0YjQifX19'
         slot: 15
         iso: 'en'
@@ -81,18 +83,19 @@ ip: "play.minetasia.com"
 
 # kit to load set * to first for all else the name of the plugin
 kits_load_regex: ".*$"
-
 # advancement to load (regex) : set .* for all for sbb and minekarttour set ((sbb.*)|(minekarttour.*))
 advancement_load: ".*"
+# javascript regex server type load
+server_type_load: ".*$"
+# javascript regex for server to send message when update
+update_say: "^hub$"
+
 # all folder COULD contain a world to load data packs
 world_folder_regex: "(world|world_nether|world_the_end)"
 # all load lang need same in gui.lang.X
 advancement_lang:
   - "fr"
   - "en"
-
-# javascript regex server type load
-server_type_load: ".*$"
 
 # in phase Game and end add  maxPlayerCount by next number only for admin spectator
 max-player-count-add-admin: 5

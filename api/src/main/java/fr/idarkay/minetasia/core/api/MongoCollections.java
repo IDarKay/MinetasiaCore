@@ -10,6 +10,7 @@ package fr.idarkay.minetasia.core.api;
  * @author alice. B. (IDarKay),
  * Created the 09/02/2020 at 20:49
  */
+@Deprecated
 public enum MongoCollections
 {
     USERS("users"),
@@ -23,8 +24,9 @@ public enum MongoCollections
     SETTINGS("settings"),
 
     SKYBLOCK_SHOP_ITEM("skyblock_shop_item"),
-    SKYBLOCK_HDV("skyblock_hdv")
-
+    SKYBLOCK_HDV("skyblock_hdv"),
+    SKYBLOCK_ISLAND("skyblock_island"),
+    SKYBLOCK_ONLINE_ISLAND("skyblock_online_island")
     ;
     public final String name;
 

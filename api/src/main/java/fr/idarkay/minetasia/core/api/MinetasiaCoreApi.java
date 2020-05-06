@@ -1,9 +1,23 @@
 package fr.idarkay.minetasia.core.api;
 
+import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
-import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.core.api.utils.Boost;
+import fr.idarkay.minetasia.core.api.utils.GuiLang;
+import fr.idarkay.minetasia.core.api.utils.InventorySyncPlayer;
+import fr.idarkay.minetasia.core.api.utils.Kit;
+import fr.idarkay.minetasia.core.api.utils.MainKit;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaSettings;
+import fr.idarkay.minetasia.core.api.utils.MoneyUpdater;
+import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
+import fr.idarkay.minetasia.core.api.utils.PlayerStats;
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
+import fr.idarkay.minetasia.core.api.utils.Server;
+import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import fr.idarkay.minetasia.normes.Tuple;
@@ -17,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * File <b>MinetasiaCoreApi</b> located on fr.idarkay.minetasia.core.api
@@ -211,12 +226,23 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
 
     public abstract void publishServerType(@NotNull String chanel, String message, String serverType , boolean sync);
 
+    public abstract void publishServerTypeRegex(@NotNull String chanel, String message, String regex, boolean sync);
+
     public abstract String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync);
 
     public abstract String publishTargetPlayer(@NotNull String chanel, String message, UUID target, boolean rep, boolean sync);
 
     public abstract String publishTargetPlayer(@NotNull String chanel, String message, PlayerStatueFix target, boolean rep, boolean sync);
 
+    public abstract <T extends MinetasiaPacketOut> void sendPacketGlobal(@NotNull MinetasiaPacketOut packetOut, boolean proxy, boolean sync);
+
+    public abstract <T extends MinetasiaPacketOut> void sendPacketProxy(@NotNull MinetasiaPacketOut packetOut, boolean sync);
+
+    public abstract <T extends MinetasiaPacketOut> void sendPacketType(@NotNull MinetasiaPacketOut packetOut, String serverType , boolean sync);
+
+    public abstract <T extends MinetasiaPacketOut> MinetasiaPacketIn sendPacketToServer(@NotNull MinetasiaPacketOut packetOut, Server server, boolean sync);
+
+    public abstract <T extends MinetasiaPacketOut> MinetasiaPacketIn publishTargetPlayer(@NotNull MinetasiaPacketOut packetOut, PlayerStatueFix server, boolean sync);
 
     /**
      * move a player to random lobby
@@ -224,6 +250,10 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      * @since 1.0
      */
     public abstract void movePlayerToHub(@NotNull Player player);
+
+    public abstract void movePlayerToSkyblockHub(@NotNull Player player);
+
+    public abstract void movePlayerToSkyblockIsland(@NotNull Player player);
 
     /**
      *  move a player to server
@@ -514,13 +544,6 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract String getGroupDisplay(UUID player);
 
     /**
-     * can't change phase in hub server
-     * @param phase to set
-     * @see ServerPhase
-     */
-    public abstract void setServerPhase(@NotNull ServerPhase phase);
-
-    /**
      * get the phase of the server
      * @return {@link ServerPhase}
      */
@@ -544,6 +567,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
      */
     public abstract boolean isHub();
 
+    @Deprecated
     public abstract void registerGui(MinetasiaGUI gui);
 
     @NotNull
@@ -626,5 +650,11 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract void registerIpConsumer(Consumer<String> ipConsumer);
 
     public abstract boolean isMuted(UUID player);
+
+    public abstract void setServerPhase(@NotNull ServerPhase phase);
+
+    public abstract void setInventorySyncGetter(Function<Player, InventorySyncPlayer> func);
+
+    public abstract Map<String, GuiLang> getLang();
 
 }

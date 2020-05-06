@@ -1,12 +1,16 @@
 package fr.idarkay.minetasia.core.spigot.listener;
 
 import fr.idarkay.minetasia.core.api.Command;
+import fr.idarkay.minetasia.core.spigot.utils.InventorySyncType;
 import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
+import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.commands.friends.FriendCommand;
 import fr.idarkay.minetasia.core.spigot.messages.*;
 import fr.idarkay.minetasia.core.spigot.permission.Group;
+import fr.idarkay.minetasia.core.spigot.utils.InventorySyncTools;
+import fr.idarkay.minetasia.normes.Tuple;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -106,11 +110,29 @@ public final class MessageListener implements Listener {
         }
     }
 
-    private String concat(String[] array, String split, int indexFrom)
+    @EventHandler
+    public void onSocketPrePossesEvent(SocketPrePossesEvent event)
     {
-        StringBuilder result = new StringBuilder();
-        for(int i = indexFrom; i < array.length; i++) result.append(i != indexFrom && split != null ? split : "").append(array[i]);
-        String r = result.toString();
-        return r.equals("null") ? null : r;
+        if (event.getChanel().equals("inventory-sync"))
+        {
+            try
+            {
+                String[] split = event.getValue().split(";", 3);
+                UUID playerUUID = UUID.fromString(split[0]);
+                InventorySyncType inventorySyncType = InventorySyncType.valueOf(split[1]);
+                String value = split[2];
+                if(!inventorySyncType.equals(InventorySyncType.NONE))
+                {
+                    InventorySyncTools.pendingSync.put(playerUUID, new Tuple<>(inventorySyncType, value));
+                }
+                event.setAnswer("done");
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+                event.setAnswer("error");
+            }
+
+        }
     }
+
 }

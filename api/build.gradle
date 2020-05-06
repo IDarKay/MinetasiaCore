@@ -4,6 +4,7 @@ dependencies {
     compile 'org.mongodb:mongodb-driver-sync:4.0.0-rc0'
     compileOnly (group: 'spigot', name: 'spigot', version: '1.15.1')
     compile project(":normes")
+    compile project(":common")
 //    compile 'com.github.koca2000:NoteBlockAPI:1.5.0'
 }
 

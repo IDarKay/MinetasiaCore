@@ -3,6 +3,8 @@ package fr.idarkay.minetasia.test;
 import com.google.gson.JsonObject;
 import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.advancement.*;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
 import fr.idarkay.minetasia.core.api.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaLang;
@@ -33,6 +35,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -137,6 +140,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
         {
             return serverConfig;
         }
+
 
         @Override
         public int compareTo(@NotNull fr.idarkay.minetasia.core.api.utils.Server server)
@@ -302,6 +306,12 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public void publishServerTypeRegex(@NotNull String chanel, String message, String regex, boolean sync)
+    {
+
+    }
+
+    @Override
     public String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync)
     {
         return null;
@@ -319,14 +329,53 @@ public class MinetasiaTest extends MinetasiaCoreApi
         return null;
     }
 
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketGlobal(@NotNull MinetasiaPacketOut packetOut, boolean proxy, boolean sync)
+    {
+
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketProxy(@NotNull MinetasiaPacketOut packetOut, boolean sync)
+    {
+
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketType(@NotNull MinetasiaPacketOut packetOut, String serverType, boolean sync)
+    {
+
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> MinetasiaPacketIn sendPacketToServer(@NotNull MinetasiaPacketOut packetOut, Server server, boolean sync)
+    {
+        return null;
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> MinetasiaPacketIn publishTargetPlayer(@NotNull MinetasiaPacketOut packetOut, PlayerStatueFix server, boolean sync)
+    {
+        return null;
+    }
 
     HashMap<String, HashMap<String, String>> values = new HashMap<>();
-
-
 
     @Override
     public void movePlayerToHub(@NotNull org.bukkit.entity.Player player) {
         player.kickPlayer("Disconnect hub function not set (test core version)");
+    }
+
+    @Override
+    public void movePlayerToSkyblockHub(@NotNull Player player)
+    {
+
+    }
+
+    @Override
+    public void movePlayerToSkyblockIsland(@NotNull Player player)
+    {
+
     }
 
     @Override
@@ -608,6 +657,20 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public void setInventorySyncGetter(Function<Player, InventorySyncPlayer> func)
+    {
+
+    }
+
+    @Override
+    public Map<String, GuiLang> getLang()
+    {
+        HashMap<String, GuiLang> map = new HashMap<>();
+        map.put("fr", new GuiLang("fr", "Français", "cc", 11, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTEyNjlhMDY3ZWUzN2U2MzYzNWNhMWU3MjNiNjc2ZjEzOWRjMmRiZGRmZjk2YmJmZWY5OWQ4YjM1Yzk5NmJjIn19fQ=="));
+        return map;
+    }
+
+    @Override
     public @NotNull ServerPhase getServerPhase()
     {
         return serverPhase;
@@ -618,6 +681,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
     {
         setMaxPlayerCount(maxPlayer, true);
     }
+
 
     @Override
     public int getMaxPlayerCount()
@@ -841,6 +905,7 @@ public class MinetasiaTest extends MinetasiaCoreApi
     {
         return false;
     }
+
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
     {

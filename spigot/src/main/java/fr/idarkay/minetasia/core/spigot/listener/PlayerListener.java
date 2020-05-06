@@ -1,5 +1,6 @@
 package fr.idarkay.minetasia.core.spigot.listener;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fr.idarkay.minetasia.core.api.Command;
 import fr.idarkay.minetasia.core.api.GeneralPermission;
 import fr.idarkay.minetasia.core.api.PlayerStatue;
@@ -9,7 +10,10 @@ import fr.idarkay.minetasia.core.api.utils.Boost;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.user.CorePlayer;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
+import fr.idarkay.minetasia.core.spigot.utils.InventorySyncTools;
+import fr.idarkay.minetasia.core.spigot.utils.InventorySyncType;
 import fr.idarkay.minetasia.core.spigot.utils.Lang;
+import fr.idarkay.minetasia.normes.Tuple;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -47,8 +51,38 @@ public class PlayerListener implements Listener {
     {
         e.setJoinMessage(null);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
+            final MinePlayer minePlayer = plugin.getPlayerManager().load(e.getPlayer().getUniqueId());
+            Tuple<InventorySyncType, String> syncInv = InventorySyncTools.pendingSync.remove(e.getPlayer().getUniqueId());
+            if(syncInv != null)
+            {
+                String data = null;
+                try
+                {
+                    if ( syncInv.a() == InventorySyncType.BDD )
+                    {
+                        String invData = minePlayer.getData(syncInv.b(), String.class);
+                        if(invData != null)
+                        {
+                            data = invData;
+                        }
+                    }
+                    else if (syncInv.a() == InventorySyncType.DAT)
+                    {
+                        data = syncInv.b();
+                    }
+                    if (data != null)
+                    {
+                        InventorySyncTools.applied(data, e.getPlayer());
+                    }
+                }
+                catch (CommandSyntaxException exception)
+                {
+                    exception.printStackTrace();
+                }
+
+            }
             plugin.getPermissionManager().loadUser(e.getPlayer().getUniqueId(), false);
+            Bukkit.getPluginManager().callEvent(new fr.idarkay.minetasia.core.api.event.PlayerJoinEvent(minePlayer, e.getPlayer()));
             long i = plugin.getPlayer(e.getPlayer().getUniqueId()).getStatus();
             plugin.getPlayerListManager().updatePlayer(e.getPlayer());
 
@@ -79,19 +113,26 @@ public class PlayerListener implements Listener {
         plugin.getOldCombatsManger().onPlayerJoinEvent(e.getPlayer(), e);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerQuitEvent(PlayerQuitEvent e)
     {
+        String bddLinkType = InventorySyncTools.getBddLinkType(plugin.getThisServer().getType());
+        final String inv = bddLinkType == null ? null : InventorySyncTools.getRawPlayerData(e.getPlayer());
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             final CorePlayer corePlayer = plugin.getPlayerManager().getCorePlayer(e.getPlayer().getUniqueId());
+            final MinePlayer minePlayer = plugin.getPlayerManager().get(e.getPlayer().getUniqueId());
             if(corePlayer.getPlayTime() > 30_000)
             {
-                final MinePlayer minePlayer = plugin.getPlayerManager().get(e.getPlayer().getUniqueId());
+
                 if(minePlayer != null)
                     minePlayer.updatePlayerStats(() -> Collections.singletonMap(plugin.getServerType() + ".play_time", TimeUnit.MILLISECONDS.toSeconds(corePlayer.getPlayTime())));
                 corePlayer.resetJoinTime();
             }
-
+            if(bddLinkType != null && inv != null && minePlayer != null)
+            {
+                ;minePlayer.putData(bddLinkType, inv);
+            }
 
             plugin.getPlayerManager().removePlayer(e.getPlayer().getUniqueId());
             plugin.getPartyManager().disconnectPlayer(e.getPlayer().getUniqueId());

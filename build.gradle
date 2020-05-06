@@ -11,7 +11,9 @@ buildscript {
         }
         mavenCentral()
     }
-    dependencies { classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.11.0" }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.11.0"
+    }
 }
 import org.apache.tools.ant.filters.ReplaceTokens
 
@@ -22,6 +24,12 @@ plugins {
     id "java"
     id "com.jfrog.artifactory" version "4.4.10"
     id 'maven-publish'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 configurations.all {
@@ -35,7 +43,7 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'groovy'
 
-    group 'minetasia'
+    group = 'minetasia'
     version = '1.0'
 
     sourceCompatibility = '1.8'
@@ -58,11 +66,6 @@ allprojects {
         }
         maven { url 'https://jitpack.io' }
         maven {
-            name =  'CodeMC'
-            url = 'https://repo.codemc.org/repository/maven-public'
-        }
-        maven { url 'https://jitpack.io' }
-        maven {
             url "${artifactory_contextUrl}/${artifactory_repo}"
             credentials {
                 username = "${artifactory_user}"
@@ -74,10 +77,7 @@ allprojects {
 
     dependencies {
         compile group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
-
     }
-
-
 
     processResources {
         from(sourceSets.main.resources.srcDirs) {
@@ -110,11 +110,36 @@ project('api') {
     }
 }
 
+project('common') {
+
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.artifactory'
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = group
+                artifactId = 'core-common-api'
+                version = version
+                artifact file("./build/libs/MinetasiaCore-common-1.0-all.jar")
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications('mavenJava')
+
+        publishArtifacts = true
+        publishPom = false
+    }
+
+}
+
 artifactory {
     contextUrl = "${artifactory_contextUrl}"
     publish {
         repository {
-            repoKey = 'gradle-dev-local'
+            repoKey = "${artifactory_repo}"
             username = "${artifactory_user}"
             password = "${artifactory_password}"
         }

@@ -1,8 +1,6 @@
 package fr.idarkay.minetasia.common.ServerConnection;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -27,8 +25,9 @@ public class MessageClient
 
     public static String send(String ip, int port, String msg, boolean needRep)
     {
-        try(final Socket con = new Socket(ip, port))
+        try
         {
+            final Socket con = new Socket(ip, port);
             con.setKeepAlive(false);
             con.setReuseAddress(false);
 
@@ -36,7 +35,7 @@ public class MessageClient
 
             if(!needRep) return null;
 
-           return read(con);
+            return read(con);
 
         } catch (IOException e)
         {
@@ -47,10 +46,8 @@ public class MessageClient
 
     public static void send(Socket con, String msg) throws IOException
     {
-        final BufferedOutputStream out = new BufferedOutputStream(con.getOutputStream());
-
-        out.write(msg.getBytes());
-        out.flush();
+        PrintWriter printWriter = new PrintWriter(con.getOutputStream(), true);
+        printWriter.println(msg);
     }
 
     public static void process(Socket socket)
@@ -58,13 +55,23 @@ public class MessageClient
         receiver.recived(socket);
     }
 
+
     public static String read(Socket con) throws IOException
     {
-        final BufferedInputStream in = new BufferedInputStream(con.getInputStream());
-        final byte[] b = new byte[4096];
-        int i = in.read(b);
-        if(i < 0) return null;
-        return new String(b, 0, i);
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+        String s = bufferedReader.readLine();
+        return  s == null || s.isEmpty() ? null : s;
     }
+
+//    public static String read(Socket con) throws IOException
+//    {
+//        final BufferedInputStream in = new BufferedInputStream(con.getInputStream());
+//        final byte[] b = new byte[4096];
+//        int i = in.read(b);
+//        if(i < 0) return null;
+//        return new String(b, 0, i);
+//    }
+
 
 }
