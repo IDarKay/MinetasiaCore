@@ -113,7 +113,7 @@ public class PlayerListener implements Listener {
         plugin.getOldCombatsManger().onPlayerJoinEvent(e.getPlayer(), e);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerQuitEvent(PlayerQuitEvent e)
     {
         String bddLinkType = InventorySyncTools.getBddLinkType(plugin.getThisServer().getType());

@@ -1,11 +1,23 @@
 package fr.idarkay.minetasia.core.api;
 
+import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
+import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
-import fr.idarkay.minetasia.common.message.MinetasiaPacketIn;
-import fr.idarkay.minetasia.common.message.MinetasiaPacketOut;
-import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.core.api.utils.Boost;
+import fr.idarkay.minetasia.core.api.utils.GuiLang;
+import fr.idarkay.minetasia.core.api.utils.InventorySyncPlayer;
+import fr.idarkay.minetasia.core.api.utils.Kit;
+import fr.idarkay.minetasia.core.api.utils.MainKit;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaSettings;
+import fr.idarkay.minetasia.core.api.utils.MoneyUpdater;
+import fr.idarkay.minetasia.core.api.utils.MongoDbManager;
+import fr.idarkay.minetasia.core.api.utils.PlayerStats;
+import fr.idarkay.minetasia.core.api.utils.PlayerStatueFix;
+import fr.idarkay.minetasia.core.api.utils.Server;
+import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.MinetasiaPlugin;
 import fr.idarkay.minetasia.normes.Tuple;
@@ -642,4 +654,7 @@ public abstract class MinetasiaCoreApi extends MinetasiaPlugin {
     public abstract void setServerPhase(@NotNull ServerPhase phase);
 
     public abstract void setInventorySyncGetter(Function<Player, InventorySyncPlayer> func);
+
+    public abstract Map<String, GuiLang> getLang();
+
 }

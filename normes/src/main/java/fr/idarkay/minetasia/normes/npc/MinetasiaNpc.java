@@ -8,13 +8,30 @@ import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.hologram.Hologram;
 import fr.idarkay.minetasia.normes.utils.BukkitUtils;
 import fr.idarkay.minetasia.normes.utils.NMSUtils;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_15_R1.DataWatcherObject;
+import net.minecraft.server.v1_15_R1.DataWatcherRegistry;
+import net.minecraft.server.v1_15_R1.EntityPlayer;
+import net.minecraft.server.v1_15_R1.EnumItemSlot;
+import net.minecraft.server.v1_15_R1.ItemStack;
+import net.minecraft.server.v1_15_R1.MinecraftServer;
+import net.minecraft.server.v1_15_R1.Packet;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntity;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityEquipment;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityHeadRotation;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityTeleport;
+import net.minecraft.server.v1_15_R1.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_15_R1.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_15_R1.PlayerInteractManager;
+import net.minecraft.server.v1_15_R1.WorldServer;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -25,6 +42,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -46,6 +64,8 @@ public class MinetasiaNpc
     private static MinetasiaPlugin plugin;
     private static final BukkitRunnable runnable = new NPCRunnable();
     private volatile static boolean isRunnable = false;
+
+    private final EnumMap<EnumItemSlot, ItemStack> equipments = new EnumMap<>(EnumItemSlot.class);
 
     public static void setPlugin(MinetasiaPlugin plugin)
     {
@@ -147,49 +167,64 @@ public class MinetasiaNpc
         }
     }
 
-    //    private static final Constructor<?> PACKET_PLAY_OUT_PLAYER_INFO_CONSTRUCTOR = Reflection.getConstructor(PACKET_PLAY_OUT_PLAYER_INFO_CLASS, false);
-//    private static final Class<?> ENTITY_PLAYER_ARRAY = Objects.requireNonNull(Reflection.getArrayNMSClass("EntityPlayer"));
-//    private static final Field ENUM_PLAYER_INFO_ACTION = Reflection.getDeclaredField(PACKET_PLAY_OUT_PLAYER_INFO_CLASS, "a", true);
-//    private static final Field LIST_PLAYER_INFO = Reflection.getDeclaredField(PACKET_PLAY_OUT_PLAYER_INFO_CLASS, "b", true);
-//    private static final Class<?> ENUM_GAMEMODE = Objects.requireNonNull(Reflection.getNMSClass("EnumGamemode"));
-//    private static final Object CREATIVE = Reflection.getEnumField(ENUM_GAMEMODE, "CREATIVE");//    private static final Object REMOVE_PLAYER = Reflection.getEnumField(PLAYER_INFO_ACTION, "REMOVE_PLAYER");
-//    private static final Class<?> PLAYER_INFO_DATA = Objects.requireNonNull(Reflection.getNMSClass("PacketPlayOutPlayerInfo$PlayerInfoData"));
-//    private static final Constructor<?> PLAYER_INFO_CONSTRUCTOR = Reflection.getConstructor(PLAYER_INFO_DATA, false,PACKET_PLAY_OUT_PLAYER_INFO_CLASS,  GameProfile.class, int.class, ENUM_GAMEMODE, ReflectionVar.I_CHAT_BASE_COMPONENT);
-//    private static final Field EID = Reflection.getDeclaredField(PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN, "a", true);
-//    private static final Field UUID = Reflection.getDeclaredField(PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN, "b", true);
-//    private static final Field POS_X = Reflection.getDeclaredField(PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN, "c", true);
-//    private static final Field POS_Y = Reflection.getDeclaredField(PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN, "d", true);
-//    private static final Field POS_Z = Reflection.getDeclaredField(PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN, "e", true);
-//    private static final Field YAW = Reflection.getDeclaredField(PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN, "f", true);
-//    private static final Field PITCH = Reflection.getDeclaredField(PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN, "g", true);
-
-//    private static final Class<?> PACKET_PLAY_OUT_PLAYER_INFO_CLASS = Objects.requireNonNull(Reflection.getNMSClass("PacketPlayOutPlayerInfo"));
-//    private static final Class<?> ENTITY_PLAYER = Objects.requireNonNull(Reflection.getNMSClass("EntityPlayer"));
-//    private static final Class<?> MINECRAFT_SERVER = Objects.requireNonNull(Reflection.getNMSClass("MinecraftServer"));
-//    private static final Class<?> WORLD_SERVER = Objects.requireNonNull(Reflection.getNMSClass("WorldServer"));
-//    private static final Class<?> PLAYER_INTERACT_MANAGER = Objects.requireNonNull(Reflection.getNMSClass("PlayerInteractManager"));
-//    private static final Class<?> PLAYER_INFO_ACTION = Objects.requireNonNull(Reflection.getNMSClass("PacketPlayOutPlayerInfo$EnumPlayerInfoAction"));
-//    private static final Class<?> PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN = Objects.requireNonNull(Reflection.getNMSClass("PacketPlayOutNamedEntitySpawn"));
-//    private static final Class<?> ENTITY_HUMAN = Reflection.getNMSClass("EntityHuman");
-//
-//    private static final Constructor<?> PLAYER_INTERACT_MANAGER_CONSTRUCTOR = Reflection.getConstructor(PLAYER_INTERACT_MANAGER, false, WORLD_SERVER);
-//    private static final Constructor<?> ENTITY_PLAYER_CONSTRUCTOR = Reflection.getConstructor(ENTITY_PLAYER, false, MINECRAFT_SERVER, WORLD_SERVER, GameProfile.class, PLAYER_INTERACT_MANAGER);
-//    private static final Constructor<?> PACKET_PLAY_OUT_PLAYER_INFO_CONSTRUCTOR_BIS = Reflection.getConstructor(PACKET_PLAY_OUT_PLAYER_INFO_CLASS, false, PLAYER_INFO_ACTION,  Iterable.class);
-//    private static final Constructor<?> PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN_CONSTRUCTOR = Reflection.getConstructor(PACKET_PLAY_OUT_NAMED_ENTITY_SPAWN, false, ENTITY_HUMAN);
-//
-//    private static final Method ENTITY_PLAYER_SET_LOCATION = Reflection.getMethod(ENTITY_PLAYER, false, "setLocation", double.class, double.class, double.class, float.class, float.class);
-
-
-
-//    private static final Object ADD_PLAYER = Reflection.getEnumField(PLAYER_INFO_ACTION, "ADD_PLAYER");
-
-//    private PacketPlayOutPlayerInfo packetInfoAdd, packetInfoRemove;
     private PacketPlayOutNamedEntitySpawn spawnPacket;
     private PacketPlayOutEntityDestroy packetDestroy;
     private Location lastLocation, currentLocation;
 
     private EntityPlayer npc;
     private boolean isLoad = false;
+
+    public void setHead(org.bukkit.inventory.ItemStack head)
+    {
+        updateEquipment(EnumItemSlot.HEAD, head);
+    }
+
+    public void setChest(org.bukkit.inventory.ItemStack chest)
+    {
+        updateEquipment(EnumItemSlot.CHEST, chest);
+    }
+
+    public void setLegs(org.bukkit.inventory.ItemStack legs)
+    {
+        updateEquipment(EnumItemSlot.LEGS, legs);
+    }
+
+    public void setFeet(org.bukkit.inventory.ItemStack feet)
+    {
+        updateEquipment(EnumItemSlot.FEET, feet);
+    }
+
+    public void setMainHand(org.bukkit.inventory.ItemStack mainHand)
+    {
+        updateEquipment(EnumItemSlot.MAINHAND, mainHand);
+    }
+
+    public void setOffHand(org.bukkit.inventory.ItemStack offHand)
+    {
+        updateEquipment(EnumItemSlot.OFFHAND, offHand);
+    }
+
+    private void updateEquipment(EnumItemSlot slot, org.bukkit.inventory.ItemStack itemStack)
+    {
+        ItemStack nms = itemStack == null || itemStack.getType().isAir() ? ItemStack.a : CraftItemStack.asNMSCopy(itemStack);
+        equipments.put(slot, nms);
+        for (UUID uuid : loadPlayer)
+        {
+            updateArmor(uuid, slot, nms);
+        }
+    }
+
+    private void updateArmor(Player player, EnumItemSlot slot, net.minecraft.server.v1_15_R1.ItemStack itemStack, boolean ignoreAir)
+    {
+        if(!isLoad || npc == null || player == null || itemStack == null || (itemStack == ItemStack.a && ignoreAir)) return;
+        Reflection.sendPacket(player, new PacketPlayOutEntityEquipment(npc.getId(), slot, itemStack));
+    }
+
+    private void updateArmor(UUID player, EnumItemSlot slot, net.minecraft.server.v1_15_R1.ItemStack itemStack)
+    {
+        if(!isLoad || npc == null) return;
+        updateArmor(Bukkit.getPlayer(player), slot, itemStack, false);
+    }
 
     /**
      * summon the npc can't use twice
@@ -253,6 +288,8 @@ public class MinetasiaNpc
         Reflection.sendPacket(player, spawnPacket);
         Reflection.sendPacket(player, new PacketPlayOutEntityMetadata(npc.getId(), npc.getDataWatcher(), true));
         Reflection.sendPacket(player, new PacketPlayOutEntityHeadRotation(npc, NMSUtils.floatAngleToByte(npc.getHeadRotation())));
+        equipments.forEach((k, v) -> updateArmor(player, k, v, true));
+
         Bukkit.getScheduler().runTaskLater(plugin, () ->  Reflection.sendPacket(player, new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc)), 5L);
     }
 
@@ -487,6 +524,7 @@ public class MinetasiaNpc
         isLoad = false;
         loadNpc.remove(this);
         sendUpdatePacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc));
+        sendUpdatePacket(packetDestroy);
         checkNeedRegister();
     }
 
@@ -504,8 +542,8 @@ public class MinetasiaNpc
             randomBytes[6]  |= 0x2f;  /* set to version 2     */
             randomBytes[8]  &= 0x3f;  /* clear variant        */
             randomBytes[8]  |= 0x80;  /* set to IETF variant  */
-            return (UUID) Reflection.getConstructor(Class.forName("java.util.UUID"), true, byte[].class).newInstance(randomBytes);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e)
+            return (UUID) Reflection.getConstructor(UUID.class, true, byte[].class).newInstance(randomBytes);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException  e)
         {
             e.printStackTrace();
             throw new RuntimeException(e);

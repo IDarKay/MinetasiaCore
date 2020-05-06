@@ -11,7 +11,9 @@ buildscript {
         }
         mavenCentral()
     }
-    dependencies { classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.11.0" }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.11.0"
+    }
 }
 import org.apache.tools.ant.filters.ReplaceTokens
 
@@ -22,6 +24,12 @@ plugins {
     id "java"
     id "com.jfrog.artifactory" version "4.4.10"
     id 'maven-publish'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 configurations.all {

@@ -663,6 +663,14 @@ public class MinetasiaTest extends MinetasiaCoreApi
     }
 
     @Override
+    public Map<String, GuiLang> getLang()
+    {
+        HashMap<String, GuiLang> map = new HashMap<>();
+        map.put("fr", new GuiLang("fr", "Français", "cc", 11, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTEyNjlhMDY3ZWUzN2U2MzYzNWNhMWU3MjNiNjc2ZjEzOWRjMmRiZGRmZjk2YmJmZWY5OWQ4YjM1Yzk5NmJjIn19fQ=="));
+        return map;
+    }
+
+    @Override
     public @NotNull ServerPhase getServerPhase()
     {
         return serverPhase;
