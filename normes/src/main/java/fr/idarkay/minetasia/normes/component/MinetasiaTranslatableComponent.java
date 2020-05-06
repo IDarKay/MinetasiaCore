@@ -173,15 +173,20 @@ public class MinetasiaTranslatableComponent extends BaseComponent
     private final <R> @NotNull IChatBaseComponent[] split(R argsObject, int maxChar, @NotNull String path, @NotNull String defaultMsg, @NotNull String lang, Tuple<Args, Object>... args)
     {
         final List<IChatBaseComponent> back = new ArrayList<>();
-        String[] split = Objects.requireNonNull(minetasiaLang, "Can't use this function elsewhere skyblock").get(path, defaultMsg, lang, args).replaceAll(".{" +maxChar+ ",}?[ ]", "$0\n").split("\n");
-        for (int i = 1; i < split.length; i++)
-        {
-            split[i] = ChatColor.getLastColors(split[i-1]) + split[i];
-        }
+        String[] spl = Objects.requireNonNull(minetasiaLang, "Can't use this function elsewhere skyblock").get(path, defaultMsg, lang, args).split("@@");
 
-        for (String s : split)
+        for (String s1 : spl)
         {
-            back.add(new TextComponent(s, this).toChatBaseComponent(lang, argsObject));
+            String[] split = s1.replaceAll(".{" +maxChar+ ",}?[ ]", "$0\n").split("\n");
+            for (int i = 1; i < split.length; i++)
+            {
+                split[i] = ChatColor.getLastColors(split[i-1]) + split[i];
+            }
+
+            for (String s : split)
+            {
+                back.add(new TextComponent(s, this).toChatBaseComponent(lang, argsObject));
+            }
         }
         return back.toArray(new IChatBaseComponent[0]);
     }

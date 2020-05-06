@@ -19,7 +19,8 @@ public enum  ClickEventType
     OPEN_URL("open_url", ChatClickable.EnumClickAction.OPEN_URL),
     RUN_COMMAND("run_command", ChatClickable.EnumClickAction.RUN_COMMAND),
     SUGGEST_COMMAND("suggest_command", ChatClickable.EnumClickAction.SUGGEST_COMMAND),
-    CHANGE_PAGE("change_page", ChatClickable.EnumClickAction.CHANGE_PAGE)
+    CHANGE_PAGE("change_page", ChatClickable.EnumClickAction.CHANGE_PAGE),
+    COPY_TO_CLIPBOARD("copy_to_clipboard", ChatClickable.EnumClickAction.COPY_TO_CLIPBOARD)
     ;
 
     private final String key;

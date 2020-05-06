@@ -326,7 +326,7 @@ public class PermissionManager
         {
             if (isTemp)
             {
-                String data = plugin.getPlayerData(uuid, think).toString();
+                String data = plugin.getPlayerData(uuid, think, String.class);
                 JsonObject tempPermission = data == null ? null : PARSER.parse(data).getAsJsonObject();
                 if(data != null)
                     for(Map.Entry<String, JsonElement> j : tempPermission.entrySet())
@@ -337,7 +337,7 @@ public class PermissionManager
             }
             else
             {
-                String data = plugin.getPlayerData(uuid, think).toString();
+                String data = plugin.getPlayerData(uuid, think, String.class);
                 JsonArray permission = data == null ? null : PARSER.parse(data).getAsJsonArray();
                 if(data != null)
                     for (JsonElement j : permission) back.add(j.getAsString());

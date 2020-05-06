@@ -3,20 +3,20 @@ package fr.idarkay.minetasia.core.spigot;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.google.gson.JsonParser;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import fr.idarkay.minetasia.common.MongoCollections;
 import fr.idarkay.minetasia.common.ServerConnection.MessageClient;
 import fr.idarkay.minetasia.common.ServerConnection.MessageServer;
+import fr.idarkay.minetasia.common.message.*;
 import fr.idarkay.minetasia.core.api.*;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementFrame;
 import fr.idarkay.minetasia.core.api.advancement.AdvancementIcon;
 import fr.idarkay.minetasia.core.api.advancement.MinetasiaBaseAdvancement;
+import fr.idarkay.minetasia.core.api.event.AsyncMinetasiaPacketCombingEvent;
 import fr.idarkay.minetasia.core.api.event.MessageReceivedEvent;
-import fr.idarkay.minetasia.core.api.event.PlayerMoveToHubEvent;
 import fr.idarkay.minetasia.core.api.event.SocketPrePossesEvent;
 import fr.idarkay.minetasia.core.api.exception.PlayerNotFoundException;
 import fr.idarkay.minetasia.core.api.utils.*;
@@ -29,6 +29,7 @@ import fr.idarkay.minetasia.core.spigot.executor.sanction.AdminSanctionCommand;
 import fr.idarkay.minetasia.core.spigot.executor.sanction.SanctionCommand;
 import fr.idarkay.minetasia.core.spigot.executor.sanction.UnSanctionCommand;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
+import fr.idarkay.minetasia.core.spigot.gui.LangGui;
 import fr.idarkay.minetasia.core.spigot.kits.KitMain;
 import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
 import fr.idarkay.minetasia.core.spigot.listener.AsyncPlayerChatListener;
@@ -40,6 +41,7 @@ import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryCloseListene
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryDragListener;
 import fr.idarkay.minetasia.core.spigot.listener.inventory.InventoryOpenListener;
 import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
+import fr.idarkay.minetasia.core.spigot.messages.CorePacketManger;
 import fr.idarkay.minetasia.core.spigot.messages.SanctionMessage;
 import fr.idarkay.minetasia.core.spigot.messages.ServerMessage;
 import fr.idarkay.minetasia.core.spigot.moderation.PlayerSanction;
@@ -56,10 +58,7 @@ import fr.idarkay.minetasia.core.spigot.user.CorePlayer;
 import fr.idarkay.minetasia.core.spigot.user.MinePlayer;
 import fr.idarkay.minetasia.core.spigot.user.PartyManager;
 import fr.idarkay.minetasia.core.spigot.user.PlayerManager;
-import fr.idarkay.minetasia.core.spigot.utils.Lang;
-import fr.idarkay.minetasia.core.spigot.utils.MongoDBManager;
-import fr.idarkay.minetasia.core.spigot.utils.PlayerListManager;
-import fr.idarkay.minetasia.core.spigot.utils.PlayerStatueFixC;
+import fr.idarkay.minetasia.core.spigot.utils.*;
 import fr.idarkay.minetasia.normes.MinetasiaGUI;
 import fr.idarkay.minetasia.normes.Reflection;
 import fr.idarkay.minetasia.normes.Tuple;
@@ -122,7 +121,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             .put(BoostType.STARS, 10F)
             .build()
             ;
-    public class PartyServerBoost implements Boost
+
+    public static class PartyServerBoost implements Boost
     {
 
         private final Map<BoostType, Float> boost = new HashMap<>();
@@ -158,7 +158,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         }
     }
 
-    private PartyServerBoost partyServerBoost = new PartyServerBoost();
+    private final PartyServerBoost partyServerBoost = new PartyServerBoost();
 
     private MongoDBManager mongoDBManager;
     private PlayerManager playerManager;
@@ -215,6 +215,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
 
     public void initClientReceiver()
     {
+        final JsonParser packetJsonParser = new JsonParser();
         MessageClient.setReceiver(socket -> {
             if(this.isEnabled())
             {
@@ -222,8 +223,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                     try
                     {
                         final String msg = MessageClient.read(socket);
-
-                        if(msg == null)
+                        if(msg == null || msg.isEmpty())
                         {
                             socket.close();
                             return;
@@ -236,6 +236,24 @@ public class MinetasiaCore extends MinetasiaCoreApi {
                             return;
                         }
 
+                        String channel = split[0];
+
+                        if(split.length == 2 && channel.startsWith(MinetasiaPacketManager.channelPrefix))
+                        {
+                            MessageOutChanel<?, ?> messageInChanel = MinetasiaPacketManager.getMessageOutChanel(channel);
+                            if(messageInChanel != null)
+                            {
+                                MinetasiaPacket packet = messageInChanel.getPacketSerializer().read(packetJsonParser.parse(split[1]).getAsJsonObject());
+                                final AsyncMinetasiaPacketCombingEvent event = new AsyncMinetasiaPacketCombingEvent(packet);
+                                if(event.isNeedRep() && event.getRep() != null)
+                                {
+                                    MessageClient.send(socket, event.getRep().write().toString());
+                                }
+                                socket.close();
+                                return;
+
+                            }
+                        }
 
                         final SocketPrePossesEvent e = new SocketPrePossesEvent(socket, split.length == 1 ? "none" : split[0], split.length == 1 ? split[0] : split[1]);
                         Bukkit.getPluginManager().callEvent(e);
@@ -388,6 +406,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         Objects.requireNonNull(getCommand("unwarn")).setExecutor(new UnSanctionCommand(this, CommandPermission.UN_WARN, SanctionType.WARN));
 
         Objects.requireNonNull(getCommand("report")).setExecutor(new ReportExecutor(this));
+        Objects.requireNonNull(getCommand("stop")).setExecutor(new StopExecutor());
 
         console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "register events");
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -396,9 +415,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         //register Listener
         registerListener();
 
-        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "start player count schedule");
+        console.sendMessage(ChatColor.GREEN + LOG_PREFIX + "init messaging");
+        CorePacketManger.init();
         initClientReceiver();
-
+        messageServer.open();
 
 
         //for sign
@@ -414,6 +434,8 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         {
            Bukkit.getScheduler().runTaskLater(this, this.permissionManager::loadTabGroup, 1L);
         }
+
+
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
             if(getConfig().getBoolean("default-register"))
@@ -448,7 +470,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             if(c != lastPlayerCount)
             {
                 lastPlayerCount = c;
-                MinetasiaCore.this.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.PLAYER_COUNT, MinetasiaCore.this.getThisServer().getName(), c), true);
+                serverManager.sayServerUpdate(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.PLAYER_COUNT, MinetasiaCore.this.getThisServer().getName(), c), true);
             }
         }
     }
@@ -725,6 +747,22 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     }
 
     @Override
+    public void publishServerTypeRegex(@NotNull String chanel, String message, String regex, boolean sync)
+    {
+        Validate.notNull(chanel);
+        final Runnable run = () -> {
+
+            final String fullMsg = chanel + ";" + (message == null ? "" : message);
+
+            mongoDBManager.getCollection(MongoCollections.SERVERS).find(Filters.regex("type", regex, "i")).forEach(document -> MessageClient.send(document.getString("ip"), document.getInteger("publish_port"), fullMsg, false));
+
+        };
+
+        if(!sync) Bukkit.getScheduler().runTaskAsynchronously(this, run);
+        else run.run();
+    }
+
+    @Override
     public String publishTarget(@NotNull String chanel, String message, Server target, boolean rep, boolean sync)
     {
         Validate.notNull(chanel);
@@ -759,6 +797,49 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         return publishTarget(chanel, message, target.getServer(), rep, sync);
     }
 
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketGlobal(@NotNull MinetasiaPacketOut packetOut, boolean proxy, boolean sync)
+    {
+        publishGlobal(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), proxy, sync);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketProxy(@NotNull MinetasiaPacketOut packetOut, boolean sync)
+    {
+        publishProxy(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), sync);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> void sendPacketType(@NotNull MinetasiaPacketOut packetOut, String serverType, boolean sync)
+    {
+        publishServerType(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), serverType, sync);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> MinetasiaPacketIn sendPacketToServer(@NotNull MinetasiaPacketOut packetOut, Server server, boolean sync)
+    {
+        String back = publishTarget(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), server, packetOut.isNeedRep(), sync);
+        return back == null ? null : minetasiaPacketInFromString(MinetasiaPacketManager.channelPrefix + packetOut.name(), back);
+    }
+
+    @Override
+    public <T extends MinetasiaPacketOut> MinetasiaPacketIn publishTargetPlayer(@NotNull MinetasiaPacketOut packetOut, PlayerStatueFix player, boolean sync)
+    {
+        String back = publishTargetPlayer(MinetasiaPacketManager.channelPrefix + packetOut.name(), packetOut.write().toString(), player, packetOut.isNeedRep(), sync);
+        return back == null ? null : minetasiaPacketInFromString(MinetasiaPacketManager.channelPrefix + packetOut.name(), back);
+    }
+
+    private MinetasiaPacketIn minetasiaPacketInFromString(String channel, String s)
+    {
+
+        MessageInChanel<?, ?> messageInChanel = MinetasiaPacketManager.getMessageInChanel(channel);
+        if(messageInChanel != null)
+        {
+            return messageInChanel.getPacketSerializer().read(JSON_PARSER.parse(s).getAsJsonObject());
+        }
+        return null;
+    }
+
     public String publishTarget(@NotNull String chanel, String message, @NotNull String ip, int port, boolean rep, boolean sync)
     {
         if(rep && !sync) throw new IllegalArgumentException("cant get rep in async");
@@ -778,32 +859,75 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     @Override
     public void movePlayerToHub(@NotNull org.bukkit.entity.Player player)
     {
+       movePlayerToType(player, "hub");
+    }
 
-        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
-        {
-            Bukkit.getPluginManager().callEvent(new PlayerMoveToHubEvent(player));
-            int i = -1;
-            Server sr = null;
+    @Override
+    public void movePlayerToSkyblockHub(@NotNull org.bukkit.entity.Player player)
+    {
+        movePlayerToType(player, "skyblock-hub");
+    }
 
-            for(Server s : getServers(HUB_NAME).values())
-            {
-                if(sr == null || i == -1 || s.getPlayerCount() < i) {
-                    sr = s;
-                    i = s.getPlayerCount();
-                }
-            }
-            if(sr == null) Bukkit.getScheduler().runTask(this, () -> player.kickPlayer("No valid hub"));
-            else  movePlayerToServer(player, sr);
-        });
+    public void movePlayerToType(@NotNull org.bukkit.entity.Player player, String type)
+    {
+        Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), type);
+
+        String msg = player.getUniqueId() + ";" + type + ";" + map.a().name() + ";" + map.b();
+
+        MinePlayer minePlayer = playerManager.getOnlyInCache(player.getUniqueId());;
+        if(minePlayer == null) return;
+        publishTarget("connect-type", msg, minePlayer.getProxyIp(), minePlayer.getProxyPublishPort(), false, false);
+
+//        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+//        output.writeUTF("ConnectType");
+//        output.writeUTF(type);
+//        output.writeUTF(map.a().name());
+//        output.writeUTF(map.b());
+//
+//        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
+    }
+
+    @Override
+    public void movePlayerToSkyblockIsland(@NotNull org.bukkit.entity.Player player)
+    {
+        Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), "skyblock-island");
+        Document doc = getPlayer(player.getUniqueId()).getData("skyblock", Document.class);
+
+        String msg = player.getUniqueId() + ";" + (doc == null || !doc.containsKey("island") ? "" : doc.getString("island")) + ";" +  (doc == null ? 1 : doc.getInteger("island_weight", 1)) + ";" + map.a().name() + ";" + map.b();
+
+        MinePlayer minePlayer = playerManager.getOnlyInCache(player.getUniqueId());;
+        if(minePlayer == null) return;
+        publishTarget("connect-skyblock-island", msg, minePlayer.getProxyIp(), minePlayer.getProxyPublishPort(), false, false);
+
+//        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+//        output.writeUTF("ConnectSkyblockIsland");
+//
+//        output.writeUTF(doc == null ? "" : doc.containsKey("island") ? doc.getString("island") : "");
+//        output.writeInt();
+//        output.writeUTF(map.a().name());
+//        output.writeUTF(map.b());
+//
+//        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
 
     @Override
     public void movePlayerToServer(@NotNull org.bukkit.entity.Player player, Server server) {
-        ByteArrayDataOutput output = ByteStreams.newDataOutput();
-        output.writeUTF("Connect");
-        output.writeUTF(server.getName());
 
-        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
+        Tuple<InventorySyncType, String> map = InventorySyncTools.map(player, getThisServer().getType(), server.getType());
+
+        String msg = player.getUniqueId() + ";" + server.getName() + ";" + map.a().name() + ";" + map.b();
+
+        MinePlayer minePlayer = playerManager.getOnlyInCache(player.getUniqueId());;
+        if(minePlayer == null) return;
+        publishTarget("connect-player", msg, minePlayer.getProxyIp(), minePlayer.getProxyPublishPort(), false, false);
+
+//        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+//        output.writeUTF("Connect");
+//        output.writeUTF(server.getName());
+//        output.writeUTF(map.a().name());
+//        output.writeUTF(map.b());
+//
+//        player.sendPluginMessage(this, "BungeeCord", output.toByteArray());
     }
 
     @Override
@@ -1188,7 +1312,6 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         if(phase == ServerPhase.STARTUP)
         {
             serverManager.registerServer();
-            messageServer.open();
         }
         else
         {
@@ -1199,9 +1322,10 @@ public class MinetasiaCore extends MinetasiaCoreApi {
             }
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
                 mongoDBManager.getCollection(MongoCollections.SERVERS).updateOne(Filters.eq(getThisServer().getName()), Updates.set("phase", phase.ordinal()));
-                publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_STATUE, getThisServer().getName(), phase.name()), true);
+                serverManager.sayServerUpdate(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.SERVER_STATUE, getThisServer().getName(), phase.name()), true);
             });
         }
+
     }
 
     @Override
@@ -1216,6 +1340,7 @@ public class MinetasiaCore extends MinetasiaCoreApi {
         setMaxPlayerCount(maxPlayer, true);
         getThisServer().setMaxPlayerCount(maxPlayer);
     }
+
 
     @Override
     public int getMaxPlayerCount()
@@ -1236,31 +1361,9 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     private final static String DRAG_METHODS_NAME = "drag";
 
     @Override
+    @Deprecated
     public void registerGui(MinetasiaGUI gui)
     {
-//        final Class<? extends MinetasiaGUI> clazz = gui.getClass();
-//        for(Method method : clazz.getDeclaredMethods())
-//        {
-//            if(method.getDeclaredAnnotation(MinetasiaGuiNoCallEvent.class) != null)
-//            {
-//                final String name = method.getName();
-//                switch (name)
-//                {
-//                    case OPEN_METHODS_NAME:
-//                        InventoryOpenListener.blackListClazz.add(clazz);
-//                        break;
-//                    case CLOSE_METHODS_NAME:
-//                        InventoryCloseListener.blackListClazz.add(clazz);
-//                        break;
-//                    case CLICK_METHODS_NAME:
-//                        InventoryClickListener.blackListClazz.add(clazz);
-//                        break;
-//                    case DRAG_METHODS_NAME:
-//                        InventoryDragListener.blackListClazz.add(clazz);
-//                        break;
-//                }
-//            }
-//        }
     }
 
     @Override
@@ -1339,6 +1442,18 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void registerIpConsumer(Consumer<String> ipConsumer)
     {
         this.ipRunnable.addConsumer(ipConsumer);
+    }
+
+    @Override
+    public void setInventorySyncGetter(Function<Player, InventorySyncPlayer> func)
+    {
+        InventorySyncTools.function = func;
+    }
+
+    @Override
+    public Map<String, GuiLang> getLang()
+    {
+        return LangGui.LANG_TEXTURE;
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
@@ -1528,4 +1643,15 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     {
         return oldCombatsManger;
     }
+
+    public void doAsync(Runnable runnable)
+    {
+        Bukkit.getScheduler().runTaskAsynchronously(this, runnable);
+    }
+
+    public void doSync(Runnable runnable)
+    {
+        Bukkit.getScheduler().runTask(this, runnable);
+    }
+
 }

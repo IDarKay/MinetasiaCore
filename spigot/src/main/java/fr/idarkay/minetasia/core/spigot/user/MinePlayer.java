@@ -6,10 +6,14 @@ import com.google.gson.JsonParser;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import fr.idarkay.minetasia.common.MongoCollections;
 import fr.idarkay.minetasia.core.api.Economy;
-import fr.idarkay.minetasia.core.api.MongoCollections;
 import fr.idarkay.minetasia.core.api.event.PlayerMoneyChangeEvent;
-import fr.idarkay.minetasia.core.api.utils.*;
+import fr.idarkay.minetasia.core.api.utils.Boost;
+import fr.idarkay.minetasia.core.api.utils.MinetasiaPlayer;
+import fr.idarkay.minetasia.core.api.utils.Party;
+import fr.idarkay.minetasia.core.api.utils.PlayerStats;
+import fr.idarkay.minetasia.core.api.utils.StatsUpdater;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.messages.PlayerMessage;
 import fr.idarkay.minetasia.core.spigot.moderation.PlayerSanction;
@@ -58,6 +62,8 @@ public class MinePlayer implements MinetasiaPlayer
     @NotNull private final List<NamespacedKey> validateAdvancement = new ArrayList<>();
 
     @NotNull private String username;
+    private String proxyIp = null;
+    private int proxyPublishPort = 0;
 
     private Stats stats;
 
@@ -87,7 +93,8 @@ public class MinePlayer implements MinetasiaPlayer
                     Arrays.asList(
                             Aggregates.match(Filters.eq(uuid.toString())),
                             Aggregates.lookup(MongoCollections.USERS.name, "_id", "_id", "users"),
-                            Aggregates.lookup(MongoCollections.PARTY.name, "party_id", "_id", "party")
+                            Aggregates.lookup(MongoCollections.PARTY.name, "party_id", "_id", "party"),
+                            Aggregates.lookup(MongoCollections.PROXY.name, "proxy_id", "_id", "proxy")
                     )
             ).first();
             if(main == null) throw new NullPointerException("player not in online user");
@@ -95,6 +102,14 @@ public class MinePlayer implements MinetasiaPlayer
             final List<Document> party = main.getList("party", Document.class);
             if(party != null && party.size() > 0)
                 CORE.getPartyManager().load(party.get(0));
+
+            List<Document> proxy = main.getList("proxy", Document.class);
+            if (proxy != null && proxy.size() > 0)
+            {
+                Document bungge = proxy.get(0);
+                this.proxyIp = bungge.getString("ip");
+                this.proxyPublishPort = bungge.getInteger("publish_port", 0);
+            }
 
             doc =  main.getList("users", Document.class).get(0);
             if(!CORE.getThisServer().getName().equals(main.getString("server_id")))
@@ -427,11 +442,7 @@ public class MinePlayer implements MinetasiaPlayer
     @Override
     public @Nullable <T> T getData(@NotNull String key, @NotNull Class<T> clazz)
     {
-        Validate.notNull(key);
-        Validate.notNull(clazz);
-        final Object value = data.get(key);
-        if(value == null) return null;
-        return clazz.cast(value);
+        return clazz.cast(getData(key));
     }
 
     @Override
@@ -723,4 +734,13 @@ public class MinePlayer implements MinetasiaPlayer
 
     }
 
+    public int getProxyPublishPort()
+    {
+        return proxyPublishPort;
+    }
+
+    public String getProxyIp()
+    {
+        return proxyIp;
+    }
 }

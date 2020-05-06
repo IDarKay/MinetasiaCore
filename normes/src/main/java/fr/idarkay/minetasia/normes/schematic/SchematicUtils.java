@@ -458,14 +458,23 @@ public class SchematicUtils
         {
             for(int z = 0 ; z < width  ; z++)
             {
-                for(int y = height ; y < sHeight + height ; y++)
+                for(int y = 0 ; y < sHeight ; y++)
                 {
-                    final int i = (y - height) * length * sHeight + z * length + x;
-                    final Material mat = schematic.getBlocks()[i];
-                    final String data = schematic.getData()[i];
-                    chunkData.setBlock(x, y, z, mat);
-                    if(data != null)
-                      chunkData.setBlock(x, y, z, Bukkit.createBlockData(data));
+                    int i = y *  length * width + z * length + x;
+                    try
+                    {
+
+                        final Material mat = schematic.getBlocks()[i];
+                        final String data = schematic.getData()[i];
+                        chunkData.setBlock(x, y + height, z, mat);
+                        if(data != null)
+                            chunkData.setBlock(x, y + height, z, Bukkit.createBlockData(data));
+                    }
+                    catch (ArrayIndexOutOfBoundsException ignore)
+                    {
+                        Bukkit.getLogger().warning("ArrayIndexOutOfBoundsException in schem (" + i + "");
+                    }
+
                 }
             }
         }

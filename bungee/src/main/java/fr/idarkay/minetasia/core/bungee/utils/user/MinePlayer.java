@@ -157,7 +157,7 @@ public class MinePlayer
 
     private synchronized void set(String key, Object value)
     {
-        CORE.getMongoDBManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.addToSet(key, value));
+        CORE.getMongoDBManager().getCollection(MongoCollections.USERS).updateOne(Filters.eq(uuid.toString()), Updates.set(key, value));
     }
 
     private synchronized void increment(String key, Number increment)

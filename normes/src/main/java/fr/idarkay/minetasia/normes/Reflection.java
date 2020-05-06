@@ -454,4 +454,15 @@ public class Reflection
         }
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Enum e(String enu, String name)
+    {
+        try
+        {
+            return Enum.valueOf((Class<Enum>) getNMSClass(enu), name);
+        }
+        catch (Exception ex) { ex.printStackTrace(); }
+        return null;
+    }
+
 }

@@ -1,7 +1,7 @@
 package fr.idarkay.minetasia.core.spigot.server;
 
 import com.mongodb.client.model.Filters;
-import fr.idarkay.minetasia.core.api.MongoCollections;
+import fr.idarkay.minetasia.common.MongoCollections;
 import fr.idarkay.minetasia.core.api.utils.Server;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.messages.CoreMessage;
@@ -11,7 +11,6 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -29,6 +28,7 @@ public final class ServerManager {
     private final HashMap<String, fr.idarkay.minetasia.core.api.utils.Server> servers = new HashMap<>();
     private final MineServer server;
     private final MinetasiaCore plugin;
+    private final String updateSay;
 
     public ServerManager(MinetasiaCore plugin)
     {
@@ -37,13 +37,21 @@ public final class ServerManager {
         if(ip.equals("")) ip = "127.0.0.1";
         int port = Bukkit.getPort();
 
-        this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(), plugin.getServerConfig());
+        this.server = new MineServer(ip, port, plugin.getMessageServer().getPort(), plugin.getServerType(),  plugin.getServerConfig());
         servers.put(server.getName(), server);
+        String serverTypeLoad = plugin.getConfig().getString("server_type_load");
+        this.updateSay = plugin.getConfig().getString("update_say");
 
-        plugin.getMongoDbManager().getCollection(MongoCollections.SERVERS).find(Filters.regex("type", Objects.requireNonNull(plugin.getConfig().getString("server_type_load")))).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
+        if(serverTypeLoad == null || serverTypeLoad.isEmpty() || serverTypeLoad.equals("none"))
+        {
+            return;
+        }
+
+        plugin.getMongoDbManager().getCollection(MongoCollections.SERVERS).find(Filters.regex("type", serverTypeLoad)).forEach(d -> servers.put(d.getString("_id"), MineServer.getServerFromDocument(d)));
     }
 
     private boolean register = false;
+
 
     public void registerServer()
     {
@@ -51,34 +59,30 @@ public final class ServerManager {
         {
             plugin.getMongoDbManager().insert(MongoCollections.SERVERS, server.toDocument());
 
-            if(server.getType().equalsIgnoreCase("hub"))
-            {
-                plugin.publishGlobal(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true, true);
-            }
-            else
-            {
-                plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
-                plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson()), true);
-            }
+            String message = ServerMessage.getMessage(ServerMessage.CREATE,  server.toJson());
+            boolean isSync = !Bukkit.isPrimaryThread();
+
+            plugin.publishProxy(CoreMessage.CHANNEL, message, isSync);
+            plugin.publishServerTypeRegex(CoreMessage.CHANNEL, message, updateSay, isSync);
+
             register = true;
         }
+    }
+
+    public void sayServerUpdate(String channel, String message, boolean sync)
+    {
+        plugin.publishProxy(channel, message, sync);
+        plugin.publishServerTypeRegex(channel, message, updateSay, sync);
     }
 
     public void disable()
     {
         plugin.getMongoDbManager().delete(MongoCollections.SERVERS, server.getName());
-        if(server.getType().equalsIgnoreCase("hub"))
-        {
-            plugin.publishGlobal(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true, true);
-        }
-        else
-        {
-            plugin.publishProxy(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
-            plugin.publishHub(CoreMessage.CHANNEL, ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName()), true);
-        }
+        String message = ServerMessage.getMessage(ServerMessage.REMOVE,  server.getName());
+
+        plugin.publishProxy(CoreMessage.CHANNEL, message, true);
+        plugin.publishServerTypeRegex(CoreMessage.CHANNEL, message, updateSay, true);
         register = true;
-
-
     }
 
     public MineServer getServer()
@@ -137,5 +141,4 @@ public final class ServerManager {
             return false;
         }
     }
-
 }

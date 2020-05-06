@@ -1,6 +1,7 @@
 package fr.idarkay.minetasia.normes;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
+import fr.idarkay.minetasia.normes.Listener.PlayerDeathListener;
 import fr.idarkay.minetasia.normes.Listener.PlayerPacketListener;
 import fr.idarkay.minetasia.normes.Listener.PlayerQuitListener;
 import fr.idarkay.minetasia.normes.books.MinetasiaBook;
@@ -10,6 +11,7 @@ import fr.idarkay.minetasia.normes.packet.PlayerConnectionListener;
 import fr.idarkay.minetasia.normes.schematic.Schematic;
 import fr.idarkay.minetasia.normes.schematic.SchematicUtils;
 import fr.idarkay.minetasia.normes.utils.VoidConsumer;
+import net.redheademile.minetasia.normes.BossBarAPI;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -55,8 +57,10 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
         {
             MinetasiaNpc.setPlugin(this);
             Hologram.setPlugin(this);
+            BossBarAPI.setPlugin(this);
             MinetasiaBook.setPlugin(this);
             getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
+            getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
             isEnable = true;
             registerPlayerPacketComingEvent();
             NoteBlockAPI.setJavaPlugin(this);

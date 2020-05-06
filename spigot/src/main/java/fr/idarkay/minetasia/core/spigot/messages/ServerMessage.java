@@ -1,9 +1,7 @@
 package fr.idarkay.minetasia.core.spigot.messages;
 
 import fr.idarkay.minetasia.core.api.ServerPhase;
-import fr.idarkay.minetasia.core.api.event.ServerPlayerCountUpdateEvent;
-import fr.idarkay.minetasia.core.api.event.ServerRegisterEvent;
-import fr.idarkay.minetasia.core.api.event.ServerUnregisterEvent;
+import fr.idarkay.minetasia.core.api.event.*;
 import fr.idarkay.minetasia.core.spigot.MinetasiaCore;
 import fr.idarkay.minetasia.core.spigot.server.MineServer;
 import org.bukkit.Bukkit;
@@ -24,9 +22,11 @@ public class ServerMessage extends CoreMessage
 
     public static final String CREATE = "create";
     public static final String REMOVE = "remove";
+
     public static final String PLAYER_COUNT = "playerCount";
     public static final String SERVER_STATUE = "serverStatue";
     public static final String SERVER_MAX_PLAYER = "serverMaxPlayer";
+
 
     public ServerMessage()
     {
@@ -66,7 +66,8 @@ public class ServerMessage extends CoreMessage
                         Bukkit.getPluginManager().callEvent(new ServerPlayerCountUpdateEvent(server, count, old));
                     }
 
-                } catch (Exception ignore)
+                }
+                catch (Exception ignore)
                 {
                 }
             } else if(args[1].equals(SERVER_STATUE))
@@ -74,7 +75,8 @@ public class ServerMessage extends CoreMessage
                 try
                 {
                     plugin.getServer(args[2]).setPhase(ServerPhase.valueOf(args[3]));
-                } catch (Exception ignore)
+                }
+                catch (Exception ignore)
                 {
                 }
             } else if(args[1].equals(SERVER_MAX_PLAYER))
@@ -86,6 +88,7 @@ public class ServerMessage extends CoreMessage
                 {
                 }
             }
+
         }
     }
 
@@ -97,7 +100,8 @@ public class ServerMessage extends CoreMessage
 
     public static boolean goodObject(Object... args)
     {
-        return args.length > 1 && (args[0].equals(CREATE) || args[0].equals(REMOVE) || args[0].equals(PLAYER_COUNT) || args[0].equals(SERVER_STATUE) || args[0].equals(SERVER_MAX_PLAYER));
+        return true;
+//        return args.length > 1 && (args[0].equals(CREATE) || args[0].equals(REMOVE) || args[0].equals(ASK_CONFIG) || args[0].equals(PLAYER_COUNT) || args[0].equals(SERVER_STATUE) || args[0].equals(SERVER_ON) || args[0].equals(SET_INFORMATION));
     }
 
     public static  @NotNull String getIdentifier()

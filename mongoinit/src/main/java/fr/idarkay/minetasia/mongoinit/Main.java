@@ -1,9 +1,5 @@
 package fr.idarkay.minetasia.mongoinit;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -35,7 +31,8 @@ public class Main
         System.out.println("create:<collection_name_1>,<collection_name_2>,<collection_name_3>...");
         System.out.println("sanction:<>");
 
-        final String host = getOrDefault(args, "host", "mongodb://localhost:27017");
+//        final String host = getOrDefault(args, "host", "mongodb://localhost:27017");
+//        final String host = "mongodb+srv://idarkay:vItNS1waRh5ygdwr@cluster0-hofwz.mongodb.net/minetasia?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=true";
         final String user = getOrDefault(args, "user", "initializer");
         final String pass = getOrDefault(args, "pass", "initializerpass");
         final String dbname = getOrDefault(args, "dbname", "minetasia");
@@ -51,17 +48,17 @@ public class Main
         }
 
 
-        final MongoCredential credential = MongoCredential.createCredential(user, dbname, pass.toCharArray());
-        final ConnectionString connectionString = new ConnectionString(host);
-        final MongoClientSettings settings = MongoClientSettings.builder()
-                .credential(credential)
-                .applyToSslSettings(builder -> builder.enabled(true))
-                .applyConnectionString(connectionString)
-                .applyToClusterSettings(builder ->
-                        builder.hosts(Collections.singletonList(new ServerAddress(host, port))))
-                .build();
+//        final MongoCredential credential = MongoCredential.createCredential(user, dbname, pass.toCharArray());
+//        final ConnectionString connectionString = new ConnectionString(host);
+//        final MongoClientSettings settings = MongoClientSettings.builder()
+//                .credential(credential)
+//                .applyToSslSettings(builder -> builder.enabled(true))
+//                .applyConnectionString(connectionString)
+//                .applyToClusterSettings(builder ->
+//                        builder.hosts(Collections.singletonList(new ServerAddress(host, port))))
+//                .build();
 
-        final MongoClient mongoClient = MongoClients.create(connectionString);
+        final MongoClient mongoClient = MongoClients.create("mongodb+srv://idarkay:vItNS1waRh5ygdwr@cluster0-hofwz.mongodb.net/minetasia");
 
         final MongoDatabase database = mongoClient.getDatabase(dbname);
 
