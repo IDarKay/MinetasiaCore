@@ -61,7 +61,7 @@ public class PlayerPacketListener implements Listener
                 final MinetasiaNpc npc = MinetasiaNpc.getNpcFromId((Integer) PACKET_PLAY_IN_USE_ENTITY_ID.get(packet));
                 if(npc != null)
                 {
-                    if(packet.c() == null)
+                    if(packet.b() == PacketPlayInUseEntity.EnumEntityUseAction.ATTACK)
                     {
                         Bukkit.getPluginManager().callEvent(new PlayerNpcHitEvent(e.getPlayer(), npc.getUuid()));
                     }

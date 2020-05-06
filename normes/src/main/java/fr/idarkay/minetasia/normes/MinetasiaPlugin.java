@@ -1,6 +1,7 @@
 package fr.idarkay.minetasia.normes;
 
 import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
+import fr.idarkay.minetasia.normes.Listener.PlayerDeathListener;
 import fr.idarkay.minetasia.normes.Listener.PlayerPacketListener;
 import fr.idarkay.minetasia.normes.Listener.PlayerQuitListener;
 import fr.idarkay.minetasia.normes.books.MinetasiaBook;
@@ -59,6 +60,7 @@ public abstract class MinetasiaPlugin extends JavaPlugin {
             BossBarAPI.setPlugin(this);
             MinetasiaBook.setPlugin(this);
             getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
+            getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
             isEnable = true;
             registerPlayerPacketComingEvent();
             NoteBlockAPI.setJavaPlugin(this);

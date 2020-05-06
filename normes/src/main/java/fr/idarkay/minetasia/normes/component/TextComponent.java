@@ -38,6 +38,11 @@ public class TextComponent extends BaseComponent
         this.text = chatBaseComponents.getText();
     }
 
+    public String getText()
+    {
+        return text;
+    }
+
     @Override
     protected @NotNull NBTTagCompound getAddon()
     {

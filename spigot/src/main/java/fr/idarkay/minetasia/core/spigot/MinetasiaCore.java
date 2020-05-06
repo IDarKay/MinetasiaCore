@@ -29,6 +29,7 @@ import fr.idarkay.minetasia.core.spigot.executor.sanction.AdminSanctionCommand;
 import fr.idarkay.minetasia.core.spigot.executor.sanction.SanctionCommand;
 import fr.idarkay.minetasia.core.spigot.executor.sanction.UnSanctionCommand;
 import fr.idarkay.minetasia.core.spigot.gui.GUI;
+import fr.idarkay.minetasia.core.spigot.gui.LangGui;
 import fr.idarkay.minetasia.core.spigot.kits.KitMain;
 import fr.idarkay.minetasia.core.spigot.kits.KitsManager;
 import fr.idarkay.minetasia.core.spigot.listener.AsyncPlayerChatListener;
@@ -1447,6 +1448,12 @@ public class MinetasiaCore extends MinetasiaCoreApi {
     public void setInventorySyncGetter(Function<Player, InventorySyncPlayer> func)
     {
         InventorySyncTools.function = func;
+    }
+
+    @Override
+    public Map<String, GuiLang> getLang()
+    {
+        return LangGui.LANG_TEXTURE;
     }
 
     public void setMaxPlayerCount(int maxPlayer, boolean startup)
